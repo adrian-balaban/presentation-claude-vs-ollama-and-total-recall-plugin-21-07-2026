@@ -25,7 +25,7 @@ Cinci lucruri pe care le iei de aici:
 1. **Cum funcționează total-recall** — arhitectura MCP, vaulturile, hook-urile și algoritmul de căutare cu Ebbinghaus decay.
 2. **Cum îl instalezi și îl folosești** — de la `install.sh` până la skill-ul `/memory-workflow`.
 3. **Ce este Ollama și de ce contează** — modele locale, zero cost-per-token, fără date trimise în cloud.
-4. **Comparație directă Claude vs Ollama** — capabilități, confidențialitate, cost, viteză, integrare cu Claude Code.
+4. **Comparație directă Claude vs Ollama** — capabilități, confidențialitate, cost, viteză, integrare cu Claude Code si .
 5. **Când să alegi fiecare** — un ghid de decizie cu criterii clare.
 
 ---
@@ -45,6 +45,7 @@ Cinci lucruri pe care le iei de aici:
    - Ce este Ollama → *Slide 11–12*
    - Comparație directă → *Slide 13–15*
    - Cazuri de utilizare și decizie → *Slide 16–17*
+   - Agent Claude vs agent LangChain → *Slide 17b*
 
 3. **Q&A** (15 min)
 
@@ -389,6 +390,107 @@ curl http://localhost:11434/api/generate \
 
 ---
 
+## Slide 11b — Modele instalate local: cazul real (`ollama list`)
+
+> Live demo: ce ai pe mașina ta acum și ce poate rula efectiv pe **Dell Latitude 5521** (i7-11850H, MX450 2GB GDDR6).
+
+```
+$ ollama list
+NAME                          SIZE      MODIFIED
+nemotron-3-nano:30b           24 GB     2 hours ago
+mistral-medium-3.5:latest     80 GB     3 hours ago
+qwen3.6:latest                23 GB     3 hours ago
+qwen3.5:latest                6.6 GB    4 hours ago
+gemma4:latest                 9.6 GB    4 hours ago
+kimi-k2.7-code:cloud          —         4 hours ago
+ornith:9b                     5.6 GB    4 hours ago
+glm-5.2:cloud                 —         44 hours ago
+north-mini-code-1.0:latest    18 GB     3 days ago
+```
+
+| Model | Disk | Parametri est. | Specializare | VRAM necesar | Pe MX450? |
+|---|---|---|---|---|---|
+| `mistral-medium-3.5` | 80 GB | ~90B | General, reasoning, multilingual | 80+ GB | ❌ CPU only, lent |
+| `nemotron-3-nano:30b` | 24 GB | 30B | Reasoning, STEM (NVIDIA) | 24 GB | ❌ CPU only |
+| `qwen3.6` | 23 GB | ~30B | Multilingual, cod, math | 23 GB | ❌ CPU only |
+| `north-mini-code-1.0` | 18 GB | ~20B | Cod | 18 GB | ❌ CPU only |
+| `gemma4` | 9.6 GB | ~12B | General, multimodal text | 10 GB | ❌ CPU only |
+| `qwen3.5` | 6.6 GB | ~7B | General, multilingual | 7 GB | ❌ CPU only |
+| `ornith:9b` | 5.6 GB | 9B | Fine-tune comunitar | 6 GB | ❌ CPU only |
+| `kimi-k2.7-code` | — | N/A | Cod (Moonshot AI, **cloud**) | 0 | ✅ API |
+| `glm-5.2` | — | N/A | General CN/EN (Zhipu AI, **cloud**) | 0 | ✅ API |
+
+**Lecția practică:**
+
+- MX450 (2GB VRAM) nu poate ține niciun model în VRAM — toate rulează pe CPU via RAM de sistem
+- `qwen3.5` (6.6GB) și `ornith:9b` (5.6GB) sunt singurele care intră confortabil în 16GB RAM → ~3–8 tok/s pe i7-11850H
+- `mistral-medium-3.5` la 80GB necesită 80GB RAM liber — imposibil pe laptop
+- `kimi-k2.7-code` și `glm-5.2` sunt de fapt **API cloud** mascate în Ollama — nu rulează local
+- **Concluzie pentru acest laptop:** Claude API rămâne alegerea corectă; modelele locale sunt bune doar pentru experimente offline sau dacă se conectează un eGPU extern via **Thunderbolt 4**
+
+---
+
+## Slide 11c — Pot adăuga GPU pe laptopul meu? Prețuri reale (RO)
+
+> Cazul concret: **Dell Latitude 5521**, i7-11850H, MX450 2GB (soldat) — ce opțiuni există?
+
+### Ce e posibil și ce nu
+
+| Variantă | Posibil? | De ce |
+|---|---|---|
+| Scot MX450 și pun alt GPU intern | **NU** | GPU-ul e soldat pe placă, nu există slot MXM |
+| eGPU extern via **Thunderbolt 4** | **DA** | 2x TB4 disponibil (PCIe x4 3.0, ~32 Gbps) |
+
+### eGPU vs laptop refurbished cu Quadro — comparație pentru LLM
+
+| Criteriu | Precision 7530 + Quadro P2000 | eGPU + RTX 3060 12GB (pe Latitude 5521) |
+|---|---|---|
+| VRAM | 4 GB (Pascal, 2017) | **12 GB** (Ampere, 2020) |
+| Tensor cores | ✗ nu are | ✅ gen 2 (FP16/BF16) |
+| Modele 7B Q4 | ⚠️ offload CPU, ~3–5 tok/s | ✅ complet în VRAM, ~40–50 tok/s |
+| Modele 13B Q4 | ✗ imposibil decent | ✅ ~8 GB, ~20–25 tok/s |
+| CPU | i7-8850H (gen 8, mai slab) | i7-11850H (gen 11) — **îl ai deja** |
+| Preț estimat | 2.200–2.800 lei | ~2.400–3.500 lei |
+| Portabil | ✅ integrat | ✗ cutie ~7 kg, staționar |
+
+> **Bottleneck TB4 la LLM:** PCIe x4 reduce viteza cu 15–25% față de desktop — dar **pentru inference LLM contează doar VRAM** (datele stau pe GPU, banda spre host contează doar la load inițial). Dezavantajul TB4 e practic irelevant pentru Ollama.
+
+### Prețuri concrete România (date live, 2026)
+
+**Enclosure eGPU — OLX second-hand:**
+
+| Model | Conexiune | Preț |
+|---|---|---|
+| Razer Core X | Thunderbolt 3/4 | ~1.380 lei |
+| Razer Core X V2 Next-Gen | Thunderbolt 5 (compat. TB4) | ~1.500–1.600 lei |
+| Razer Core X Chroma | Thunderbolt 3/4 | ~2.000 lei |
+
+![eGPU enclosure Razer Core X V2 — Thunderbolt 5 + sursă 750W 80+ Gold, OLX Cluj-Napoca, 1.600 lei](images/razer-core-x-v2-egpu-olx.png)
+
+> *Sursă imagine: OLX, anunț ID 305525034, vânzător "cristi" (Cluj-Napoca, 17 iun 2026) — Razer Core X V2 Thunderbolt 5 + sursă 750W 80+ Gold, 1.600 lei. Captură preluată cu Chrome DevTools MCP din galeria anunțului (imaginea a 2-a).*
+
+**Plăci RTX 3060 12GB — OLX second-hand:** 950–1.100 lei  
+**Plăci RTX 3060 12GB — eMAG nou (garanție):** 2.099–2.206 lei
+
+**Bundle-uri recomandate:**
+
+| Variantă | Enclosure | Placă | Total est. | Profil |
+|---|---|---|---|---|
+| **Economic** | Razer Core X SH ~1.400 lei | RTX 3060 12GB SH ~1.000 lei | **~2.400 lei** | Risc mic de defecte, fără garanție |
+| **Echilibrat** ⭐ | Razer Core X SH ~1.400 lei | RTX 3060 12GB nou ~2.100 lei | **~3.500 lei** | Garanție pe placă, enclosure solid SH |
+| **Safe** | Razer Core X nou ~2.900 lei | RTX 3060 12GB nou ~2.100 lei | **~5.000 lei** | Totul nou, garanție completă |
+
+### Concluzie pentru use-case Ollama
+
+**Recomandarea clară: bundle Echilibrat (~3.500 lei)** — Razer Core X second-hand + RTX 3060 12GB nou.
+
+- Reutilizezi Latitude 5521 (CPU mai bun, RAM mai mult) — nu cumperi un al doilea laptop cu hardware mai slab
+- 12 GB VRAM: rulezi `qwen3.5` (6.6 GB), `gemma4` (9.6 GB) **complet pe GPU**, rapid
+- Enclosure-ul second-hand se strică rar; placa nouă vine cu garanție 2 ani
+- Dacă mai târziu vrei un laptop cu TB5 — enclosure-ul TB5 (1.500 lei) e deja compatibil
+
+---
+
 ## Slide 12 — Cum funcționează Ollama intern
 
 ```
@@ -590,6 +692,68 @@ claude --model qwen2.5-coder:32b
 
 ---
 
+## Slide 17b — Agent Claude vs agent LangChain
+
+> Confuzia vine din faptul că „agent Claude" și „agent LangChain" trăiesc la **niveluri diferite de stivă**:
+> unul e *model + harness*, celălalt e *framework model-agnostic*.
+
+### Diferența fundamentală
+
+| Axa | Agent Claude (Claude Code / Agent SDK) | Agent LangChain (LangChain / LangGraph) |
+|---|---|---|
+| **Modelul** | Prins de **Claude** (Anthropic). Nu poți pune alt LLM. | **Model-agnostic** — Claude, GPT, Gemini, **Ollama local**, orice |
+| **Cine deține loop-ul** | Anthropic: harness închis, opinat (plan mode, hooks, permisiuni, subagents, MCP, compaction). Configurezi, nu scrii loop-ul. | Tu scrii loop-ul / graful. LangGraph = mașină de stări explicită (noduri, muchii, routing condiționat, checkpointuri). |
+| **Starea** | Conversație + memorie fișier + MCP (ex. total-recall). Compaction de context built-in. | Abstracții pluggable: `BufferMemory`, summary, retriever vectorial; LangGraph are checkpointer (in-mem/SQLite/Postgres) pentru stare durabilă între rulări. |
+| **Tool-uri** | **MCP** e standardul. Subagents (Task), hooks (Pre/PostToolUse), skills. | Funcții `@tool` + integrări (loaders, retrievers, vector stores). Are și adaptoare MCP acum. |
+| **Computer use / mediu** | First-class: bash, edit fișiere, computer use (ecran/tastatură) în Agent SDK. Claude Code = harness specializat cod. | Doar ce-i dai tu ca tool. Fără computer use built-in decât dacă-l wirezi. |
+| **Control flow** | Modelul decide mult; îl direcționezi cu CLAUDE.md, skills, permission mode. | **Tu controlezi** graful — routing forțat, ramuri paralele, human-in-the-loop gates. Mai mult workflow-engine decât agent liber. |
+| **Taxa de abstracție** | Subțire, aproape de API. | Straturi groase, schimbări breaking între versiuni, abstracții leaky (mulți au migrat la LangGraph sau API raw). |
+
+### Cele trei forme de „agent Claude"
+
+```
+Claude Code       → „vreau un agent care să-mi lucreze în repo, ruleze teste,
+                     editeze fișiere, cu permisiuni și plan mode — gata din cutie"
+                     (nu scrii cod de agent)
+
+Agent SDK         → „vreau un agent Claude programabil propriu" — Claude e creierul,
+                     tool-urile și suprafața sunt ale tale. Loop subțire:
+                     model + tools + max turns.
+
+LangChain/LangGraph → „vreau un pipeline model-agnostic cu control flow explicit,
+                       stare durabilă, human-in-the-loop, sau pot schimba
+                       între Claude și un model local"
+```
+
+### Pentru cazul nostru: de ce contează pe 16 iulie
+
+| | Agent Claude | Agent LangChain |
+|---|---|---|
+| Poate rula pe **Ollama** (RTX 3060 local)? | **NU** — lipit de modelul Anthropic, backend cloud, plat per token | **DA** — `ChatOllama`, rulează pe GPU local, zero cost per token, offline, datele nu ies din mașină |
+| Inteligență | Maximă (Opus 4.8) | Depinde de modelul local (mai slab decât Claude) |
+| Privatitate | Date → Anthropic | 100% on-premise |
+
+> **Tensiunea pe care o discutăm:** agent Claude = inteligență mai bună + harness polish, dar **dependent de cloud, cost, privatitate**. Agent LangChain + Ollama = **suveran** (local, gratuit, offline), dar **tu construiești loop-ul** și calitatea depinde de modelul local.
+
+### Unde se întâlnesc cele două lumi: total-recall
+
+`total-recall` este un **MCP server** — poate fi backend de memorie **pentru ambele**:
+
+- **Claude Code** îl folosește nativ (cele 12 unelte, hook-uri auto)
+- **Un agent LangChain** îl consumă via `@langchain/mcp-adapters` ca tool de retrieval
+
+Aici converg cele două teme ale prezentării: **memorie persistentă comună** (total-recall), **backend de inteligență interschimbabil** (Claude cloud ↔ Ollama local). Același vault, două runtime-uri diferite.
+
+### Regulă de decizie
+
+| Vrei… | Alegi |
+|---|---|
+| Cod / inginerie în repo, calitate maximă, accept cloud | **Claude Code** |
+| Agent custom cu Claude ca creier, tool-uri proprii | **Claude Agent SDK** |
+| Control flow explicit, stare durabilă, sau **model local (Ollama)** | **LangGraph** (nu LangChain clasic) |
+
+---
+
 ## Slide 18 — Sinteza finală și întrebări deschise
 
 ### Ce am acoperit
@@ -605,6 +769,8 @@ claude --model qwen2.5-coder:32b
 - Claude API: calitate maximă, cost per token, date în cloud
 - Ollama: gratuit pe hardware propriu, 100% local, offline capabil
 - Integrare Ollama cu Claude Code: posibilă via OpenAI-compat endpoint
+- Agent Claude (model + harness) vs agent LangChain (framework model-agnostic): doar LangChain poate rula pe Ollama; Claude agent e lipit de Anthropic
+- total-recall ca punct de convergență: același vault MCP, consumabil din ambele runtime-uri
 - Decizia cheie: confidențialitate > calitate > cost
 
 ### Întrebări deschise pentru discuție
