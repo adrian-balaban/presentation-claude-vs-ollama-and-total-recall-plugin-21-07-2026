@@ -137,7 +137,7 @@ Preferă PostgreSQL față de MySQL pentru proiecte noi...
 ```
 src/
 ├── index.ts          ← boot: signal handlers + main()
-├── server.ts         ← MCP Server, 12 scheme tool, dispatch + store_memory/recall_memory/search_index
+├── server.ts         ← MCP Server, 12 scheme tool, dispatch
 ├── state.ts          ← singletons partajate: memIndex, invertedIndex
 ├── paths.ts          ← căile vault, EXCLUDED_DIRS, ensureDir
 ├── types.ts          ← MemoryFrontmatter, MemoryMetadata, Index
@@ -151,6 +151,8 @@ src/
 ├── embeddings.ts     ← HuggingFace pipeline (opțional)
 ├── vectorStore.ts    ← sqlite-vec: upsert/search/delete
 └── tools/
+    ├── store.ts      ← store_memory
+    ├── recall.ts     ← recall_memory, search_index
     ├── query.ts      ← list_memories, get_memories_by_keys, get_stats,
     │                    get_timeline, get_related_memories, prune_memories
     └── mutate.ts     ← update_memory, delete_memory, rebuild_index
