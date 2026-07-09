@@ -1,5 +1,5 @@
 ---
-title: "Total Recall Plugin & Claude vs Ollama"
+title: "Claude vs Ollama & Total Recall Plugin"
 author: Adrian Balaban
 date: 2026-07-16
 layout: docs
@@ -11,8 +11,8 @@ layout: docs
 **Data:** 16 iulie 2026
 
 Două subiecte practice despre cum extindem și alegem uneltele AI în workflow-ul de zi cu zi:
-primul despre persistența memoriei în Claude Code printr-un plugin MCP; al doilea despre decizia
-„cloud sau local" când lucrezi cu modele de limbaj mari.
+- primul despre decizia „cloud sau local" când lucrezi cu LLM-uri; 
+- al doilea despre persistența memoriei în Claude/Copilot/Gemini printr-un plugin MCP
 
 ---
 
@@ -22,403 +22,47 @@ primul despre persistența memoriei în Claude Code printr-un plugin MCP; al doi
 
 Cinci lucruri pe care le iei de aici:
 
-1. **Cum funcționează total-recall** — arhitectura MCP, vaulturile, hook-urile și algoritmul de căutare cu Ebbinghaus decay.
-2. **Cum îl instalezi și îl folosești** — de la `install.sh` până la skill-ul `/memory-workflow`.
-3. **Ce este Ollama și de ce contează** — modele locale, zero cost-per-token, fără date trimise în cloud.
-4. **Comparație directă Claude vs Ollama** — capabilități, confidențialitate, cost, viteză, integrare cu Claude Code (`ollama launch claude`).
-5. **Când să alegi fiecare** — un ghid de decizie cu criterii clare.
+1. **Ce este Ollama și de ce contează** — modele cloud egale ca performanță cu cele de la Anthropic și modele locale, zero cost-per-token, fără date trimise în cloud.
+2. **Comparație directă Claude vs Ollama** — capabilități, confidențialitate, cost, viteză, integrare cu Claude Code (`ollama launch claude`).
+3. **Când să alegi fiecare** — un ghid de decizie cu criterii clare.
+4. **Cum funcționează total-recall** — arhitectura MCP, vaulturile (personal & org), hook-urile automate, integrarea Obsidian și algoritmul de căutare hibrid (TF-IDF + vector + multilingual + Ebbinghaus decay).
+5. **Cum îl instalezi și îl configurezi** — suport multi-client (Claude Code, Copilot CLI, Gemini CLI) și opțiuni avansate (Ollama, Vertex AI, allowlist-uri de email).
 
 ---
 
-## Slide 0b — Agendă (~55 de minute)
+## Slide 0b — Agendă (~65 de minute)
 
-1. **Total Recall Plugin** (25 min)
-   - Ce este și de ce există → *Slide 1–2*
-   - Arhitectura și componentele → *Slide 3–5*
-   - De ce algoritmi proprii (fără dependențe grele) → *Slide 4b*
-   - Cele 12 unelte MCP → *Slide 6*
-   - Algoritmul de căutare → *Slide 7*
-   - Embeddings & vectorizare (căutare semantică, opțională) → *Slide 7b*
-   - Hook-urile și ciclul de viață → *Slide 8*
-   - Instalare și utilizare practică → *Slide 9*
-   - Compatibilitate (Copilot / Codex) → *Slide 10*
+1. **Claude vs Ollama** (25 min)
+   - Ce este Ollama → *Slide 1 & 5*
+   - Deep-dive (opțional, dacă timpul permite): modele instalate real, eGPU pe laptop, modele `:cloud` → *Slide 2 / 3 / 4*
+   - Ollama vs llama.cpp (motorul de dedesubt) → *Slide 6*
+   - Comparație directă & Costuri & Date → *Slide 7–9*
+   - Integrare Ollama ↔ Claude Code → *Slide 10*
+   - Ghid de decizie → *Slide 11*
+   - Agent Claude vs agent LangChain → *Slide 12*
+   - Sinteză și resurse → *Slide 24–25*
 
-2. **Claude vs Ollama** (25 min)
-   - Ce este Ollama → *Slide 11–12*
-   - Deep-dive (opțional, dacă timpul permite): modele instalate real, eGPU pe laptop, modele `:cloud` → *Slide 11b / 11c / 11d*
-   - Ollama vs llama.cpp (motorul de dedesubt) → *Slide 12b*
-   - Comparație directă → *Slide 13–15*
-   - Integrare Ollama ↔ Claude Code → *Slide 16*
-   - Ghid de decizie → *Slide 17*
-   - Agent Claude vs agent LangChain → *Slide 17b*
+2. **Total Recall Plugin** (25 min)
+   - Ce este și de ce există → *Slide 13–14*
+   - Arhitectura și componentele → *Slide 15–17*
+   - De ce algoritmi proprii (fără dependențe grele) → *Slide 16b*
+   - Cele 12 unelte MCP → *Slide 18*
+   - Algoritmul de căutare (hibrid, multilingual) → *Slide 19*
+   - Provideri de Embeddings (Ollama / Vertex AI / HF) → *Slide 19b*
+   - Hook-urile pe diverse terminale → *Slide 20*
+   - Instalare dedicată per client → *Slide 21*
+   - Compatibilitate extinsă (Claude / Copilot / Gemini / Codex) → *Slide 22*
+   - Integrare nativă cu Obsidian → *Slide 22b*
 
 3. **Q&A** (15 min)
 
 ---
 
-## TEMA 1 — TOTAL RECALL PLUGIN
+## TEMA 1 — CLAUDE vs OLLAMA
 
 ---
 
-## Slide 1 — Problema: Claude uită tot după sesiune
-
-> La sfârșitul fiecărei conversații, Claude pierde tot contextul acumulat.
-> Decizii, preferințe, arhitecturi discutate — totul dispare.
-
-**Simptomele:**
-- Reexplici același context la fiecare sesiune nouă
-- Preferințele tale de cod trebuie re-menționate de fiecare dată
-- Deciziile de arhitectură nu se acumulează nicăieri
-- Feedback-ul pe care l-ai dat modelului nu persistă
-
-**Consecința:** Cu cât lucrezi mai mult cu Claude Code, cu atât pierzi mai mult timp re-explicând ceea ce ai deja explicat.
-
----
-
-## Slide 2 — Soluția: total-recall
-
-> Un plugin Claude Code care dă AI-ului memorie persistentă, căutabilă, între sesiuni.
-
-**Ce este:**
-- **Plugin Claude Code** instalat din marketplace
-- **MCP server** cu 12 unelte (stdio, înregistrat via `claude mcp add`)
-- **Vault de fișiere Markdown** stocat local la `~/.total-recall/`
-- **Hook-uri automate** care injectează contextul la fiecare sesiune nouă
-- **Skill `/memory-workflow`** pentru sesiuni structurate de recall/store
-
-**Ce nu este:**
-- Nu trimite date în cloud (vaultul personal este complet local)
-- Nu folosește o bază de date opacă — fiecare memorie este un fișier `.md` citibil
-- Nu suprascrie context — injectează, nu înlocuiește
-
----
-
-## Slide 3 — Structura pe disk
-
-```
-~/.total-recall/
-├── index.json               ← index plat: key → MemoryMetadata
-├── invertedIndex.json       ← TF-IDF inverted index: token → {docs, idf}
-├── .index-cache.txt         ← rezumat injectat la SessionStart (shell-readable)
-├── personal-vault/
-│   ├── architecture/
-│   │   └── db-choice.md     ← memorie individuală: frontmatter YAML + corp Markdown
-│   ├── feedback/
-│   ├── knowledge/
-│   ├── project/
-│   └── vectors.db           ← embeddings sqlite-vec (opțional)
-└── org/
-    └── org-vault/
-        └── architecture/
-            └── team-decision.md   ← memorii partajate cu echipa, sync pe git
-```
-
-**Fiecare memorie** este un fișier `.md` cu frontmatter:
-
-```markdown
----
-title: "Preferă PostgreSQL pentru date relaționale"
-tags: [architecture, database, feedback]
-author: adrianb
-importanceScore: 0.8
-created: 2026-06-01T10:00:00Z
-updated: 2026-06-15T14:30:00Z
----
-
-## Executive Summary
-
-Preferă PostgreSQL față de MySQL pentru proiecte noi...
-```
-
----
-
-## Slide 4 — Arhitectura: modulele principale
-
-```
-src/
-├── index.ts          ← boot: signal handlers + main()
-├── server.ts         ← MCP Server, 12 scheme tool, dispatch
-├── state.ts          ← singletons partajate: memIndex, invertedIndex
-├── paths.ts          ← căile vault, EXCLUDED_DIRS, ensureDir
-├── types.ts          ← MemoryFrontmatter, MemoryMetadata, Index
-├── lru-cache.ts      ← LRUCache (100 intrări, 30 min TTL)
-├── persistence.ts    ← loadIndexes, scheduleSave (debounce 1s), flushPending
-├── frontmatter.ts    ← parser YAML minimal (fără gray-matter, fără CVE-uri)
-├── vault-scan.ts     ← reconcileIndex, slugify, tokenEstimate
-├── tfidf.ts          ← tokenize, rebuildInvertedIndex, tfidfSearch
-├── ebbinghaus.ts     ← computeRetentionStrength, daysSince
-├── rrf.ts            ← Reciprocal Rank Fusion (k=60)
-├── embeddings.ts     ← HuggingFace pipeline (opțional)
-├── vectorStore.ts    ← sqlite-vec: upsert/search/delete
-└── tools/
-    ├── store.ts      ← store_memory
-    ├── recall.ts     ← recall_memory, search_index
-    ├── query.ts      ← list_memories, get_memories_by_keys, get_stats,
-    │                    get_timeline, get_related_memories, prune_memories
-    └── mutate.ts     ← update_memory, delete_memory, rebuild_index
-```
-
----
-
-## Slide 4b — De ce algoritmi proprii (fără dependențe grele)
-
-> Toți algoritmii cheie sunt **scrisi de la zero în plugin**, nu luați din librării externe: căutare vectorială (KNN peste sqlite-vec), serializare frontmatter, logica de retenție Ebbinghaus, ranking TF-IDF, RRF. De ce?
-
-| Algoritm / modul | De ce e in-house, nu din librărie |
-|---|---|
-| **Frontmatter parser** (`frontmatter.ts`) | Înlocuiește `gray-matter`, care depindea de `js-yaml 3.x` (**CVE GHSA-h67p-54hq-rp68**). Parser-ul propriu procesează **doar ce scrie plugin-ul** — imun la YAML merge-key DoS, fără YAML arbitrar. |
-| **TF-IDF + inverted index** (`tfidf.ts`) | Scorul e combinat cu **title-boost (2×), tag-boost (1.5×)** și **decay Ebbinghaus** — o librărie generică de TF-IDF nu le știe pe toate trei; le-am co-scris ca să fie o singură formulă coerentă. |
-| **Ebbinghaus retention** (`ebbinghaus.ts`) | Logică **domain-specific** (curba uitării aplicată memoriei): `λ = 0.16 × (1 − importance × 0.8)` + boost de `accessCount`. Nu există librărie standard pentru asta. |
-| **RRF fusion** (`rrf.ts`) | 12 linii, scale-free (`Σ 1/(60 + rank)`) — mai simplu să scrii decât să tragi o dependență. |
-| **Căutare vectorială** (`vectorStore.ts` + `embeddings.ts`) | Doar **wrapper subțire** peste `sqlite-vec` + `@huggingface/transformers` — dar ambele **opționale, lazy-load, `--external`** la esbuild. Fără ele, pluginul degradează curat la TF-IDF. |
-
-### Ce câștigi păstrând totul in-house
-
-1. **Suprafață de atac minimă / securitate.** Singura dependență obligatorie e `@modelcontextprotocol/sdk`. Fără `gray-matter` → fără CVE-ul `js-yaml`. Parser-ul YAML propriu nu acceptă YAML arbitrar → imposibil de injectat chei de frontmatter.
-2. **Zero dependență de LLM.** Pluginul e **determinist** — niciun apel de API, niciun cost, merge **offline / air-gapped**. Retrieval-ul nu depinde de o decizie de model.
-3. **Control complet asupra scoring-ului.** Boost-urile de titlu/tag, decay-ul Ebbinghaus și importanta sunt **o singură formulă**, nu trei librării care se bat. Comportament previzibil, ușor de raționa.
-4. **Performanță și predictibilitate.** Inverted index în memorie, LRU cache (100 intrări / 30 min), persistență debounced (1s), scrieri atomice (write-`.tmp` + rename). Niciun black-box care să facă I/O surpriză.
-5. **Bundle mic, deps native externalizate.** `@huggingface/transformers` și `sqlite-vec` sunt `--external` la esbuild → pluginul se bundle-uiează ușor; runtime-ul de model se instalează/upgrade-ează independent.
-6. **Auditabilitate.** Fiecare decizie de scoring e în cod, observabilă prin `get_stats` (`recentErrors`, `perfSamples`, `vectorSearchEnabled`). Nu există "magie" ascunsă într-o dependență.
-
-> **Filozofia:** un plugin de memorie pentru Claude Code trebuie să fie **ușor, sigur, determinist și previzibil**. Orice dependență grea e un risc de securitate (CVE), un risc de breaking-change, sau un black-box de performanță. De aceea TF-IDF, Ebbinghaus, RRF, frontmatter și chiar wrapper-ul vectorial sunt **scrise de mână** — doar motorul de inference (ONNX) și stocarea vectorială (sqlite-vec) rămân externe, și ele opționale.
-
----
-
-## Slide 5 — Dual Vault: personal vs org
-
-```
-store_memory(tags=[...])
-       │
-       ├── conține "org"  ──►  ORG VAULT  (~/.total-recall/org/org-vault/)
-       │                        key prefix: "org/"
-       │                        scriere protejată de autor
-       │                        sync automat → git repo echipă (branch org-vault)
-       │                        filtru de confidențialitate înainte de push
-       │
-       └── altfel         ──►  PERSONAL VAULT  (~/.total-recall/personal-vault/)
-                                key: cale relativă simplă
-                                jurnal auto-adăugat la fiecare store
-```
-
-**Regulă cheie:** tagurile `personal` și `org` sunt mutual exclusive — `store_memory` aruncă eroare dacă ambele sunt prezente.
-
-**Filtru de confidențialitate (org sync):**
-- Blochează token-uri cu entropie ridicată (secrete, chei API)
-- Blochează toate adresele email (cu excepția domeniilor din allowlist)
-- Fail-closed: dacă filtrul nu poate analiza conținutul, NU face push
-
----
-
-## Slide 6 — Cele 12 unelte MCP
-
-### Scriere
-| Unealtă | Ce face |
-|---|---|
-| `store_memory` | Creează o memorie nouă; `force=true` suprascrie |
-| `update_memory` | Modifică titlu/conținut/taguri/importanceScore |
-| `delete_memory` | Șterge fișierul + intrarea din index + vectorul |
-
-### Căutare / Citire
-| Unealtă | Ce face |
-|---|---|
-| `recall_memory` | TF-IDF + Ebbinghaus + opțional vector search via RRF |
-| `search_index` | TF-IDF doar pe metadate (fără citire fișiere, fără bump accessCount) |
-| `get_memories_by_keys` | Lookup direct după cheie; trece prin LRU cache |
-
-### Listare / Interogare
-| Unealtă | Ce face |
-|---|---|
-| `list_memories` | Inventar paginat cu filtre pe categorie/tag |
-| `get_related_memories` | Similaritate Jaccard pe taguri + boost categorie (0.2) |
-| `get_timeline` | Memorii ordonate după `updated` |
-| `get_stats` | Contoare, statistici cache, percentile performanță, erori recente |
-
-### Întreținere
-| Unealtă | Ce face |
-|---|---|
-| `rebuild_index` | `reconcileIndex()` + rebuild TF-IDF; păstrează `accessCount`/`lastAccessed` |
-| `prune_memories` | **Listează** candidații cu retenție scăzută (Ebbinghaus); NU șterge automat |
-
----
-
-## Slide 7 — Algoritmul de căutare: TF-IDF + Ebbinghaus
-
-### Pipeline `recall_memory`
-
-```
-query (text liber)
-  │
-  ├─ tfidfSearch(query)
-  │    ├─ tokenize(query) → tokens
-  │    ├─ pentru fiecare token: lookup în invertedIndex
-  │    ├─ scor = TF × IDF × title-boost(2×) × tag-boost(1.5×)
-  │    └─ × computeRetentionStrength(importance, daysSince, accessCount)
-  │
-  ├─ [opțional: hybrid=true + dependențe instalate]
-  │    ├─ embed(query) → vector query
-  │    ├─ searchVector(db, qvec, 50) → rezultate vectoriale
-  │    └─ Reciprocal Rank Fusion([tfidf, vector], k=60)
-  │              scor(d) = Σ 1/(60 + rank(d)) pe ambele liste
-  │
-  └─ slice la `limit`, bump accessCount, returnează cu/fără conținut complet
-```
-
-### Curba Ebbinghaus (uitarea modelată matematic)
-
-```
-λ     = 0.16 × (1 − importanceScore × 0.8)
-decay = importanceScore × exp(−λ × daysSince) × (1 + accessCount × 0.2)
-```
-
-| importanceScore | λ (viteza de uitare) | Comportament |
-|---|---|---|
-| 1.0 (critic) | 0.032 | Decay lent — memoria rămâne relevantă săptămâni |
-| 0.5 (normal) | 0.096 | Decay mediu |
-| 0.3 (scăzut) | 0.122 | Decay rapid — dispare din rezultate în zile |
-
-Fiecare acces adaugă +20% forță de retenție (`accessCount × 0.2`).
-
----
-
-## Slide 7b — Embeddings & vectorizare: căutarea semantică (opțională)
-
-> Întrebare: folosește total-recall embeddings / vectorizare? **Da — dar opțional, lazy, complet local, și degradează curat fără ele.**
-
-### Unde (unde în cod)
-
-| Modul | Rol |
-|---|---|
-| `src/embeddings.ts` | Lazy-load `@huggingface/transformers`, model **`Xenova/all-MiniLM-L6-v2` (384-dim)**, compute embedding **la scriere** (write time) |
-| `src/vectorStore.ts` | Lazy-load **`sqlite-vec`**, tabel virtual `vec_memories` cu coloană `FLOAT[384]`, **KNN la citire** (read time) |
-| `src/rrf.ts` | **Reciprocal Rank Fusion** (k=60) — combină lista TF-IDF cu lista vectorială după rang, nu după scor |
-| `src/server.ts` | Expune `recall_memory(hybrid: bool)` — implicit `hybrid` când dependențele sunt prezente |
-
-```
-query ─► TF-IDF (tfidf.ts + Ebbinghaus decay) ─┐
-      └► embed query ─► sqlite-vec KNN ────────┤─► rrf.ts ─► listă finală ordonată
-```
-
-### De ce (motivul de design)
-
-1. **Recall semantic, nu doar potrivire de token.** TF-IDF e exact-token: query "k8s pod OOM" ratează o memorie titlată "Kubernetes workload killed for memory pressure". Transformerul 384-dim prinde similaritatea semantică → parafrazele tot se potrivesc.
-2. **RRF, nu interpolare de scoruri.** Scorurile TF-IDF și similaritatea vectorială nu sunt pe aceeași scară → media e lipsită de sens. RRF folosește **doar poziția în rang** (Σ 1/(60 + rank)) — scale-free, rețeta standard pentru retriever-e eterogene.
-3. **Opțional / lazy / graceful-degrade.** Totul prin `await import(...)` lazy — pluginul merge și pe mașini air-gapped unde `@huggingface/transformers` nu poate încărca modelul. Dacă modelul nu se încarcă, `get_stats.recentErrors` înregistrează eșecul (observabil, nu tăcut) și revine la TF-IDF.
-4. **Dependențe externalizate în esbuild.** Ambele (`@huggingface/transformers`, `sqlite-vec`) sunt `--external` → pluginul e bundle-uat fără ele; utilizatorul instalează runtime-ul de model independent de plugin (bundle mic, upgrade independent).
-5. **Write path conștient de race.** `embedAndUpsert` e fire-and-forget pe write, dar `flushPending()` e cablat pe `SIGTERM`/`SIGINT` → vectorii ajung pe disc înainte de `process.exit` (counter-ul `pendingFlushes` fixează un race anterior unde writer-ul pierzător își pierdea vectorul).
-
-### Ce NU face
-
-- **Niciun cloud embedding API** (HuggingFace Inference, OpenAI, Bedrock) — modelul rulează **local**, via runtime ONNX on-device bundle-uit în `@huggingface/transformers`. Offline → importul reușește, dar download-ul modelului pică la prima utilizare → fallback TF-IDF.
-- **Nu re-embed la fiecare citire** — vectorii se calculează **o dată, la scriere**, și se stochează în `vectors.db`; citirile sunt KNN pur.
-- **Nu cere env var sau API key.**
-
-> **TL;DR:** unde = `embeddings.ts` + `vectorStore.ts` + `rrf.ts`, suprafațat prin `recall_memory(hybrid)`; de ce = recall semantic peste TF-IDF cu fuziune RRF, totul opțional, lazy, local, cu degrade curat. Detaliul complet: `others.md`.
-
----
-
-## Slide 8 — Hook-urile: integrarea automată cu Claude Code
-
-### `SessionStart` (4 pași, secvențiali)
-
-```
-1. pull-org-vault.sh       — git pull pe branch-ul org-vault (dacă e configurat)
-2. build-memory-index.sh   — scanare awk a frontmatter-ului → .index-cache.txt
-3. load-memory-index.sh    — cat .index-cache.txt → injectat în context
-4. load-open-questions.sh  — cat open-questions.md → injectat în context
-```
-
-**Efect:** La fiecare nouă sesiune, Claude primește automat rezumatul tuturor memoriilor tale — fără să ceri explicit.
-
-### `PostToolUse` (declanșator: `store_memory|update_memory|delete_memory`)
-
-```
-sync-org-memory.sh
-  ├─ verifică dacă memoria are tag "org"
-  ├─ aplică filtrul de confidențialitate
-  └─ git add/commit/push → branch org-vault al echipei
-  + rebuild .index-cache.txt
-```
-
-### `PreCompact` (când contextul e aproape de limită)
-
-```
-extract-and-store-memories.sh
-  ├─ citește transcriptul sesiunii din stdin JSON (transcript_path)
-  ├─ cere lui Claude să extragă 0–3 learnings cheie ca JSON lines
-  └─ store-learning.mjs → scrie direct ca fișiere .md în personal-vault
-       (fără round-trip MCP; nu suprascrie memorii existente)
-```
-
----
-
-## Slide 9 — Instalare și utilizare practică
-
-### Instalare
-
-```bash
-# 1. Clonează marketplace-ul
-git clone https://github.com/adrian-balaban/my-claude-plugins-marketplace.git
-
-# 2. Rulează installerul
-cd my-claude-plugins-marketplace/plugins/total-recall
-./install.sh
-
-# Optional: cu org vault
-./install.sh --org-repo git@github.com:echipa/memories.git \
-             --allowed-email-domain companie.ro
-```
-
-### Utilizare în sesiune Claude Code
-
-```
-# Caută memorii
-> "reamintește-mi decizia despre baza de date"
-→ recall_memory(query="decizie baza de date")
-
-# Stochează o memorie
-> "reține că preferăm PostgreSQL cu partitionare pe lună"
-→ store_memory(title="...", content="...", tags=["architecture", "database"])
-
-# Listează tot
-> "arată-mi toate memoriile de arhitectură"
-→ list_memories(category="architecture")
-
-# Skill dedicat
-> /total-recall:memory-workflow
-```
-
-### Ordinea de recuperare (din eficiență → completitudine)
-
-1. Index injectat la SessionStart (gratuit — deja în context)
-2. `get_memories_by_keys(summary=true)` — dacă știi cheia
-3. `search_index(query=...)` — metadate rapid, fără citire fișiere
-4. `recall_memory(query=..., full=false)` — TF-IDF + Ebbinghaus
-5. `recall_memory(query=..., full=true)` — cu conținut complet
-
----
-
-## Slide 10 — Compatibilitate: Claude Code vs Copilot vs Codex
-
-| Componentă | Claude Code | GitHub Copilot | OpenAI Codex CLI |
-|---|---|---|---|
-| **MCP Server (12 unelte)** | ✅ Nativ | ✅ stdio MCP suportat | ✅ `~/.codex/config.toml` |
-| **Hook-uri** (SessionStart/PostToolUse/PreCompact) | ✅ Nativ | ❌ Nu există echivalent | ❌ Nu există echivalent |
-| **Skill `/memory-workflow`** | ✅ Nativ | ❌ Slash commands doar CC | ❌ Nu există |
-| **Index auto-injectat** | ✅ Via hook | ❌ Manual `search_index` | ❌ Manual |
-| **Org sync automat** | ✅ Via hook | ❌ Manual `sync-org-memory.mjs` | ❌ Manual |
-| **Extragere learnings** | ✅ Via PreCompact | ❌ Nu | ❌ Nu |
-
-**Concluzie:** Cele 12 unelte MCP funcționează oriunde există un client MCP stdio.
-Magia automată (injecție context, sync org, extragere learnings) este exclusivă Claude Code.
-
----
-
-## TEMA 2 — CLAUDE vs OLLAMA
-
----
-
-## Slide 11 — Ce este Ollama?
+## Slide 1 — Ce este Ollama?
 
 > Ollama este un tool open-source care îți permite să rulezi modele LLM mari **local**,
 > pe propriul hardware, fără nicio conexiune la internet și fără cost per token.
@@ -454,35 +98,44 @@ curl http://localhost:11434/api/generate \
 | `deepseek-coder:33b` | ~19 GB | 24+ GB | Specializat cod |
 | `qwen2.5-coder:32b` | ~18 GB | 24+ GB | Cod, multilingual |
 
+> **⚠️ De ce nu vezi Claude, Gemini sau GPT în listă?**
+> Ollama rulează **doar modele open-weight** — adică modele AI ale căror greutăți pot fi descărcate și rulate pe hardware propriu. Claude (Anthropic), Gemini (Google) și GPT (OpenAI) sunt **modele proprietare** — nu pot fi rulate local în Ollama, oricât de mult hardware ai avea.
+
+> **Confuzia frecventă: Gemini ≠ Gemma.** Ambele sunt de la Google, dar:
+> - **Gemini** = model închis, doar API (Google AI Studio / Vertex AI) → ❌ nu intră în Ollama
+> - **Gemma** = fratele open-weight al Gemini (Gemma 2, **Gemma 3** cu multimodal) → ✅ rulează în Ollama: `ollama run gemma3`, `ollama run gemma3:27b`
+>
+> Așadar singura familie Google pe care o poți rula local prin Ollama este **Gemma**, tocmai pentru că e open-weight. Vrei Gemini (modelul de frontieră)? Atunci folosești API-ul Google, nu Ollama.
+
 ---
 
-## Slide 11b — Modele instalate local: cazul real (`ollama list`)
+## Slide 2 — Modele instalate local: cazul real (`ollama list`)
 
 > Live demo: ce ai pe mașina ta acum și ce poate rula efectiv pe **Dell Latitude 5521** (i7-11850H, MX450 2GB GDDR6).
 
 ```
 $ ollama list
 NAME                          SIZE      MODIFIED
-nemotron-3-nano:30b           24 GB     2 hours ago
-mistral-medium-3.5:latest     80 GB     3 hours ago
-qwen3.6:latest                23 GB     3 hours ago
-qwen3.5:latest                6.6 GB    4 hours ago
-gemma4:latest                 9.6 GB    4 hours ago
-kimi-k2.7-code:cloud          —         4 hours ago
-ornith:9b                     5.6 GB    4 hours ago
-glm-5.2:cloud                 —         44 hours ago
-north-mini-code-1.0:latest    18 GB     3 days ago
+nemotron-3-nano:30b           24 GB     8 days ago
+mistral-medium-3.5:latest     80 GB     8 days ago
+qwen3.6:latest                23 GB     8 days ago
+qwen3.5:latest                6.6 GB    8 days ago
+gemma4:latest                 9.6 GB    8 days ago
+kimi-k2.7-code:cloud          —         8 days ago
+ornith:9b                     5.6 GB    8 days ago
+glm-5.2:cloud                 —         10 days ago
+north-mini-code-1.0:latest    18 GB     12 days ago
 ```
 
-| Model | Disk | Parametri est. | Specializare | VRAM necesar | Pe MX450? |
+| Model | Disk | Parametri estimați din mărimea pe disk presupunând quantizare Q4 (~0.55 GB/B); pentru modelele cu dimensiune în nume (`:30b`, `:9b`) se ia valoarea din nume. Quantizarea reală poate diferi (Q8 → mai puți parametri per GB), deci cifrele sunt aproximative. | Specializare | VRAM necesar | Pe MX450? |
 |---|---|---|---|---|---|
-| `mistral-medium-3.5` | 80 GB | ~90B | General, reasoning, multilingual | 80+ GB | ❌ CPU only, lent |
-| `nemotron-3-nano:30b` | 24 GB | 30B | Reasoning, STEM (NVIDIA) | 24 GB | ❌ CPU only |
-| `qwen3.6` | 23 GB | ~30B | Multilingual, cod, math | 23 GB | ❌ CPU only |
-| `north-mini-code-1.0` | 18 GB | ~20B | Cod | 18 GB | ❌ CPU only |
-| `gemma4` | 9.6 GB | ~12B | General, multimodal text | 10 GB | ❌ CPU only |
-| `qwen3.5` | 6.6 GB | ~7B | General, multilingual | 7 GB | ❌ CPU only |
-| `ornith:9b` | 5.6 GB | 9B | Fine-tune comunitar | 6 GB | ❌ CPU only |
+| `mistral-medium-3.5` | 80 GB | ~140–160B | General, reasoning, multilingual | 80+ GB | ❌ CPU only, lent |
+| `nemotron-3-nano:30b` | 24 GB | 30B (din nume) | Reasoning, STEM (NVIDIA) | 24 GB | ❌ CPU only |
+| `qwen3.6` | 23 GB | ~40B | Multilingual, cod, math | 23 GB | ❌ CPU only |
+| `north-mini-code-1.0` | 18 GB | ~32B | Cod | 18 GB | ❌ CPU only |
+| `gemma4` | 9.6 GB | ~17B | General, multimodal text | 10 GB | ❌ CPU only |
+| `qwen3.5` | 6.6 GB | ~12B | General, multilingual | 7 GB | ❌ CPU only |
+| `ornith:9b` | 5.6 GB | 9B (din nume) | Fine-tune comunitar | 6 GB | ❌ CPU only |
 | `kimi-k2.7-code` | — | N/A | Cod (Moonshot AI, **cloud**) | 0 | ✅ API |
 | `glm-5.2` | — | N/A | General CN/EN (Zhipu AI, **cloud**) | 0 | ✅ API |
 
@@ -491,12 +144,12 @@ north-mini-code-1.0:latest    18 GB     3 days ago
 - MX450 (2GB VRAM) nu poate ține niciun model în VRAM — toate rulează pe CPU via RAM de sistem
 - `qwen3.5` (6.6GB) și `ornith:9b` (5.6GB) sunt singurele care intră confortabil în 16GB RAM → ~3–8 tok/s pe i7-11850H
 - `mistral-medium-3.5` la 80GB necesită 80GB RAM liber — imposibil pe laptop
-- `kimi-k2.7-code` și `glm-5.2` sunt de fapt **API cloud** mascate în Ollama — nu rulează local
+- `kimi-k2.7-code:cloud` și `glm-5.2:cloud` sunt de fapt **API cloud** mascate în Ollama — nu rulează local
 - **Concluzie pentru acest laptop:** Claude API rămâne alegerea corectă; modelele locale sunt bune doar pentru experimente offline sau dacă se conectează un eGPU extern via **Thunderbolt 4**
 
 ---
 
-## Slide 11c — Pot adăuga GPU pe laptopul meu? Prețuri reale (RO)
+## Slide 3 — Pot adăuga GPU pe laptopul meu? Prețuri reale (RO)
 
 > Cazul concret: **Dell Latitude 5521**, i7-11850H, MX450 2GB (soldat) — ce opțiuni există?
 
@@ -557,7 +210,7 @@ north-mini-code-1.0:latest    18 GB     3 days ago
 
 ---
 
-## Slide 11d — La ce e util Ollama cu GLM-5.2 și Kimi-K2.7-Code?
+## Slide 4 — La ce e util Ollama cu GLM-5.2 și Kimi-K2.7-Code?
 
 > Ambele apar în `ollama list` cu `SIZE=—` și suffix `:cloud` — **nu sunt modele locale**.
 > Sunt API-uri externe proxiate prin Ollama; inferența rulează pe serverele Zhipu AI / Moonshot AI din China.
@@ -603,7 +256,7 @@ glm-5.2:cloud           —     ← niciun fișier GGUF descarcat
 
 **Profilul modelului:**
 - Specializat pentru **generare și analiză de cod** (Python, TypeScript, Java, Go, C++)
-- „K2.7" = versiunea 2.7 din seria Kimi; ~2T tokens antrenament pe cod + documentație
+- „K2.7" = o versiune recentă din seria Kimi (K2), antrenată masiv pe cod + documentație
 - Concurent direct cu DeepSeek-Coder și CodeLlama pentru sarcini pure de cod
 
 **Use-case-uri concrete:**
@@ -640,7 +293,7 @@ glm-5.2:cloud           —     ← niciun fișier GGUF descarcat
 
 **Alege GLM-5.2 / Kimi-K2.7-Code când:**
 - Task-ul implică text **în chineză** sau cod fără date sensibile
-- Experimentezi rapid și vrei să compari răspunsuri de la mai mulți furnizori
+- Experimentezi rapid și vrei să compari răspunsuri de la mai multi furnizori
 - Bugetul API e un factor și datele nu sunt confidențiale
 
 **Rămâi pe Claude când:**
@@ -653,7 +306,7 @@ glm-5.2:cloud           —     ← niciun fișier GGUF descarcat
 
 ### Ce îmi trebuie ca să rulez GLM-5.2 / Kimi-K2.7-Code local?
 
-> Răspuns scurt: **nu poți** — sunt modele de frontieră masive, și tagul `:cloud` înseamnă exact asta.
+> Răspuns scurt: **nu poți** — sunt modele masive, și tagul `:cloud` înseamnă exact asta.
 
 **Distincție `:cloud` vs local:**
 
@@ -669,7 +322,7 @@ glm-5.2:cloud           —     ← niciun fișier GGUF descarcat
 
 Pe Dell Latitude 5521 (MX450 2GB VRAM) nici un model serios de 7B nu încape în VRAM — glm-5.2 / kimi-k2 local e exclus complet.
 
-**Ce poți rula local, realist (pe CPU, cu RAM de sistem):**
+**What you can run locally, realistically (on CPU, with system RAM):**
 
 ```bash
 ollama pull qwen3:4b        # ~3 GB, rulează ok pe CPU, ~3–8 tok/s
@@ -678,7 +331,7 @@ ollama pull gemma3:4b       # ~3 GB
 ollama pull deepseek-r1:7b  # ~5 GB, lent pe CPU
 ```
 
-**Cum folosești variantele `:cloud` (modelele din `ollama list`):**
+**How to use the `:cloud` variants (the models listed in `ollama list`):**
 
 ```bash
 # 1. Instalează Ollama (dacă nu ai) — https://docs.ollama.com/quickstart
@@ -691,11 +344,11 @@ ollama login        # cont pe ollama.com
 ollama run glm-5.2:cloud
 ollama run kimi-k2.7-code:cloud
 
-# 4. Sau din Claude Code (Slide 16)
+# 4. Sau din Claude Code (Slide 10)
 ollama launch claude --model glm-5.2:cloud
 ```
 
-**Dacă vrei frontier local (cu eGPU — Slide 11c):**
+**Dacă vrei frontier local (cu eGPU — Slide 3):**
 
 Un RTX 3090/4090 24GB rulează local modele de ~30–70B parametri cuantizate (GGUF Q4). **Dar „frontieră locală" e un framing greșit**: în picker-ul Ollama, modelele de coding de top (glm-5.2, kimi-k2.7-code, minimax-m3, nemotron-3-super) sunt toate `:cloud` — API remote, zero VRAM local. Local-feasibil pe 12–24GB: `gemma4`, `qwen3.6`, `nemotron-3-nano:30b`. Big-open care ar *vrea* local (Qwen3-235B ≈ 142GB ≈ 6×24GB, DeepSeek-V3 ≈ 400GB ≈ 17×24GB, Kimi-K2 ≈ 600GB ≈ 25×24GB) cer hardware datacenter — de aceea le accesezi prin `:cloud`, nu pe GPU propriu.
 
@@ -703,7 +356,7 @@ Un RTX 3090/4090 24GB rulează local modele de ~30–70B parametri cuantizate (G
 
 ---
 
-## Slide 12 — Cum funcționează Ollama intern
+## Slide 5 — Cum funcționează Ollama intern
 
 ```
 Cerere utilizator
@@ -725,15 +378,15 @@ Cerere utilizator
 ```
 
 **Quantizare** (de ce modelele de 70B încap pe 48GB VRAM):
-- Parametrii modelului sunt comprimate de la float32 (4 bytes/param) la int4 (0.5 bytes/param)
+- Parametrii modelului sunt comprimați de la float32 (4 bytes/param) la int4 (0.5 bytes/param)
 - Pierdere de calitate: ~2-5% față de versiunea completă
 - Format standard: **GGUF** (GPT-Generated Unified Format)
 
-**Context window:** limitat de VRAM disponibil — un model de 8B pe 8GB VRAM poate susține context de ~8K tokens; Llama 3.1 70B pe 48GB poate susține 128K tokens.
+**Context window:** limitat de VRAM disponibil (model + KV cache asociat) — un model de 8B pe 8GB VRAM susține context de ~8K tokens; Llama 3.1 70B Q4 pe 48GB poate ajunge **la limită** la 128K tokens doar cu KV cache quantizat (modelul ~40GB lasă puțin spațiu; practic, 32–64K e mai realist pe 48GB).
 
 ---
 
-## Slide 12b — Ollama vs llama.cpp: relația și când alegi care
+## Slide 6 — Ollama vs llama.cpp: relația și când alegi care
 
 > **Relația:** Ollama e construit **peste llama.cpp** — îl folosește ca motor de inference sub capotă, prin propriul wrapper în Go + un fork al nucleului GGML/llama.cpp. Deci nu sunt concurenți: Ollama = strat prietenos peste llama.cpp.
 
@@ -750,7 +403,7 @@ Cerere utilizator
 
 ### Performanță
 
-- **llama.cpp direct** e adesea **ușor mai rapid/mai slab** — fără overhead de wrapper, și expune mai multe manete: rope scaling, tensor split pe mai multe GPU-uri, formate/flag-uri bleeding-edge.
+- **llama.cpp direct** e adesea **ușor mai rapid / cu amprentă mai mică de resurse** — fără overhead de wrapper, și expune mai multe manete: rope scaling, tensor split pe mai multe GPU-uri, formate/flag-uri bleeding-edge.
 - **Ollama** a închis majoritatea gap-ului pentru cazurile comune, dar rămâne în urmă la flag-uri/formate de quant bleeding-edge (nu tot ce apare în llama.cpp ajunge imediat în wrapper).
 
 ### Când alegi care
@@ -759,13 +412,13 @@ Cerere utilizator
 |---|---|
 | Setup rapid, swap între modele, workflow API-first (agenți, LangChain, Claude Code) | **Ollama** |
 | Tuning de performanță maximă, build custom, sau inference înglobat direct într-o aplicație | **llama.cpp** |
-| VRAM strâns — controlezi fin quantizarea/offload-ul | **llama.cpp** |
+| VRAM strâns — controlezi fin cuantizarea/offload-ul | **llama.cpp** |
 
-> **Pentru GLM-4 / Kimi-K2 local:** Ollama e calea ușoară (`ollama pull`); llama.cpp îți dă control pe quantizare/offload când ești la limită cu VRAM-ul (ex. RTX 3060 12GB).
+> **Pentru GLM-4 / Kimi-K2 local:** Ollama e calea ușoară (`ollama pull`); llama.cpp îți dă control pe cuantizare/offload când ești la limită cu VRAM-ul (ex. RTX 3060 12GB).
 
 ---
 
-## Slide 13 — Comparație directă: Claude vs Ollama
+## Slide 7 — Comparație directă: Claude vs Ollama
 
 | Criteriu | Claude (API Anthropic) | Ollama (local) |
 |---|---|---|
@@ -785,7 +438,7 @@ Cerere utilizator
 
 ---
 
-## Slide 14 — Costul real: Claude API vs Ollama
+## Slide 8 — Costul real: Claude API vs Ollama
 
 ### Claude API (Sonnet 4.6)
 
@@ -816,11 +469,11 @@ Fără GPU (CPU only):
   → Hardware cost: $0
 ```
 
-**Concluzie financiară:** Pentru un developer cu utilizare agentică intensă (~$400/lună API), Ollama devine mai ieftin decât API-ul Claude în 2-6 luni cu un GPU decent. Utilizatorii light (~$30/lună) recuperază hardware-ul în câțiva ani, nu luni — ROI-ul în luni presupune utilizare intensă. Sub un GPU de ~$600, diferența de calitate poate să nu merite.
+**Concluzie financiară:** Pentru un developer cu utilizare agentică intensă (~$400/lună API), Ollama devine mai ieftin decât API-ul Claude în 2-6 luni cu un GPU decent. Utilizatorii light (~$30/lună) recuperează hardware-ul în câțiva ani, nu luni — ROI-ul în luni presupune utilizare intensă. Sub un GPU de ~$600, diferența de calitate poate să nu merite.
 
 ---
 
-## Slide 15 — Confidențialitate și date: diferența crucială
+## Slide 9 — Confidențialitate și date: diferența crucială
 
 ### Claude API
 
@@ -861,7 +514,7 @@ Model GGUF în RAM/VRAM — NICIODATĂ în afara mașinii
 
 ---
 
-## Slide 16 — Ollama cu Claude Code: integrarea practică
+## Slide 10 — Ollama cu Claude Code: integrarea practică
 
 **Metoda oficială: `ollama launch claude`** — pornește clientul Claude Code cu Ollama ca backend, nativ (fără proxy):
 
@@ -932,7 +585,7 @@ Sau permanent în `~/.claude/settings.json`:
 }
 ```
 
-> **⚠️ Gotcha subscription hijack:** NU seta `ANTHROPIC_API_KEY=""` pe calea manuală. Un șir gol e tratat ca „nu e setat" → dacă ai Claude Max/Pro, Claude Code cade pe OAuth-ul abonamentului și trimite cererile la `api.anthropic.com` în loc de Ollama. Lasă `ANTHROPIC_AUTH_TOKEN=ollama` să facă toată treaba; verifică cu `/status` în sesiune că base URL-ul e `http://localhost:11434`. (`ollama launch claude` evită asta configurând și `ANTHROPIC_DEFAULT_*_MODEL` + `CLAUDE_CODE_SUBAGENT_MODEL`.)
+> **⚠️ Gotcha subscription hijack:** NU seta `ANTHROPIC_API_KEY=""` pe calea manuală. Un șir gol e tratat ca „nu e setat" → dacă ai Claude Max/Pro, Claude Code recurge la OAuth-ul abonamentului și trimite cererile la `api.anthropic.com` în loc de Ollama. Lasă `ANTHROPIC_AUTH_TOKEN=ollama` să facă toată treaba (are prioritate și suprascrie fallback-ul OAuth); nu seta deloc `ANTHROPIC_API_KEY`. Verifică cu `/status` în sesiune că base URL-ul e `http://localhost:11434`. (`ollama launch claude` evită capcana setând `ANTHROPIC_AUTH_TOKEN=ollama` + `ANTHROPIC_BASE_URL` pentru tine, plus modelele implicite.)
 
 **Capabilități suportate (toate condiționate de modelul ales):** tool calling, file edits, subagents, web search/fetch, vision, thinking controls.
 
@@ -944,7 +597,7 @@ Sau permanent în `~/.claude/settings.json`:
 
 ---
 
-## Slide 17 — Ghid de decizie: Claude API sau Ollama?
+## Slide 11 — Ghid de decizie: Claude API sau Ollama?
 
 ```
 ┌─────────────────────────────────────────────────────────────────┐
@@ -963,10 +616,10 @@ Sau permanent în `~/.claude/settings.json`:
                                     │  complex, cod avansat)?     │
                                     └────────────┬────────────────┘
                                          NU │         │ DA
-                                            ▼         ▼
-                                     Ollama cu   Claude API
-                                     model 7-8B  (Sonnet/Opus)
-                                     + cost $0   + calitate max
+                                             ▼         ▼
+                                      Ollama cu   Claude API
+                                      model 7-8B  (Sonnet/Opus)
+                                      + cost $0   + calitate max
 ```
 
 **Scenarii recomandate:**
@@ -984,7 +637,7 @@ Sau permanent în `~/.claude/settings.json`:
 
 ---
 
-## Slide 17b — Agent Claude vs agent LangChain
+## Slide 12 — Agent Claude vs agent LangChain
 
 > Confuzia vine din faptul că „agent Claude" și „agent LangChain" trăiesc la **niveluri diferite de stivă**:
 > unul e *model + harness*, celălalt e *framework model-agnostic*.
@@ -995,7 +648,7 @@ Sau permanent în `~/.claude/settings.json`:
 |---|---|---|
 | **Modelul** | Clientul e prins de **Claude/Anthropic** (format API Anthropic), DAR din `ollama launch claude` (vezi mai jos) backend-ul poate fi **Ollama** — client Claude Code + model local. | **Model-agnostic** la nivel de framework — Claude, GPT, Gemini, **Ollama local**, orice |
 | **Cine deține loop-ul** | Anthropic: harness închis, opinat (plan mode, hooks, permisiuni, subagents, MCP, compaction). Configurezi, nu scrii loop-ul. | Tu scrii loop-ul / graful. LangGraph = mașină de stări explicită (noduri, muchii, routing condiționat, checkpointuri). |
-| **Starea** | Conversație + memorie fișier + MCP (ex. total-recall). Compaction de context built-in. | Abstracții pluggable: `BufferMemory`, summary, retriever vectorial; LangGraph are checkpointer (in-mem/SQLite/Postgres) pentru stare durabilă între rulări. |
+| **Starea** | Conversație + memorie fișier + MCP (ex. total-recall). Compactare de context built-in. | Abstracții pluggable: `BufferMemory`, summary, retriever vectorial; LangGraph are checkpointer (in-mem/SQLite/Postgres) pentru stare durabilă între rulări. |
 | **Tool-uri** | **MCP** e standardul. Subagents (Task), hooks (Pre/PostToolUse), skills. | Funcții `@tool` + integrări (loaders, retrievers, vector stores). Are și adaptoare MCP acum. |
 | **Computer use / mediu** | First-class: bash, edit fișiere, computer use (ecran/tastatură) în Agent SDK. Claude Code = harness specializat cod. | Doar ce-i dai tu ca tool. Fără computer use built-in decât dacă-l wirezi. |
 | **Control flow** | Modelul decide mult; îl direcționezi cu CLAUDE.md, skills, permission mode. | **Tu controlezi** graful — routing forțat, ramuri paralele, human-in-the-loop gates. Mai mult workflow-engine decât agent liber. |
@@ -1013,8 +666,8 @@ Agent SDK         → „vreau un agent Claude programabil propriu" — Claude e
                      model + tools + max turns.
 
 LangChain/LangGraph → „vreau un pipeline model-agnostic cu control flow explicit,
-                       stare durabilă, human-in-the-loop, sau pot schimba
-                       între Claude și un model local"
+                        stare durabilă, human-in-the-loop, sau pot schimba
+                        între Claude și un model local"
 ```
 
 ### Pentru cazul nostru: de ce contează pe 16 iulie
@@ -1022,7 +675,7 @@ LangChain/LangGraph → „vreau un pipeline model-agnostic cu control flow expl
 | | Agent Claude | Agent LangChain |
 |---|---|---|
 | Poate rula pe **Ollama** (RTX 3060 local)? | **DA, din `ollama launch claude`** — client Claude Code + backend Ollama (fără proxy, Ollama vorbește nativ format Anthropic). | **DA** — `ChatOllama`, rulează pe GPU local, zero cost per token, offline, datele nu ies din mașină |
-| Inteligenție | Cu Claude real: maximă (Opus 4.8). Cu Ollama: **depinde de modelul local** (mai slab decât Claude; endpoint-ul Anthropic-compatibil suportă extended thinking și tool calling, dar **nu** prompt caching — v. Slide 16). | Depinde de modelul local (mai slab decât Claude) |
+| Inteligență | Cu Claude real: maximă (Opus 4.8). Cu Ollama: **depinde de modelul local** (mai slab decât Claude; endpoint-ul Anthropic-compatibil suportă extended thinking și tool calling, dar **nu** prompt caching — v. Slide 10). | Depinde de modelul local (mai slab decât Claude) |
 | Privatitate | Cu Claude real: date → Anthropic. Cu Ollama: **100% on-premise**. | 100% on-premise |
 | Cost | Cu Claude: plat per token. Cu Ollama: **zero**. | Zero |
 
@@ -1047,8 +700,7 @@ Cum funcționează tehnic (fără proxy):
 
 `total-recall` este un **MCP server** — poate fi backend de memorie **pentru ambele**:
 
-- **Claude Code** îl folosește nativ (cele 12 unelte, hook-uri auto)
-- **Un agent LangChain** îl consumă via `@langchain/mcp-adapters` ca tool de retrieval
+- **Claude Code/Copilot/Gemini** îl folosește nativ (cele 12 unelte, hook-uri auto)
 
 Aici converg cele două teme ale prezentării: **memorie persistentă comună** (total-recall), **backend de inteligență interschimbabil** (Claude cloud ↔ Ollama local). Același vault, două runtime-uri diferite.
 
@@ -1063,16 +715,402 @@ Aici converg cele două teme ale prezentării: **memorie persistentă comună** 
 
 ---
 
-## Slide 18 — Sinteza finală și întrebări deschise
+## TEMA 2 — TOTAL RECALL PLUGIN
+
+---
+
+## Slide 13 — Problema: Claude uită tot după sesiune
+
+> La sfârșitul fiecărei conversații, Claude pierde tot contextul acumulat.
+> Decizii, preferințe, arhitecturi discutate — totul dispare.
+
+**Simptomele:**
+- Reexplici același context la fiecare sesiune nouă
+- Preferințele tale de cod trebuie re-menționate de fiecare dată
+- Deciziile de arhitectură nu se acumulează nicăieri
+- Feedback-ul pe care l-ai dat modelului nu persistă
+
+**Consecința:** Cu cât lucrezi mai mult cu Claude Code, cu atât pierzi mai mult timp re-explicând ceea ce ai deja explicat.
+
+---
+
+## Slide 14 — Soluția: total-recall
+
+> Un plugin Claude Code care dă AI-ului memorie persistentă, căutabilă, între sesiuni.
+
+**Ce este:**
+- **Plugin Claude Code** instalat din marketplace
+- **MCP server** cu 12 unelte (stdio, înregistrat via `claude mcp add`)
+- **Vault de fișiere Markdown** stocat local la `~/.total-recall/`
+- **Hook-uri automate** care injectează contextul la fiecare sesiune nouă
+- **Skill `/memory-workflow`** pentru sesiuni structurate de recall/store
+
+**Ce nu este:**
+- Nu trimite date în cloud (vaultul personal este complet local)
+- Nu folosește o bază de date opacă — fiecare memorie este un fișier `.md` citibil
+- Nu suprascrie context — injectează, nu înlocuiește
+
+---
+
+## Slide 15 — Structura pe disk
+
+```
+~/.total-recall/
+├── index.json               ← index plat: key → MemoryMetadata
+├── invertedIndex.json       ← TF-IDF inverted index: token → {docs, idf}
+├── .index-cache.txt         ← rezumat injectat la SessionStart (shell-readable)
+├── personal-vault/
+│   ├── architecture/
+│   │   └── db-choice.md     ← memorie individuală: frontmatter YAML + corp Markdown
+│   ├── feedback/
+│   ├── knowledge/
+│   ├── project/
+│   └── vectors.db           ← embeddings sqlite-vec (opțional)
+└── org/
+    └── org-vault/
+        └── architecture/
+            └── team-decision.md   ← memorii partajate cu echipa, sync pe git
+```
+
+**Fiecare memorie** este un fișier `.md` cu frontmatter:
+
+```markdown
+---
+title: "Preferă PostgreSQL pentru date relaționale"
+tags: [architecture, database, feedback]
+author: adrianb
+importanceScore: 0.8
+created: 2026-06-01T10:00:00Z
+updated: 2026-06-15T14:30:00Z
+---
+
+## Executive Summary
+
+Preferă PostgreSQL față de MySQL pentru proiecte noi...
+```
+
+---
+
+## Slide 16 — Arhitectura: modulele principale
+
+```
+src/
+├── index.ts          ← boot: signal handlers + main()
+├── server.ts         ← MCP Server, 12 scheme tool, dispatch
+├── state.ts          ← singletons partajate: memIndex, invertedIndex
+├── paths.ts          ← căile vault, EXCLUDED_DIRS, ensureDir
+├── types.ts          ← MemoryFrontmatter, MemoryMetadata, Index
+├── lru-cache.ts      ← LRUCache class + shared contentCache instance (100 entries, 30 min TTL)
+├── persistence.ts    ← loadIndexes, scheduleSave (debounce 1s), flushPending
+├── frontmatter.ts    ← parser YAML minimal (fără gray-matter, fără CVE-uri)
+├── vault-scan.ts     ← reconcileIndex, slugify, tokenEstimate
+├── tfidf.ts          ← tokenize, rebuildInvertedIndex, tfidfSearch
+├── ebbinghaus.ts     ← computeRetentionStrength, daysSince
+├── rrf.ts            ← Reciprocal Rank Fusion (k=60)
+├── embeddings.ts     ← HuggingFace pipeline (opțional)
+├── vectorStore.ts    ← sqlite-vec: upsert/search/delete
+└── tools/
+    ├── store.ts      ← store_memory
+    ├── recall.ts     ← recall_memory, search_index
+    ├── query.ts      ← list_memories, get_memories_by_keys, get_stats,
+    │                    get_timeline, get_related_memories, prune_memories
+    └── mutate.ts     ← update_memory, delete_memory, rebuild_index
+```
+
+---
+
+## Slide 16b — De ce algoritmi proprii (fără dependențe grele)
+
+> Toți algoritmii cheie sunt **scrisi de la zero în plugin**, nu luați din librării externe: căutare vectorială (KNN peste sqlite-vec), serializare frontmatter, logica de retenție Ebbinghaus, ranking TF-IDF, RRF. De ce?
+
+| Algoritm / modul | De ce e in-house, nu din librărie |
+|---|---|
+| **Frontmatter parser** (`frontmatter.ts`) | Înlocuiește `gray-matter`, care depindea de `js-yaml 3.x` (**CVE GHSA-h67p-54hq-rp68**). Parser-ul propriu procesează **doar ce scrie plugin-ul** — imun la YAML merge-key DoS, fără YAML arbitrar. |
+| **TF-IDF + inverted index** (`tfidf.ts`) | Scorul e combinat cu **title-boost (2×), tag-boost (1.5×)** și **decay Ebbinghaus** — o librărie generică de TF-IDF nu le știe pe toate trei; le-am co-scris ca să fie o singură formulă coerentă. |
+| **Ebbinghaus retention** (`ebbinghaus.ts`) | Logică **domain-specific** (curba uitării aplicată memoriei): `λ = 0.16 × (1 − importance × 0.8)` + boost de `accessCount`. Nu există librărie standard pentru asta. |
+| **RRF fusion** (`rrf.ts`) | 12 linii, scale-free (`Σ 1/(60 + rank)`) — mai simplu să scrii decât să tragi o dependență. |
+| **Căutare vectorială** (`vectorStore.ts` + `embeddings.ts`) | Doar **wrapper subțire** peste `sqlite-vec` + `@huggingface/transformers` — dar ambele **opționale, lazy-load, `--external`** la esbuild. Fără ele, pluginul degradează curat la TF-IDF. |
+
+### Ce câștigi păstrând totul in-house
+
+1. **Suprafață de atac minimă / securitate.** Singura dependență obligatorie e `@modelcontextprotocol/sdk`. Fără `gray-matter` → fără CVE-ul `js-yaml`. Parser-ul YAML propriu nu acceptă YAML arbitrar → imposibil de injectat chei de frontmatter.
+2. **Zero dependență de LLM.** Pluginul e **determinist** — niciun apel de API, niciun cost, merge **offline / air-gapped**. Retrieval-ul nu depinde de o decizie de model.
+3. **Control complet asupra scoring-ului.** Boost-urile de titlu/tag, decay-ul Ebbinghaus și importanta sunt **o singură formulă**, nu trei librării care se bat. Comportament previzibil, ușor de raționa.
+4. **Performanță și predictibilitate.** Inverted index în memorie, LRU cache (100 intrări / 30 min), persistență debounced (1s), scrieri atomice (write-`.tmp` + rename). Niciun black-box care să facă I/O surpriză.
+5. **Bundle mic, deps native externalizate.** `@huggingface/transformers` și `sqlite-vec` sunt `--external` la esbuild → pluginul se bundle-uiează ușor; runtime-ul de model se instalează/upgrade-ează independent.
+6. **Auditabilitate.** Fiecare decizie de scoring e în cod, observabilă prin `get_stats` (`recentErrors`, `perfSamples`, `vectorSearchEnabled`). Nu există "magie" ascunsă într-o dependență.
+
+> **Filozofia:** un plugin de memorie pentru Claude Code trebuie să fie **ușor, sigur, determinist și previzibil**. Orice dependență grea e un risc de securitate (CVE), un risc de breaking-change, sau un black-box de performanță. De aceea TF-IDF, Ebbinghaus, RRF, frontmatter și chiar wrapper-ul vectorial sunt **scrise de mână** — doar motorul de inference (ONNX) și stocarea vectorială (sqlite-vec) rămân externe, și ele opționale.
+
+---
+
+## Slide 17 — Dual Vault: personal vs org
+
+```
+store_memory(tags=[...])
+       │
+       ├── conține "org"  ──►  ORG VAULT  (~/.total-recall/org/org-vault/)
+       │                        key prefix: "org/"
+       │                        scriere protejată de autor
+       │                        sync automat → git repo echipă (branch org-vault)
+       │                        filtru de confidențialitate înainte de push
+       │
+       └── altfel         ──►  PERSONAL VAULT  (~/.total-recall/personal-vault/)
+                                key: cale relativă simplă
+                                jurnal auto-adăugat la fiecare store
+```
+
+**Regulă cheie:** tagurile `personal` și `org` sunt mutual exclusive — `store_memory` aruncă eroare dacă ambele sunt prezente.
+
+**Filtru de confidențialitate (org sync):**
+- Blochează token-uri cu entropie ridicată (secrete, chei API)
+- Blochează toate adresele email (cu excepția domeniilor din allowlist)
+- Fail-closed: dacă filtrul nu poate analiza conținutul, NU face push
+
+---
+
+## Slide 18 — Cele 12 unelte MCP
+
+### Scriere
+| Unealtă | Ce face |
+|---|---|
+| `store_memory` | Creează o memorie nouă; `force=true` suprascrie |
+| `update_memory` | Modifică titlu/conținut/taguri/importanceScore |
+| `delete_memory` | Șterge fișierul + intrarea din index + vectorul |
+
+### Căutare / Citire
+| Unealtă | Ce face |
+|---|---|
+| `recall_memory` | TF-IDF + Ebbinghaus + opțional vector search via RRF |
+| `search_index` | TF-IDF doar pe metadate (fără citire fișiere, fără bump accessCount) |
+| `get_memories_by_keys` | Lookup direct după cheie; trece prin LRU cache |
+
+### Listare / Interogare
+| Unealtă | Ce face |
+|---|---|
+| `list_memories` | Inventar paginat cu filtre pe categorie/tag |
+| `get_related_memories` | Similaritate Jaccard pe taguri + boost categorie (0.2) |
+| `get_timeline` | Memorii ordonate după `updated` |
+| `get_stats` | Contoare, statistici cache, percentile performanță, erori recente |
+
+### Întreținere
+| Unealtă | Ce face |
+|---|---|
+| `rebuild_index` | `reconcileIndex()` + rebuild TF-IDF; păstrează `accessCount`/`lastAccessed` |
+| `prune_memories` | **Listează** candidații cu retenție scăzută (Ebbinghaus); NU șterge automat |
+
+---
+
+## Slide 19 — Algoritmul de căutare: TF-IDF + Ebbinghaus
+
+### Pipeline `recall_memory`
+
+```
+query (text liber)
+  │
+  ├─ tfidfSearch(query)
+  │    ├─ tokenize(query) → tokens
+  │    ├─ pentru fiecare token: lookup în invertedIndex
+  │    ├─ scor = TF × IDF × title-boost(2×) × tag-boost(1.5×)
+  │    └─ × computeRetentionStrength(importance, daysSince, accessCount)
+  │
+  ├─ [opțional: hybrid=true + dependențe instalate]
+  │    ├─ embed(query) → vector query
+  │    ├─ searchVector(db, qvec, 50) → rezultate vectoriale
+  │    └─ Reciprocal Rank Fusion([tfidf, vector], k=60)
+  │              scor(d) = Σ 1/(60 + rank(d)) pe ambele liste
+  │
+  └─ slice la `limit`, bump accessCount, returnează cu/fără conținut complet
+```
+
+### Curba Ebbinghaus (uitarea modelată matematic)
+
+```
+λ     = 0.16 × (1 − importanceScore × 0.8)
+decay = importanceScore × exp(−λ × daysSince) × (1 + accessCount × 0.2)
+```
+
+| importanceScore | λ (viteza de uitare) | Comportament |
+|---|---|---|
+| 1.0 (critic) | 0.032 | Decay lent — memoria rămâne relevantă săptămâni |
+| 0.5 (normal) | 0.096 | Decay mediu |
+| 0.3 (scăzut) | 0.122 | Decay rapid — dispare din rezultate în zile |
+
+Fiecare acces adaugă +20% forță de retenție (`accessCount × 0.2`).
+
+---
+
+## Slide 19b — Embeddings, vectorizare și căutare multilinguală (opțională)
+
+> Întrebare: folosește total-recall embeddings / vectorizare? **Da — dar opțional, lazy, complet local sau via API-uri locale/GCP, și degradează curat fără ele.**
+
+### Provideri de Embeddings configurabili
+
+În configurația `~/.total-recall/config.json`, poți seta acum:
+*   **`embeddingProvider`**: `'huggingface'` (implicit, local MiniLM), `'ollama'` (API local) sau `'vertexai'` (Google Cloud Vertex AI).
+*   **`embeddingModel`**: Modelul dorit pentru providerii externi (implicit `bge-m3` pe Ollama și `text-embedding-004` pe Vertex AI).
+
+### Căutare multilinguală (cross-language)
+
+Prin activarea flag-ului `"enableMultilingualSearch": true` în config, plugin-ul realizează o expansiune de tokeni engleză-română (ex. căutarea după `"decizie"` va returna automat memorii ce conțin `"decision"`), sporind considerabil acuratețea căutării lexicale.
+
+### Modulele implicate în cod
+
+| Modul | Rol |
+|---|---|
+| `src/embeddings.ts` | Încarcă lazy `@huggingface/transformers` (model `Xenova/all-MiniLM-L6-v2` 384-dim), Ollama sau Vertex AI, calculând embedding-urile la scriere. |
+| `src/vectorStore.ts` | Încarcă lazy `sqlite-vec` (sau conexiunea de DB locală), stochează și caută KNN. |
+| `src/rrf.ts` | **Reciprocal Rank Fusion** (k=60) — fuzionează rezultatele lexicale (TF-IDF) cu cele vectoriale după poziția în rang. |
+
+---
+
+## Slide 20 — Hook-urile: integrarea automată (Claude Code / Copilot / Gemini)
+
+> Deși inițial create exclusiv pentru Claude Code, hook-urile de lifecycle rulează acum și pe **GitHub Copilot CLI** și **Gemini CLI** (prin `hooks.copilot.json` și `hooks.gemini.json`).
+
+### Execuția pe clienți non-Claude (Copilot și Gemini CLI)
+*   **Cum funcționează:** La pornirea sau pe parcursul sesiunii, clientul Copilot sau Gemini apelează hook-ul corespunzător.
+*   **Side-effects executate:** Hook-urile de fundal rulează normal (trag ultimele memorii din git, reconstruiesc cache-ul indexului local, execută push/sync automat în org-vault).
+*   **Limitare (graceful degradation):** Deoarece acești clienți drops/ignoră output-ul stdout al hook-urilor, **injectarea automată a indexului de context (`additionalContext`) în memoria de conversație este dezactivată**. Modelul nu vede rezumatul memoriilor la pornire, însă le poate interoga oricând manual prin uneltele MCP.
+
+### `SessionStart` (4 pași, secvențiali)
+
+```
+1. pull-org-vault.sh       — git pull pe branch-ul org-vault (dacă e configurat)
+2. build-memory-index.sh   — scanare awk a frontmatter-ului → .index-cache.txt
+3. load-memory-index.sh    — cat .index-cache.txt → injectat în context (doar Claude Code)
+4. load-open-questions.sh  — cat open-questions.md → injectat în context (doar Claude Code)
+```
+
+**Efect:** La fiecare nouă sesiune Claude, modelul primește automat rezumatul tuturor memoriilor tale — fără să ceri explicit.
+
+### `PostToolUse` (declanșator: `store_memory|update_memory|delete_memory`)
+
+```
+sync-org-memory.sh
+  ├─ verifică dacă memoria are tag "org"
+  ├─ aplică filtrul de confidențialitate
+  └─ git add/commit/push → branch org-vault al echipei
+  + rebuild .index-cache.txt
+```
+
+### `PreCompact` (când contextul e aproape de limită)
+
+```
+extract-and-store-memories.sh
+  ├─ citește transcriptul sesiunii din stdin JSON (transcript_path)
+  ├─ cere lui Claude să extragă 0–3 learnings cheie ca JSON lines
+  └─ store-learning.mjs → scrie direct ca fișiere .md în personal-vault
+       (fără round-trip MCP; nu suprascrie memorii existente)
+```
+
+### `SessionEnd` (la închiderea sesiunii)
+
+```
+session-end.sh
+  ├─ log marker la ~/.total-recall/.session-end.log (observabilitate)
+  ├─ belt-and-braces SIGTERM către procesul MCP copil (backup pentru
+  │   flush-ul de stdin-end; asigură flushEmbeddings → process.exit)
+  └─ emite envelope JSON SessionEnd pe stdout
+```
+
+---
+
+## Slide 21 — Instalare și utilizare practică
+
+### Instalare bazată pe client
+
+Scriptul `install.sh` este acum conștient de starea clientului și acceptă argumente specifice:
+
+```bash
+# 1. Clonează marketplace-ul și construiește pluginul
+git clone https://github.com/adrian-balaban/my-claude-plugins-marketplace.git
+cd my-claude-plugins-marketplace/plugins/total-recall
+npm install && npm run build
+
+# 2. Înregistrează în funcție de clientul tău:
+
+# Pentru Claude Code (nativ):
+claude plugin install "$(pwd)"
+
+# Pentru GitHub Copilot CLI (MCP + hooks.copilot.json):
+./install.sh --copilot
+
+# Pentru Gemini CLI (MCP + hooks.gemini.json):
+./install.sh --gemini
+
+# Pentru instalare Standalone (scrie căi absolute în settings.json):
+./install.sh --standalone
+```
+
+### Utilizare în sesiune Claude Code
+
+```
+# Caută memorii
+> "reamintește-mi decizia despre baza de date"
+→ recall_memory(query="decizie baza de date")
+
+# Stochează o memorie
+> "reține că preferăm PostgreSQL cu partitionare pe lună"
+→ store_memory(title="...", content="...", tags=["architecture", "database"])
+
+# Listează tot
+> "arată-mi toate memoriile de arhitectură"
+→ list_memories(category="architecture")
+
+# Skill dedicat
+> /total-recall:memory-workflow
+```
+
+### Ordinea de recuperare (din eficiență → completitudine)
+
+1. Index injectat la SessionStart (gratuit — deja în context)
+2. `get_memories_by_keys(summary=true)` — dacă știi cheia
+3. `search_index(query=...)` — metadate rapid, fără citire fișiere
+4. `recall_memory(query=..., full=false)` — TF-IDF + Ebbinghaus
+5. `recall_memory(query=..., full=true)` — cu conținut complet
+
+---
+
+## Slide 22 — Compatibilitate: Claude Code vs Copilot vs Gemini vs Codex
+
+| Capabilitate | Claude Code | GitHub Copilot CLI | Gemini CLI | OpenAI Codex CLI |
+|---|---|---|---|---|
+| **MCP Server (12 unelte)** | ✅ Nativ | ✅ stdio MCP suportat | ✅ stdio MCP suportat | ✅ `~/.codex/config.toml` |
+| **Side Effects (Sync/Index)** | ✅ Da | ✅ Da (hooks automate) | ✅ Da (hooks automate) | ❌ Nu (manual) |
+| **Context Injection** | ✅ Da (`additionalContext`) | ❌ Nu (ignorat de client) | ❌ Nu (ignorat de client) | ❌ Nu |
+| **Playbook Skills** | ✅ Da (nativ) | ❌ Nu | ❌ Nu | ❌ Nu |
+
+**Namespace-uri specifice per client:**
+*   **Claude Code:** namespace simplu (`mcp__plugin_total-recall_total-recall__*`)
+*   **Copilot CLI:** înregistrat ca `mcp__total-recall__<tool>` (folosește double underscores `__`)
+*   **Gemini CLI:** înregistrat ca `mcp_total-recall_<tool>` (folosește single underscore `_`)
+
+---
+
+## Slide 22b — Integrare nativă cu Obsidian
+
+> Deoarece total-recall stochează toate memoriile ca fișiere Markdown (`.md`) simple cu metadate text, vault-urile pot fi deschise direct în editorul **Obsidian**.
+
+### Bune practici în Obsidian:
+
+1. **YAML simplu și curat:** Stick la array-uri simple de string-uri și valori scalare. Parser-ul in-house din total-recall (`frontmatter.ts`) este optimizat pentru viteză și securitate, neavând suport pentru ancore YAML sau blocuri multi-line complexe.
+2. **Fără Watcher activ pe fișiere:** total-recall nu monitorizează permanent discul. Modificările făcute manual în Obsidian se vor reflecta în index doar la repornirea sesiunii de terminal sau apelând manual unealta `rebuild_index`.
+3. **Legături wiki-style (Wiki-links):** Legăturile de tip `[[wikilinks]]` sunt acceptate și indexate lexical ca și cuvinte brute. Graful de conexiuni dintre fișiere nu este însă rezolvat în interiorul MCP-ului.
+4. **Protecție de sincronizare (Obsidian Sync):** **Nu folosi Obsidian Sync pe folderul `org-vault`**. Acest folder trebuie sincronizat exclusiv prin comanda Git integrată în total-recall pentru a asigura rularea filtrului de confidențialitate (secrete, chei API) înainte de push.
+
+---
+
+## Slide 23 — Sinteza finală și întrebări deschise
 
 ### Ce am acoperit
 
 **Total Recall:**
-- Plugin MCP cu 12 unelte pentru memorie persistentă în Claude Code
+- Plugin MCP cu 12 unelte pentru memorie persistentă în Claude Code, Copilot și Gemini CLI
 - Vault dual: personal (local) + org (sync git cu privacy filter)
-- Căutare: TF-IDF + Ebbinghaus decay + opțional vector hybrid
-- Hook-uri automate: injecție context, sync, extragere learnings
-- Portabil pe Copilot/Codex (MCP), fără automatizări (hooks)
+- Căutare hibridă: TF-IDF + vector local/Ollama/Vertex AI + expansiune multilinguală + Ebbinghaus decay
+- Hook-uri automate: suport pentru sync și rebuild de cache pe fundal pentru Claude, Copilot și Gemini
+- Integrare nativă cu Obsidian ca editor de documente (vault-uri Markdown)
 
 **Claude vs Ollama:**
 - Claude API: calitate maximă, cost per token, date în cloud
@@ -1092,7 +1130,7 @@ Aici converg cele două teme ale prezentării: **memorie persistentă comună** 
 
 ---
 
-## Slide 19 — Resurse
+## Slide 24 — Resurse
 
 ### Total Recall
 - **Repo:** `github/total-recall/`
@@ -1114,7 +1152,7 @@ Aici converg cele două teme ale prezentării: **memorie persistentă comună** 
 ### Integrare Claude Code ↔ Ollama
 - **Comandă oficială:** `ollama launch claude` (docs.ollama.com/integrations/claude-code)
 - **Compatibilitate API Anthropic:** docs.ollama.com/api/anthropic-compatibility
-- **Variabile de mediu:** `ANTHROPIC_BASE_URL`, `ANTHROPIC_AUTH_TOKEN` (nu seta `ANTHROPIC_API_KEY` pe calea manuală — v. Slide 16)
+- **Variabile de mediu:** `ANTHROPIC_BASE_URL`, `ANTHROPIC_AUTH_TOKEN` (nu seta `ANTHROPIC_API_KEY` pe calea manuală — v. Slide 10)
 
 ---
 

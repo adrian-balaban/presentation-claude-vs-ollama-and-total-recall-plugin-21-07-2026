@@ -1,11 +1,11 @@
-# CLAUDE.md — presentation-total-recall-si-claude-vs-ollama
+# CLAUDE.md — presentation-claude-vs-ollama-and-total-recall
 
 ## Ce conține acest repo
 
 Materiale pentru prezentarea din **16 iulie 2026**, cu două subiecte:
 
-1. **Plugin total-recall pentru Claude Code** — memorie persistentă via MCP
-2. **Claude vs Ollama** — cloud vs local, comparație directă
+1. **Claude vs Ollama** — cloud vs local, comparație directă
+2. **Plugin total-recall** — memorie persistentă via MCP
 
 ## Fișiere
 

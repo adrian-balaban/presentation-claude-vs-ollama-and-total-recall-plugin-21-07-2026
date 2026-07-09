@@ -4,8 +4,8 @@ Materiale pentru prezentarea din **16 iulie 2026**.
 
 ## Subiecte
 
-1. **Plugin total-recall pentru Claude Code** — memorie persistentă, MCP server cu 12 unelte, hook-uri automate, dual vault (personal + org), algoritm TF-IDF + Ebbinghaus decay.
-2. **Claude vs Ollama** — comparație directă: calitate, cost, confidențialitate, integrare cu Claude Code.
+1. **Claude vs Ollama** — comparație directă: calitate, cost, confidențialitate, integrare cu Claude Code, Copilot si Gemini CLI.
+2. **Plugin total-recall** — memorie persistentă, MCP server cu 12 unelte, hook-uri automate, dual vault (personal + org), algoritm TF-IDF + Ebbinghaus decay.
 
 ## Fișiere
 
