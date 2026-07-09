@@ -137,7 +137,7 @@ Preferă PostgreSQL față de MySQL pentru proiecte noi...
 ```
 src/
 ├── index.ts          ← boot: signal handlers + main()
-├── server.ts         ← MCP Server, 12 scheme tool, dispatch
+├── server.ts         ← MCP Server, 12 scheme tool, dispatch + store_memory/recall_memory/search_index
 ├── state.ts          ← singletons partajate: memIndex, invertedIndex
 ├── paths.ts          ← căile vault, EXCLUDED_DIRS, ensureDir
 ├── types.ts          ← MemoryFrontmatter, MemoryMetadata, Index
@@ -151,8 +151,6 @@ src/
 ├── embeddings.ts     ← HuggingFace pipeline (opțional)
 ├── vectorStore.ts    ← sqlite-vec: upsert/search/delete
 └── tools/
-    ├── store.ts      ← store_memory
-    ├── recall.ts     ← recall_memory, search_index
     ├── query.ts      ← list_memories, get_memories_by_keys, get_stats,
     │                    get_timeline, get_related_memories, prune_memories
     └── mutate.ts     ← update_memory, delete_memory, rebuild_index
@@ -406,7 +404,7 @@ cd my-claude-plugins-marketplace/plugins/total-recall
 | **Hook-uri** (SessionStart/PostToolUse/PreCompact) | ✅ Nativ | ❌ Nu există echivalent | ❌ Nu există echivalent |
 | **Skill `/memory-workflow`** | ✅ Nativ | ❌ Slash commands doar CC | ❌ Nu există |
 | **Index auto-injectat** | ✅ Via hook | ❌ Manual `search_index` | ❌ Manual |
-| **Org sync automat** | ✅ Via hook | ❌ Manual `sync-org-memory.cjs` | ❌ Manual |
+| **Org sync automat** | ✅ Via hook | ❌ Manual `sync-org-memory.mjs` | ❌ Manual |
 | **Extragere learnings** | ✅ Via PreCompact | ❌ Nu | ❌ Nu |
 
 **Concluzie:** Cele 12 unelte MCP funcționează oriunde există un client MCP stdio.
@@ -697,7 +695,7 @@ ollama launch claude --model glm-5.2:cloud
 
 **Dacă vrei frontier local (cu eGPU — Slide 11c):**
 
-Un RTX 3090/4090 24GB permite modele de ~30–70B parametri cuantizate, dar Kimi-K2 (1T) și GLM-5 depășesc și 24GB. Pentru astea ai nevoie de 2–4× GPU 24GB sau treci la variante mai mici: Qwen3-235B, GLM-4.6, DeepSeek-V3 (merg pe 2×24GB cuantizat Q4).
+Un RTX 3090/4090 24GB rulează local modele de ~30–70B parametri cuantizate (GGUF Q4). **Dar „frontieră locală" e un framing greșit**: în picker-ul Ollama, modelele de coding de top (glm-5.2, kimi-k2.7-code, minimax-m3, nemotron-3-super) sunt toate `:cloud` — API remote, zero VRAM local. Local-feasibil pe 12–24GB: `gemma4`, `qwen3.6`, `nemotron-3-nano:30b`. Big-open care ar *vrea* local (Qwen3-235B ≈ 142GB ≈ 6×24GB, DeepSeek-V3 ≈ 400GB ≈ 17×24GB, Kimi-K2 ≈ 600GB ≈ 25×24GB) cer hardware datacenter — de aceea le accesezi prin `:cloud`, nu pe GPU propriu.
 
 > **Recomandare pentru demo la prezentare:** folosește `glm-5.2:cloud` / `kimi-k2.7-code:cloud` pentru exemplul „model de frontieră", și `qwen3:4b` local pentru demo-ul „rulează pe laptopul meu, offline". Contrastul ăsta ilustrează perfect tensiunea cloud ↔ local din titlul prezentării.
 
@@ -771,7 +769,7 @@ Cerere utilizator
 |---|---|---|
 | **Modele disponibile** | Claude Sonnet 4.6, Opus 4.8, Haiku 4.5 | Llama, Mistral, Gemma, Phi, Qwen, DeepSeek etc. |
 | **Calitate top-tier** | ✅ Claude Opus 4.8 = state of the art | Llama 3.3 70B ≈ GPT-4o, dar sub Opus |
-| **Cost per token** | $3–$15 / 1M tokens (input) | $0 — hardware propriu |
+| **Cost per token** | $3–$15 / 1M tokens (input $3 / output $15) | $0 — hardware propriu |
 | **Cost infrastructură** | $0 (fără server propriu) | GPU bun: $500–$3000+ |
 | **Confidențialitate** | Date trimise la Anthropic | 100% local, zero egress |
 | **Latență** | ~500ms–2s primul token | ~100ms–500ms (GPU local) |
@@ -793,10 +791,10 @@ Cerere utilizator
 Input:  $3.00 / 1M tokens
 Output: $15.00 / 1M tokens
 
-Sesiune tipică de cod (8h/zi, developer activ):
-  Input:  ~200K tokens/zi  → $0.60/zi
-  Output: ~50K tokens/zi   → $0.75/zi
-  TOTAL:  ~$1.35/zi → ~$30/lună
+Sesiune agentică intensă (8h/zi, multe tool calls, context re-reads):
+  Input:  ~3M tokens/zi    → $9/zi
+  Output: ~600K tokens/zi  → $9/zi
+  TOTAL:  ~$18/zi → ~$400/lună (22 zile lucrătoare)
 ```
 
 ### Ollama pe hardware local
@@ -816,7 +814,7 @@ Fără GPU (CPU only):
   → Hardware cost: $0
 ```
 
-**Concluzie financiară:** Ollama devine mai ieftin decât API-ul Claude în 2-6 luni dacă ai sau cumperi un GPU decent. Sub un GPU de ~$600, diferența de calitate poate să nu merite.
+**Concluzie financiară:** Pentru un developer cu utilizare agentică intensă (~$400/lună API), Ollama devine mai ieftin decât API-ul Claude în 2-6 luni cu un GPU decent. Utilizatorii light (~$30/lună) recuperază hardware-ul în câțiva ani, nu luni — ROI-ul în luni presupune utilizare intensă. Sub un GPU de ~$600, diferența de calitate poate să nu merite.
 
 ---
 
@@ -1095,7 +1093,7 @@ Aici converg cele două teme ale prezentării: **memorie persistentă comună** 
 ## Slide 19 — Resurse
 
 ### Total Recall
-- **Repo:** `github/claude-plugins-total-recall/`
+- **Repo:** `github/total-recall/`
 - **Arhitectura detaliată:** `plugins/total-recall/ARCHITECTURE.md`
 - **Instalare:** `plugins/total-recall/install.sh --help`
 - **README:** `plugins/total-recall/README.md`

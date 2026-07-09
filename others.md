@@ -21,8 +21,7 @@ Total-recall folosește embeddings și/sau vectorizare? **Da — dar opțional, 
 | `src/embeddings.ts` | Lazy-load `@huggingface/transformers`, apelează modelul, upsert-ează vectori, deține promisiunea de init. |
 | `src/vectorStore.ts` | Lazy-load `sqlite-vec`, creează tabelul virtual `vec_memories` cu coloană `FLOAT[384]`, expune `upsertVector` / `searchVectors`. |
 | `src/rrf.ts` | Reciprocal Rank Fusion — combină cele două liste ordonate într-una singură. |
-| `src/recall.ts` | Poarta "hybrid" care rulează TF-IDF + vector search în paralel și le fuzionează. |
-| `src/server.ts` | Dispatch-ul de unelte MCP — `recall_memory(hybrid: bool)` default-ează la hybrid când dependențele sunt prezente. |
+| `src/server.ts` | Dispatch MCP + poarta "hybrid" (`recall_memory`): rulează TF-IDF + vector search în paralel și le fuzionează via `rrf.ts`; `hybrid: bool` default-ează la true când dependențele native sunt prezente. |
 | `package.json` | Dependențe opționale `@huggingface/transformers ^3.8.1`, `sqlite-vec ^0.1.9` — ambele declarate `--external` la esbuild, deci nu sunt bundle-uite. |
 
 ### Tabelul 2 — modulele de scoring & storage
@@ -110,6 +109,6 @@ Config-ul esbuild marchează ambele dependențe ca `--external` — pluginul e b
 
 ## Referințe
 
-- **Arhitectura completă:** `../claude-plugins-total-recall/plugins/total-recall/ARCHITECTURE.md`
-- **Cod sursă:** `../claude-plugins-total-recall/plugins/total-recall/src/` (`embeddings.ts`, `vectorStore.ts`, `rrf.ts`, `tfidf.ts`, `ebbinghaus.ts`, `recall.ts`, `server.ts`)
+- **Arhitectura completă:** `../total-recall/plugins/total-recall/ARCHITECTURE.md`
+- **Cod sursă:** `../total-recall/plugins/total-recall/src/` (`embeddings.ts`, `vectorStore.ts`, `rrf.ts`, `tfidf.ts`, `ebbinghaus.ts`, `server.ts`)
 - **Slide corespondent în prezentare:** `Slide 7b — Embeddings & vectorizare` în `prezentare.ro.md`

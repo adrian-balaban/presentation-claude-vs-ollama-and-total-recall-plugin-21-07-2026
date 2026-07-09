@@ -21,6 +21,6 @@ Versiunile viitoare în engleză vor folosi `.md` sau `.en.md`.
 
 ## Referințe pentru conținut
 
-- **total-recall plugin:** `../claude-plugins-total-recall/plugins/total-recall/`
-- **Arhitectura detaliată:** `../claude-plugins-total-recall/plugins/total-recall/ARCHITECTURE.md`
+- **total-recall plugin:** `../total-recall/plugins/total-recall/`
+- **Arhitectura detaliată:** `../total-recall/plugins/total-recall/ARCHITECTURE.md`
 - **Model presentation similar (RO):** `../poc-for-presentation-on-flink-variants-for-cdc-and-outbox/kafka-connect-at-scale-74-connectors-migration.ro.md`
