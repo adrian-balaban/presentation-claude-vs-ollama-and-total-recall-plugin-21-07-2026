@@ -12,6 +12,7 @@ Materiale pentru prezentarea din **16 iulie 2026**, cu două subiecte:
 | Fișier | Conținut |
 |--------|----------|
 | `prezentare.ro.md` | Prezentarea completă în română (format Markdown cu slide-uri) |
+| `others.md` | Notițe de sprijin — embeddings & vectorizare (versiunea detaliată a Slide 7b) |
 
 ## Convenție de fișiere
 

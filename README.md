@@ -12,6 +12,7 @@ Materiale pentru prezentarea din **16 iulie 2026**.
 | Fișier | Descriere |
 |--------|-----------|
 | [`prezentare.ro.md`](prezentare.ro.md) | Prezentare completă în română |
+| [`others.md`](others.md) | Notițe de sprijin — embeddings & vectorizare (versiunea detaliată a Slide 7b) |
 
 ## Autor
 
