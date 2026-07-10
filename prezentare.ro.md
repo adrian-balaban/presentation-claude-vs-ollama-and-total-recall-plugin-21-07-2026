@@ -127,7 +127,7 @@ glm-5.2:cloud                 —         10 days ago
 north-mini-code-1.0:latest    18 GB     12 days ago
 ```
 
-| Model | Disk | Parametri estimați din mărimea pe disk presupunând quantizare Q4 (~0.55 GB/B); pentru modelele cu dimensiune în nume (`:30b`, `:9b`) se ia valoarea din nume. Quantizarea reală poate diferi (Q8 → mai puți parametri per GB), deci cifrele sunt aproximative. | Specializare | VRAM necesar | Pe MX450? |
+| Model | Disk | Parametri (est.)* | Specializare | VRAM necesar | Pe MX450? |
 |---|---|---|---|---|---|
 | `mistral-medium-3.5` | 80 GB | ~140–160B | General, reasoning, multilingual | 80+ GB | ❌ CPU only, lent |
 | `nemotron-3-nano:30b` | 24 GB | 30B (din nume) | Reasoning, STEM (NVIDIA) | 24 GB | ❌ CPU only |
@@ -138,6 +138,8 @@ north-mini-code-1.0:latest    18 GB     12 days ago
 | `ornith:9b` | 5.6 GB | 9B (din nume) | Fine-tune comunitar | 6 GB | ❌ CPU only |
 | `kimi-k2.7-code` | — | N/A | Cod (Moonshot AI, **cloud**) | 0 | ✅ API |
 | `glm-5.2` | — | N/A | General CN/EN (Zhipu AI, **cloud**) | 0 | ✅ API |
+
+\* *estimat din mărimea pe disk la Q4 (~0.55 GB/mld. parametri); cifre aproximative.*
 
 **Lecția practică:**
 
@@ -186,7 +188,7 @@ north-mini-code-1.0:latest    18 GB     12 days ago
 
 ![eGPU enclosure Razer Core X V2 — Thunderbolt 5 + sursă 750W 80+ Gold, OLX Cluj-Napoca, 1.600 lei](images/razer-core-x-v2-egpu-olx.png)
 
-> *Sursă imagine: OLX, anunț ID 305525034, vânzător "cristi" (Cluj-Napoca, 17 iun 2026) — Razer Core X V2 Thunderbolt 5 + sursă 750W 80+ Gold, 1.600 lei. Captură preluată cu Chrome DevTools MCP din galeria anunțului (imaginea a 2-a).*
+> *Sursă: anunț OLX Cluj-Napoca, iun 2026 — 1.600 lei.*
 
 **Plăci RTX 3060 12GB — OLX second-hand:** 950–1.100 lei  
 **Plăci RTX 3060 12GB — eMAG nou (garanție):** 2.099–2.206 lei
@@ -584,36 +586,14 @@ Ce face comanda automat:
 - setează `ANTHROPIC_BASE_URL=http://localhost:11434`, `ANTHROPIC_AUTH_TOKEN=ollama`, `ANTHROPIC_API_KEY=""`
 - Ollama expune **endpoint compatibil API Anthropic** la `localhost:11434` → cerere în format Anthropic → model Ollama răspunde → răspuns re-ambalat în format Anthropic
 
-### Cum funcționează, fără proxy
+### Distincția cheie: formatul e Anthropic, inteligența e Ollama
 
-Ollama expune nativ un **endpoint compatibil cu API-ul Anthropic** la `http://localhost:11434`. Claude Code se conectează **direct** la Ollama, **fără intermediar**.
-
-Redirecționarea (tot în `ollama launch claude`, automat):
-
-- `ANTHROPIC_BASE_URL=http://localhost:11434` — pointează la Ollama, nu la `api.anthropic.com`
-- `ANTHROPIC_AUTH_TOKEN=ollama`
-- `ANTHROPIC_API_KEY=""` — gol
-
-Așadar **înlocuitorul "proxy-ului" e faptul că Ollama vorbește direct formatul Anthropic** — traducerea e înglobată în serverul Ollama, nu e un proxy separat. (Ce spuneam mai devreme despre `claude-code-router`/LiteLLM era soluția **manuală/comunitară** de dinainte sau pentru alt setup — cu `ollama launch claude` e nativ, mult mai curat.)
-
-### API-ul este de Claude? — distincția cheie
-
-**Da, pe partea de format — dar modelul e Ollama.** E exact distincția care clarifică confuzia:
-
-- **Formatul pe care-l vorbește clientul Claude Code** = API Anthropic (Messages API, "API-ul de Claude"). Ollama servește acest format nativ.
-- **Modelul care răspunde efectiv** = un LLM livrat de Ollama (ex. `qwen3.5` local, sau `glm-5.2:cloud`, `kimi-k2.7-code:cloud` cloud), specificat via `--model`.
-
-Deci flow-ul complet:
+Ollama vorbește **nativ** formatul API Anthropic la `localhost:11434` — **nu există proxy separat**. Clientul Claude Code „crede" că vorbește cu Anthropic; de fapt răspunde modelul ales cu `--model`:
 
 ```
-cerere în format Anthropic
-      → Ollama o traduce intern
-      → modelul Ollama răspunde
-      → răspuns re-ambalat în format Anthropic
-      → clientul Claude Code îl consumă
+cerere în format Anthropic → Ollama traduce intern → modelul Ollama răspunde
+      → răspuns re-ambalat în format Anthropic → clientul Claude Code îl consumă
 ```
-
-Clientul "crede" că vorbește cu Anthropic; de fapt, inteligența o pune modelul Ollama.
 
 **Metoda manuală (alternativă, fără `launch`):**
 
@@ -729,20 +709,7 @@ LangChain/LangGraph → „vreau un pipeline model-agnostic cu control flow expl
 | Privatitate | Cu Claude real: date → Anthropic. Cu Ollama: **100% on-premise**. | 100% on-premise |
 | Cost | Cu Claude: plat per token. Cu Ollama: **zero**. | Zero |
 
-> **Nuanța cheie (corecție față de versiunea anterioară):** "Claude agent e lipit de Anthropic" nu mai e 100% adevărat. Clientul Claude Code rămâne (format API Anthropic), dar **backend-ul poate fi Ollama** prin `ollama launch claude`. Limitarea reală nu mai e "nu poate rula pe Ollama", ci **"calitatea = calitatea modelului local ales"** — harness-ul Claude Code e același, inteligența o dă modelul Ollama.
-
-### `ollama launch claude` — podul oficial
-
-```
-ollama launch claude --model qwen3.5            # model local, pe RTX 3060
-ollama launch claude --model glm-5.2:cloud      # model cloud, fără download
-```
-
-Cum funcționează tehnic (fără proxy):
-- `ollama launch claude` instalează/pornește **clientul Claude Code** și setează `ANTHROPIC_BASE_URL=http://localhost:11434`, `ANTHROPIC_AUTH_TOKEN=ollama`, `ANTHROPIC_API_KEY=""`.
-- Ollama expune nativ un **endpoint compatibil API Anthropic** la `localhost:11434` → **nu există proxy separat**, traducerea e înglobată în serverul Ollama.
-- Cerere în **format Anthropic** → Ollama o traduce intern → **modelul Ollama** răspunde → răspuns re-ambalat în format Anthropic → clientul Claude Code îl consumă.
-- Suportă tool calling, file edits, subagents, web search/fetch, vision, thinking controls — **toate condiționate de modelul ales** (un model mic local poate să nu le aibă pe toate).
+> **Nuanța cheie:** "Claude agent e lipit de Anthropic" nu mai e adevărat — backend-ul poate fi Ollama prin `ollama launch claude`. Limitarea reală: **calitatea = calitatea modelului local ales**.
 
 > **Tensiunea pe care o discutăm:** agent Claude cu Claude real = inteligență maximă + harness polish, dar **dependent de cloud, cost, privatitate**. Agent Claude + Ollama (via `ollama launch claude`) = harness polish + **suveran** (local, gratuit, offline), dar **inteligența o pune modelul local**, nu Claude. Agent LangChain + Ollama = suveran și **tu controlezi loop-ul**, dar tot calitatea modelului local e limitarea.
 
@@ -1054,15 +1021,7 @@ extract-and-store-memories.sh
        (fără round-trip MCP; nu suprascrie memorii existente)
 ```
 
-### `SessionEnd` (la închiderea sesiunii)
-
-```
-session-end.sh
-  ├─ log marker la ~/.total-recall/.session-end.log (observabilitate)
-  ├─ belt-and-braces SIGTERM către procesul MCP copil (backup pentru
-  │   flush-ul de stdin-end; asigură flushEmbeddings → process.exit)
-  └─ emite envelope JSON SessionEnd pe stdout
-```
+### `SessionEnd` — cleanup: loghează sesiunea și asigură flush-ul embeddings-urilor înainte de exit.
 
 ---
 
