@@ -614,7 +614,7 @@ LangChain/LangGraph → „vreau un pipeline model-agnostic cu control flow expl
 
 **Consecința:** Cu cât lucrezi mai mult cu Claude Code, cu atât pierzi mai mult timp re-explicând ceea ce ai deja explicat.
 
-> **Nu ești singurul care vrea asta:** Mozilla.ai a lansat `cq` (1.2k ⭐) — un standard deschis pentru *shared agent learning*. total-recall rezolvă același spațiu cu fișiere `.md` + git + curbă de uitare Ebbinghaus — zero server, zero infrastructură.
+> **Nu ești singurul care vrea asta:** Mozilla.ai a lansat `cq` (1.2k ⭐) — un standard deschis pentru *shared agent learning*: agenții propun «knowledge units» (workaround-uri, API-uri nedocumentate) într-un store comun, cu review uman. **Complementar, nu concurent:** cq = lecții operaționale partajate între agenți; total-recall = memoria TA de context (decizii, preferințe, arhitectură) cu curbă de uitare Ebbinghaus — fișiere `.md` + git, fără server și fără review pipeline.
 
 ---
 
