@@ -178,20 +178,11 @@ north-mini-code-1.0:latest    18 GB     12 days ago
 
 ### Prețuri concrete România (date live, 2026)
 
-**Enclosure eGPU — OLX second-hand:**
-
-| Model | Conexiune | Preț |
-|---|---|---|
-| Razer Core X | Thunderbolt 3/4 | ~1.380 lei |
-| Razer Core X V2 Next-Gen | Thunderbolt 5 (compat. TB4) | ~1.500–1.600 lei |
-| Razer Core X Chroma | Thunderbolt 3/4 | ~2.000 lei |
-
-![eGPU enclosure Razer Core X V2 — Thunderbolt 5 + sursă 750W 80+ Gold, OLX Cluj-Napoca, 1.600 lei](images/razer-core-x-v2-egpu-olx.png)
+![eGPU enclosure Razer Core X V2 — Thunderbolt 5 + sursă 750W 80+ Gold](images/razer-core-x-v2-egpu-olx.png)
 
 > *Sursă: anunț OLX Cluj-Napoca, iun 2026 — 1.600 lei.*
 
-**Plăci RTX 3060 12GB — OLX second-hand:** 950–1.100 lei  
-**Plăci RTX 3060 12GB — eMAG nou (garanție):** 2.099–2.206 lei
+Enclosure Razer Core X: ~1.400 lei SH / ~2.900 lei nou · RTX 3060 12GB: ~1.000 lei SH / ~2.100 lei nou (eMAG, garanție)
 
 **Bundle-uri recomandate:**
 
@@ -230,27 +221,10 @@ glm-5.2:cloud           —     ← niciun fișier GGUF descarcat
 
 ---
 
-### GLM-5.2 — Zhipu AI (智谱AI, Beijing)
+### GLM-5.2 — Zhipu AI (Beijing)
 
-**Profilul modelului:**
-- Familie GLM (General Language Model) — dezvoltat de Zhipu AI, spin-off al Universității Tsinghua
-- Antrenat masiv pe text chinezo-englez; calitate comparabilă GPT-4o pentru text chinezesc
-- Suportă context lung (~128k tokens); bun la raționament și sinteză de documente
-
-**Use-case-uri unde GLM-5.2 aduce valoare:**
-
-| Task | De ce GLM-5.2? |
-|---|---|
-| Procesare text **chinezo-englez** | Calitate nativă CN, nu traducere |
-| Traducere tehnică CN ↔ EN | Context tehnic adânc, termeni specializați |
-| Rezumare documente lungi | Context 128k; sinteze coerente |
-| Cercetare academică în chineză | Surse, citate, formulare academică CN |
-| Alternativă cost-eficientă la Claude Haiku | Prețuri API competitive pentru sarcini simple |
-
-**Limitări pentru un developer român:**
-- Limba română — calitate slabă; rămâi pe Claude pentru RO
-- Cod specializat — Kimi-K2.7-Code e mai bun
-- Date sensibile — servere în China (v. secțiunea GDPR)
+- Flagship-ul Z.ai (spin-off Tsinghua); context ~128k, bun la raționament, agentic și cod
+- Pentru un dev român: română slabă (rămâi pe Claude pentru RO), date sensibile → servere în China
 
 > **Din presă (context) — GLM-5.2, lansat 13 iunie 2026:**
 > - **Performanță comparabilă cu Claude Opus 4.8 și GPT-5.5, la ~6× mai ieftin** (apreciere atribuită lui David Sacks și Marc Andreessen).
@@ -264,22 +238,10 @@ glm-5.2:cloud           —     ← niciun fișier GGUF descarcat
 
 ---
 
-### Kimi-K2.7-Code — Moonshot AI (月之暗面, Beijing)
+### Kimi-K2.7-Code — Moonshot AI (Beijing)
 
-**Profilul modelului:**
-- Specializat pentru **generare și analiză de cod** (Python, TypeScript, Java, Go, C++)
-- „K2.7" = o versiune recentă din seria Kimi (K2), antrenată masiv pe cod + documentație
-- Concurent direct cu DeepSeek-Coder și CodeLlama pentru sarcini pure de cod
-
-**Use-case-uri concrete:**
-
-| Task | Performanță |
-|---|---|
-| Code review automat | ★★★★☆ — detectează pattern-uri problematice |
-| Generare boilerplate / scaffolding | ★★★★★ — rapid, consistent |
-| Explicare cod legacy obscur | ★★★★☆ — contextualizează bine |
-| Debugging cu stack trace | ★★★☆☆ — ok pentru erori comune |
-| Pair programming interactiv | ★★★★☆ — răspunsuri scurte, precise |
+- Specializat pe **generare și analiză de cod** (Python, TS, Java, Go, C++); concurent DeepSeek-Coder
+- Puncte forte: boilerplate/scaffolding, code review, explicare cod legacy
 
 ---
 
@@ -301,31 +263,13 @@ glm-5.2:cloud           —     ← niciun fișier GGUF descarcat
 - **Nu trimite prin aceste API-uri:** cod cu date personale ale clienților, IP proprietar, credențiale, contracte
 - Pentru echipe enterprise EU: verificați DPA (Data Processing Agreement) înainte de utilizare
 
-### Când alegi :cloud Ollama vs Claude API?
-
-**Alege GLM-5.2 / Kimi-K2.7-Code când:**
-- Task-ul implică text **în chineză** sau cod fără date sensibile
-- Experimentezi rapid și vrei să compari răspunsuri de la mai multi furnizori
-- Bugetul API e un factor și datele nu sunt confidențiale
-
-**Rămâi pe Claude când:**
-- Conținut în **română** sau orice altă limbă non-chineză
-- Date ale clienților, IP, contracte sau orice informație sensibilă
-- Ai nevoie de calitate consistentă și o relație de DPA documentată
-- Task-uri de **raționament complex**, arhitectură de sistem, cod critic
+**Regula scurtă:** cod ne-sensibil + buget → :cloud chinezesc; română, date sensibile, raționament critic → Claude.
 
 ---
 
 ### Ce îmi trebuie ca să rulez GLM-5.2 / Kimi-K2.7-Code local?
 
-> Răspuns scurt: **nu poți** — sunt modele masive, și tagul `:cloud` înseamnă exact asta.
-
-**Distincție `:cloud` vs local:**
-
-| Tag | Unde rulează | Ce îți trebuie |
-|---|---|---|
-| `glm-5.2:cloud`, `kimi-k2.7-code:cloud` | Cloud Ollama (servere remote) | Cont Ollama + `ollama login` + internet. Modelul NU se descarcă local. |
-| `glm-5.2` (fără `:cloud`) | Local (GGUF pe GPU/CPU) | Hardware cu VRAM masiv + `ollama pull <model>` |
+> Răspuns scurt: **nu poți pe hardware obișnuit** — tagul `:cloud` înseamnă exact asta: rulează pe serverele Ollama, ai nevoie doar de `ollama login` + internet.
 
 **De ce nu merge local pe hardware obișnuit:**
 
@@ -369,10 +313,9 @@ huggingface-cli download unsloth/GLM-5.2-GGUF --include "UD-IQ2_M/*" --local-dir
   --ctx-size 32768 --n-gpu-layers 999 --ot "exps=CPU" --threads $(nproc) --port 8080
 ```
 
-- **Trucul `--ot "exps=CPU"`:** rutează straturile Mixture-of-Experts pe CPU/RAM host, ținând attention + straturile dense pe GPU → poți rula un model de ~239 GB pe VRAM mult mai mic (compensezi cu RAM).
-- **Path 4× RTX 3090** (96 GB VRAM pooled) + 192 GB RAM: ~3–9 tok/s, prim token în ~30–60s; ~$5–7k doar plăcile; PCIe 4.0 x16, **fără NVLink**; PSU ~1.400 W.
-- **Runtime-uri suportate:** llama.cpp, **Ollama** (wrapper peste llama.cpp → același throughput), LM Studio (cel mai simplu GUI pe Mac), vLLM.
-- **Alternativa API Z.ai** (endpoint **compatibil Anthropic**, drop-in): ~$1.40/1M input, $0.26/1M input cache-uit, $4.40/1M output — sau plan lunar de coding $3–80/lună. Pentru majoritatea, mai ieftin decât hardware-ul.
+- **Trucul `--ot "exps=CPU"`:** straturile MoE merg pe CPU/RAM, attention rămâne pe GPU → un model de ~239 GB devine rulabil pe VRAM mult mai mic.
+- **Path realist:** 4× RTX 3090 (96 GB VRAM) + 192 GB RAM → ~3–9 tok/s; ~$5–7k doar plăcile.
+- **Alternativa API Z.ai** (endpoint **compatibil Anthropic**, drop-in): ~$1.40/1M input, $4.40/1M output, sau plan coding $3–80/lună — pentru majoritatea, mai ieftin decât hardware-ul.
 
 **What you can run locally, realistically (on CPU, with system RAM):**
 
@@ -1103,10 +1046,10 @@ claude plugin install "$(pwd)"
 
 ### Bune practici în Obsidian:
 
-1. **YAML simplu și curat:** Stick la array-uri simple de string-uri și valori scalare. Parser-ul in-house din total-recall (`frontmatter.ts`) este optimizat pentru viteză și securitate, neavând suport pentru ancore YAML sau blocuri multi-line complexe.
-2. **Fără Watcher activ pe fișiere:** total-recall nu monitorizează permanent discul. Modificările făcute manual în Obsidian se vor reflecta în index doar la repornirea sesiunii de terminal sau apelând manual unealta `rebuild_index`.
-3. **Legături wiki-style (Wiki-links):** Legăturile de tip `[[wikilinks]]` sunt acceptate și indexate lexical ca și cuvinte brute. Graful de conexiuni dintre fișiere nu este însă rezolvat în interiorul MCP-ului.
-4. **Protecție de sincronizare (Obsidian Sync):** **Nu folosi Obsidian Sync pe folderul `org-vault`**. Acest folder trebuie sincronizat exclusiv prin comanda Git integrată în total-recall pentru a asigura rularea filtrului de confidențialitate (secrete, chei API) înainte de push.
+1. **YAML simplu:** array-uri de string-uri și scalari — parser-ul in-house nu suportă ancore YAML / blocuri multi-line.
+2. **Fără watcher pe fișiere:** editările manuale intră în index doar la sesiune nouă sau `rebuild_index`.
+3. **`[[wikilinks]]`** sunt acceptate și indexate lexical (graful nu e rezolvat în MCP).
+4. **Nu folosi Obsidian Sync pe `org-vault`** — sync-ul trebuie să treacă prin git-ul total-recall, ca să ruleze filtrul de confidențialitate înainte de push.
 
 ---
 
