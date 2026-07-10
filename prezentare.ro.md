@@ -353,6 +353,8 @@ Un RTX 3090/4090 24GB rulează local modele de ~30–70B parametri cuantizate (G
 
 ## Slide 5 — Cum funcționează Ollama intern
 
+> 💡 **WOW:** quantizarea Q4 comprimă un model de 8× — un 70B care „cere" 280 GB încape în 48 GB VRAM, cu doar ~2–5% pierdere de calitate.
+
 ```
 Cerere utilizator
        │
@@ -415,6 +417,8 @@ Cerere utilizator
 
 ## Slide 7 — Comparație directă: Claude vs Ollama
 
+> 💡 **Punctul-cheie:** nu e „care e mai bun", ci **ce optimizezi** — inteligență maximă (Claude) vs suveranitate totală: $0/token, offline, zero egress (Ollama).
+
 | Criteriu | Claude (API Anthropic) | Ollama (local) |
 |---|---|---|
 | **Modele disponibile** | Claude Sonnet 4.6, Opus 4.8, Haiku 4.5 | Llama, Mistral, Gemma, Phi, Qwen, DeepSeek etc. |
@@ -434,6 +438,8 @@ Cerere utilizator
 ---
 
 ## Slide 8 — Costul real: Claude API vs Ollama
+
+> 💡 **WOW:** un developer agentic intens arde ~$400/lună pe API — un RTX 4090 de $2.000 se amortizează în ~5 luni. Dar dacă ești utilizator light ($30/lună), amortizarea durează ani.
 
 ### Claude API (Sonnet 4.6)
 
@@ -469,6 +475,8 @@ Fără GPU (CPU only):
 ---
 
 ## Slide 9 — Confidențialitate și date: diferența crucială
+
+> 💡 **WOW:** cu Ollama, promptul tău nu părăsește **niciodată** mașina — funcționează și cu cablul de rețea scos (air-gapped). Pentru finance/healthcare/NDA, asta nu e un „nice to have", e singura opțiune legală.
 
 ### Claude API
 
@@ -714,6 +722,8 @@ Aici converg cele două teme ale prezentării: **memorie persistentă comună** 
 
 ## Slide 15 — Structura pe disk
 
+> 💡 **WOW:** zero bază de date opacă — memoria AI-ului tău e un folder de fișiere `.md` pe care le poți citi, edita, versiona cu git și deschide în Obsidian.
+
 ```
 ~/.total-recall/
 ├── index.json               ← index plat: key → MemoryMetadata
@@ -752,6 +762,8 @@ Preferă PostgreSQL față de MySQL pentru proiecte noi...
 ---
 
 ## Slide 16 — Arhitectura: modulele principale
+
+> 💡 **WOW:** un motor de căutare hibrid complet (TF-IDF + vector + curbă de uitare) în ~20 de fișiere TypeScript, cu **o singură dependență obligatorie** (`@modelcontextprotocol/sdk`).
 
 ```
 src/
@@ -806,6 +818,8 @@ src/
 
 ## Slide 17 — Dual Vault: personal vs org
 
+> 💡 **WOW:** un simplu tag `org` transformă memoria personală în cunoaștere de echipă — cu filtru de confidențialitate **fail-closed**: dacă nu poate garanta că nu scapă secrete, nu face push.
+
 ```
 store_memory(tags=[...])
        │
@@ -830,6 +844,8 @@ store_memory(tags=[...])
 ---
 
 ## Slide 18 — Cele 12 unelte MCP
+
+> 💡 **Util:** CRUD complet + căutare + întreținere, în limbaj natural — spui „reține că…" / „reamintește-mi…" și modelul alege singur unealta potrivită.
 
 ### Scriere
 | Unealtă | Ce face |
@@ -862,6 +878,8 @@ store_memory(tags=[...])
 ---
 
 ## Slide 19 — Algoritmul de căutare: TF-IDF + Ebbinghaus
+
+> 💡 **WOW:** memoria AI-ului **uită ca un om** — curba uitării lui Ebbinghaus (1885) aplicată în cod: memoriile neimportante și neaccesate se estompează din rezultate, fiecare accesare le „reîmprospătează" cu +20%.
 
 ### Pipeline `recall_memory`
 
@@ -926,6 +944,8 @@ Prin activarea flag-ului `"enableMultilingualSearch": true` în config, plugin-u
 
 ## Slide 20 — Hook-urile: integrarea automată (Claude Code / Copilot / Gemini)
 
+> 💡 **WOW:** înainte de compactarea contextului (`PreCompact`), pluginul **salvează automat learnings-urile sesiunii** — cunoașterea supraviețuiește chiar și când contextul e șters.
+
 > Deși inițial create exclusiv pentru Claude Code, hook-urile de lifecycle rulează acum și pe **GitHub Copilot CLI** și **Gemini CLI** (prin `hooks.copilot.json` și `hooks.gemini.json`).
 
 ### Execuția pe clienți non-Claude (Copilot și Gemini CLI)
@@ -969,6 +989,8 @@ extract-and-store-memories.sh
 ---
 
 ## Slide 21 — Instalare și utilizare practică
+
+> 💡 **Util:** același plugin, 4 clienți — Claude Code, Copilot CLI, Gemini CLI, standalone — cu un singur `install.sh`.
 
 ### Instalare bazată pe client
 
