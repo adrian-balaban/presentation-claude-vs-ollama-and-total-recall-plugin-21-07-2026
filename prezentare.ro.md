@@ -250,6 +250,16 @@ glm-5.2:cloud           —     ← niciun fișier GGUF descarcat
 - Cod specializat — Kimi-K2.7-Code e mai bun
 - Date sensibile — servere în China (v. secțiunea GDPR)
 
+> **Din presă (context) — GLM-5.2, lansat 13 iunie 2026:**
+> - **Performanță comparabilă cu Claude Opus 4.8 și GPT-5.5, la ~6× mai ieftin** (apreciere atribuită lui David Sacks și Marc Andreessen).
+> - **66% pe 103 sarcini complexe de programare** (raport Snowflake) — foarte aproape de 67% al modelului Claude, dar la cost semnificativ mai mic.
+> - **Open-source, licență MIT**, rulat pe **cipuri Huawei Ascend** produse local — semnal al ambiției Chinei de a egala SUA.
+> - **Adopție profesională în creștere:** modelele chineze au atins **45% din traficul pe OpenRouter (aprilie 2026)**, față de 30% în 2025; pe platformele de consum (ChatGPT/Gemini/Claude) modelele americane încă domină (87–93%).
+> - **Limitări notate:** tendința de a supra-analiza detalii eronate și consum de memorie mai ridicat.
+> - *Context politic:* lansare la o zi după interdicția SUA (12 iun 2026) de export al modelelor AI de vârf, revocată pe 30 iun 2026.
+>
+> *Sursă: Libertatea (după Panorama.it) — [Strategia Chinei în competiția AI: modele open-source pe cipuri Huawei](https://www.libertatea.ro/stiri/zhipu-ai-model-china-rival-openai-anthropic-cost-de-sase-ori-mai-mic-5809983)*
+
 ---
 
 ### Kimi-K2.7-Code — Moonshot AI (月之暗面, Beijing)
@@ -321,6 +331,46 @@ glm-5.2:cloud           —     ← niciun fișier GGUF descarcat
 - **GLM-5.x** = 100–200 GB VRAM în variantele grele — 2–4×H100/A100 80GB
 
 Pe Dell Latitude 5521 (MX450 2GB VRAM) nici un model serios de 7B nu încape în VRAM — glm-5.2 / kimi-k2 local e exclus complet.
+
+> **Împăcarea celor două afirmații (posibilă întrebare la Q&A):** presa (v. Slide 4, GLM-5.2) spune că GLM-5.2 e **open-source, licență MIT** — deci *weights descărcabile liber*. Aici spun că `glm-5.2:cloud` **nu rulează pe laptopul meu**. Ambele sunt adevărate simultan: **„open-weight" ≠ „încape pe hardware-ul tău"**. Weights-urile pot fi publice și totuși modelul să ceară 100–200 GB VRAM (datacenter). De aceea Ollama îl oferă ca `:cloud` (API remote) — comoditate, nu o limitare de licență. Cu destul hardware (sau eGPU + cuantizare agresivă pentru variantele mici) **l-ai putea** rula local; pe MX450 pur și simplu nu încape.
+
+### `ollama pull` la un model GLM-5* — ce se poate și ce nu
+
+> Verificat live pe [ollama.com/search?q=glm](https://ollama.com/search?q=glm). Atenție: în registry, **întreaga familie GLM-5 e cloud-only** — nu există GGUF de descărcat.
+
+| Model în registry Ollama | Tag-uri | Local? | `ollama pull` |
+|---|---|---|---|
+| `glm-5.2` (flagship Z.ai) | `tools thinking cloud`, 1 tag | ❌ doar cloud | `ollama run glm-5.2:cloud` (după `ollama login`) |
+| `glm-5.1` | `cloud`, 1 tag | ❌ doar cloud | idem `:cloud` |
+| `glm-5` (744B total / 40B activi) | `cloud`, 1 tag | ❌ doar cloud | idem `:cloud` |
+| `glm-4.7-flash` (**cel mai puternic din clasa 30B**) | `tools thinking`, 4 tag-uri, **fără `cloud`** | ✅ **da** | `ollama pull glm-4.7-flash` |
+| `glm4` (9B, vechi) | `9b`, 32 tag-uri | ✅ da | `ollama pull glm4:9b` |
+
+**Concluzie practică:**
+- **Nu poți** face `ollama pull glm-5.2` — pe Ollama e cloud-only. Singurul GLM „de generație 5" rulabil local prin Ollama este **`glm-4.7-flash`** (clasa 30B; intră pe ~12–24 GB VRAM cuantizat, ex. RTX 3060 12GB la variantele mici).
+- **Vrei GLM-5.2 chiar local?** Nu prin Ollama, ci cu **GGUF-uri Unsloth** de pe HuggingFace + llama.cpp — dar dimensiunile sunt de clasă datacenter: `UD-IQ2_M` ~239 GB (budget, ~82% acuratețe), `UD-Q3_K_XL` ~343 GB, `UD-Q4_K_XL` ~467 GB, BF16 ~1.51 TB. Realist: Mac Studio M3 Ultra 256–512 GB sau 4–8× GPU datacenter. Pentru 95% dintre cazuri, ghidul recomandă tot API-ul (DeepInfra/Fireworks FP8, ~$0.80/1M tokens) în locul investiției în hardware.
+- *Surse:* [InsiderLLM — Run GLM-5.2 Locally](https://insiderllm.com/guides/run-glm-5-2-locally/) · [Codersera — How to Run GLM-5.2 Locally (2026)](https://codersera.com/blog/how-to-run-glm-5-2-locally-2026/)
+
+**Rețeta concretă (dacă chiar vrei GLM-5.2 local, via llama.cpp + GGUF Unsloth):**
+
+```bash
+# 1. Build llama.cpp cu CUDA
+git clone https://github.com/ggml-org/llama.cpp && cd llama.cpp
+cmake -B build -DGGML_CUDA=ON && cmake --build build --config Release -j $(nproc)
+
+# 2. Descarcă GGUF 2-bit (~239 GB)
+pip install "huggingface_hub[cli]"
+huggingface-cli download unsloth/GLM-5.2-GGUF --include "UD-IQ2_M/*" --local-dir ~/models/glm-5-2
+
+# 3. Server, cu offload MoE pe CPU (cheia care-l face fezabil pe VRAM limitat)
+./build/bin/llama-server --model ~/models/glm-5-2/UD-IQ2_M/GLM-5.2-UD-IQ2_M-00001-of-00006.gguf \
+  --ctx-size 32768 --n-gpu-layers 999 --ot "exps=CPU" --threads $(nproc) --port 8080
+```
+
+- **Trucul `--ot "exps=CPU"`:** rutează straturile Mixture-of-Experts pe CPU/RAM host, ținând attention + straturile dense pe GPU → poți rula un model de ~239 GB pe VRAM mult mai mic (compensezi cu RAM).
+- **Path 4× RTX 3090** (96 GB VRAM pooled) + 192 GB RAM: ~3–9 tok/s, prim token în ~30–60s; ~$5–7k doar plăcile; PCIe 4.0 x16, **fără NVLink**; PSU ~1.400 W.
+- **Runtime-uri suportate:** llama.cpp, **Ollama** (wrapper peste llama.cpp → același throughput), LM Studio (cel mai simplu GUI pe Mac), vLLM.
+- **Alternativa API Z.ai** (endpoint **compatibil Anthropic**, drop-in): ~$1.40/1M input, $0.26/1M input cache-uit, $4.40/1M output — sau plan lunar de coding $3–80/lună. Pentru majoritatea, mai ieftin decât hardware-ul.
 
 **What you can run locally, realistically (on CPU, with system RAM):**
 
