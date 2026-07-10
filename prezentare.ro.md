@@ -37,7 +37,7 @@ Cinci lucruri pe care le iei de aici:
 1. **Claude vs Ollama** (25 min)
    - Ce este Ollama și cum funcționează → *Slide 2 & 6*
    - Cazul real (modele instalate local, eGPU, modele `:cloud`) → *Slide 3, 4, 5*
-   - Compararea motorului: Ollama vs llama.cpp → *Slide 7*
+   - Compararea motorului: Ollama vs llama.cpp vs llamafile → *Slide 7*
    - Comparație directă: performanță, costuri, confidențialitate → *Slide 8, 9, 10*
    - Integrare practică cu Claude Code și ghid de decizie → *Slide 11 & 12*
    - Tipuri de agenți: Claude vs LangChain → *Slide 13*
@@ -60,7 +60,7 @@ Cinci lucruri pe care le iei de aici:
 > Ollama este un tool open-source care îți permite să rulezi modele LLM mari **local**,
 > pe propriul hardware, fără nicio conexiune la internet și fără cost per token.
 
-> 💡 **WOW:** Ollama a depășit **100 de milioane de descărcări** pe GitHub/Docker Hub în 2026. Este de facto standardul pentru local-first LLMs.
+> 💡 **WOW:** Ollama a depășit **100 de milioane de descărcări** pe GitHub/Docker Hub în 2026. Este cel mai popular runtime local pentru LLM-uri (dar nu singurul — v. Slide 7 pentru llama.cpp și llamafile).
 
 **Ce face Ollama:**
 - Descarcă și rulează modele quantizate local (Llama, Mistral, Gemma, Phi, Qwen, etc.)
@@ -247,7 +247,7 @@ Cerere utilizator
 
 ---
 
-## Slide 7 — Ollama vs llama.cpp: relația și când alegi care
+## Slide 7 — Ollama vs llama.cpp vs llamafile: relația și când alegi care
 
 > **Relația:** Ollama e construit **peste llama.cpp** — îl folosește ca motor de inference sub capotă, prin propriul wrapper în Go + un fork al nucleului GGML/llama.cpp. Deci nu sunt concurenți: Ollama = strat prietenos peste llama.cpp.
 
@@ -262,12 +262,41 @@ Cerere utilizator
 | **API** | `llama-server` (HTTP, mai brut) | **REST API la `:11434`** + endpoint **compatibil OpenAI** |
 | **Caz tipic** | Inference înglobat direct în altă aplicație; build-uri custom | Integrare API rapidă local (LangChain, agenți, Claude Code via `ollama launch claude`) |
 
+### A treia opțiune: llamafile — „modelul E un fișier"
+
+> 💡 **WOW:** un llamafile e **un singur executabil** care rulează pe Windows, macOS, Linux și BSD **fără instalare** — modelul, llama.cpp și runtime-ul într-un fișier pe care îl poți pune pe stick USB, arhiva sau șterge cu un simplu delete. (mozilla-ai/llamafile, 25k+ ⭐, revitalizat de Mozilla.ai)
+
+```bash
+curl -LO https://huggingface.co/mozilla-ai/llamafile_0.10/resolve/main/Qwen3.5-0.8B-Q8_0.llamafile
+chmod +x Qwen3.5-0.8B-Q8_0.llamafile
+./Qwen3.5-0.8B-Q8_0.llamafile        # gata — zero install, zero daemon
+```
+
+**Trade-off-uri oneste** (recunoscute chiar de Mozilla.ai): binarele sunt mari (runtime-ul se livrează cu fiecare model), swap-ul de modele e mai greoi decât `ollama pull`, iar pe Apple Silicon stack-urile MLX sunt mai rapide. llamafile e pentru cazul în care AI-ul trebuie să fie **portabil, vendor-free și cu adevărat al tău**.
+
+### Critica de suveranitate: Ollama = „managed service wearing a hoodie" (Mozilla.ai)
+
+> Critica **nu** e că Ollama ar fi closed-source — codul chiar e open source (MIT). Critica vizează **modul de operare**, care reproduce tiparele unui serviciu gestionat: arată a open source rebel, dar se comportă ca un vendor cloud.
+
+Concret, trei mecanisme:
+
+1. **Registry centralizat.** `ollama pull llama3.2` nu descarcă un fișier de oriunde — trage dintr-un registru controlat de compania Ollama (ollama.com/library), cu un sistem de manifest propriu, non-standard. Ce modele apar acolo, cum sunt denumite, ce tag-uri există — decide vendorul. E exact modelul Docker Hub: cod open source, canal de distribuție proprietar.
+
+2. **Formatul „blob".** Modelele circulă în ecosistem ca fișiere **GGUF** standard — le poți lua de pe Hugging Face și rula cu llama.cpp, LM Studio, llamafile etc. Dar când Ollama le trage, le sparge și le stochează în cache-ul daemonului ca blob-uri cu nume hash (`~/.ollama/models/blobs/sha256-...`), plus manifeste proprii. Fișierul tău de 24 GB nu mai e un „fișier model" pe care să-l copiezi pe alt tool sau pe un stick — e un artefact pe care doar Ollama știe să-l folosească direct. (Tehnic blob-ul *conține* GGUF-ul și poate fi recuperat, dar nu e formatul portabil pe care l-ai descărcat.)
+
+3. **Daemon obligatoriu.** Nu rulezi „un model", rulezi un serviciu de fundal (`ollama serve`) care gestionează registry-ul, cache-ul și API-ul. Ești legat de ciclul lui de viață, update-urile lui, deciziile lui.
+
+**Deci „soft lock-in" înseamnă:** nimic nu te *împiedică legal sau tehnic* să pleci (codul e liber, GGUF-ul e recuperabil) — dar cu cât folosești mai mult, cu atât modelele, scripturile și workflow-ul tău depind de registrul, formatul de stocare și daemonul unui singur vendor. Costul de ieșire crește tăcut. Prin contrast, argumentul llamafile: „modelul e un fișier" — un singur executabil pe care îl copiezi, arhivezi, ștergi, fără registru și fără daemon.
+
+> **Formularea pentru slide:** „Ollama e open source, dar distribuția e a vendorului: registry centralizat + blob-uri în format propriu + daemon obligatoriu. Nu e lacăt — e gravitație."
+
 ### Când alegi care
 
 | Vrei… | Alegi |
 |---|---|
 | Setup rapid, swap între modele, API-first (agenți, Claude Code) | **Ollama** |
 | Control maxim (cuantizare, offload, build custom) | **llama.cpp** |
+| Portabilitate totală: un fișier, zero install, zero daemon, air-gapped | **llamafile** |
 
 ---
 
@@ -298,6 +327,8 @@ Cerere utilizator
 ## Slide 9 — Costul real: Claude API vs Ollama
 
 > 💡 **WOW:** un developer agentic intens arde ~$400/lună pe API — un RTX 4090 de $2.000 se amortizează în ~5 luni. Dar dacă ești utilizator light ($30/lună), amortizarea durează ani.
+
+> 📊 **WOW (datat):** 1 iunie 2026 — Copilot a mutat Claude Opus de la **3× la 27×** multiplicator și Sonnet de la **1× la 9×**; tier-ul gratuit GPT-4o a dispărut. „Era AI-ului cloud ieftin s-a terminat" (Mozilla.ai, *AI Got Expensive. Now What?*, mai 2026). Ăsta e forcing function-ul întregii discuții cloud-vs-local.
 
 ### Claude API (Sonnet 4.6)
 
@@ -425,6 +456,8 @@ Sau permanent în `~/.claude/settings.json`:
 ```
 
 > **⚠️ Gotcha subscription hijack:** pe calea manuală NU seta `ANTHROPIC_API_KEY=""` — șirul gol = „nu e setat", iar cu Claude Max/Pro cererile pleacă pe OAuth la `api.anthropic.com` în loc de Ollama. `ANTHROPIC_AUTH_TOKEN=ollama` e suficient. Verifică cu `/status` că base URL-ul e `localhost:11434`.
+>
+> **De ce contează diferența dintre cele două variabile:** `ANTHROPIC_API_KEY` pleacă pe fir ca header `x-api-key`, în timp ce `ANTHROPIC_AUTH_TOKEN` devine `Authorization: Bearer <token>` — backend-urile non-Anthropic (Ollama, Otari) citesc de regulă doar Bearer. Și încă un detaliu: Claude Code adaugă singur `/v1/messages` la URL, deci `ANTHROPIC_BASE_URL` trebuie să fie **root-ul** serverului (fără `/v1` la coadă).
 
 **Capabilități suportate (toate condiționate de modelul ales):** tool calling, file edits, subagents, web search/fetch, vision, thinking controls.
 
@@ -433,6 +466,32 @@ Sau permanent în `~/.claude/settings.json`:
 - Calitatea output-ului depinde complet de modelul ales — harness-ul e același, inteligența o pune modelul
 - Tool use / function calling: funcționează doar cu modele care suportă (Llama 3.x, Mistral, Qwen 2.5, Qwen3, qwen3-coder)
 - Context window mai mic poate trunchia fișiere mari (recomandat 64K+ pentru repo-uri mari)
+
+---
+
+## Slide 11b — A treia cale: Otari, gateway Anthropic-compatibil (Bonus)
+
+> 💡 **WOW:** același truc `ANTHROPIC_BASE_URL`, dar cu **buget enforcement ÎNAINTE de request, nu după factură.**
+
+**Otari** (Mozilla.ai, open-source, lansat mai 2026, construit peste `any-llm`) e un gateway LLM self-hosted care expune și endpoint-ul Anthropic (`POST /v1/messages`) — deci Claude Code poate rula prin el exact ca prin Ollama, dar cu stratul operațional pe care Ollama nu-l are:
+
+- **Bugete** per user / per cheie, aplicate *înainte* ca cererea să ruleze
+- **Chei virtuale** — clientul nu vede niciodată cheia reală Anthropic/OpenAI; le poți revoca oricând
+- **Usage & spend tracking** în timp real, pe toate modelele (40+ provideri prin any-llm)
+- Rulezi Claude real, GPT, Mistral sau modele locale prin **același endpoint**
+
+```bash
+docker run --rm -p 8000:8000 \
+  -e OTARI_MASTER_KEY=... -e ANTHROPIC_API_KEY=... \
+  mzdotai/otari:latest otari serve
+
+export ANTHROPIC_BASE_URL=http://localhost:8000   # root, fără /v1
+export ANTHROPIC_AUTH_TOKEN=<cheia-ta-otari>      # Bearer, nu x-api-key
+export ANTHROPIC_MODEL="anthropic:claude-sonnet-4-6"
+claude
+```
+
+**Când are sens:** echipă care vrea Claude real + modele alternative + control central de buget și chei — fără să dea fiecărui developer cheia API brută.
 
 ---
 
@@ -475,6 +534,7 @@ Sau permanent în `~/.claude/settings.json`:
 | Cod cu context mare (>50K tokens) | Claude API | Sonnet 4.6 (200K context) |
 | Offline / air-gapped | Ollama | Orice model descărcat prealabil |
 | Echipă cu GPU server partajat | Ollama | Llama 3.3 70B, server central |
+| Echipă care vrea Claude + modele locale + control buget centralizat | **Otari gateway** (self-hosted) | Claude real + orice provider, chei virtuale, bugete per user |
 
 ---
 
@@ -494,6 +554,8 @@ Sau permanent în `~/.claude/settings.json`:
 | **Computer use / mediu** | First-class: bash, edit fișiere, computer use (ecran/tastatură) în Agent SDK. Claude Code = harness specializat cod. | Doar ce-i dai tu ca tool. Fără computer use built-in decât dacă-l wirezi. |
 | **Control flow** | Modelul decide mult; îl direcționezi cu CLAUDE.md, skills, permission mode. | **Tu controlezi** graful — routing forțat, ramuri paralele, human-in-the-loop gates. Mai mult workflow-engine decât agent liber. |
 | **Taxa de abstracție** | Subțire, aproape de API. | Straturi groase, schimbări breaking între versiuni, abstracții leaky (mulți au migrat la LangGraph sau API raw). |
+
+> **Alternativa „subțire" la LangChain pentru multi-provider:** **any-llm** (Mozilla.ai, 2.1k ⭐) — un singur `completion()` peste 40+ provideri (OpenAI, Anthropic, Mistral, Ollama…), fără taxa de abstracție LangChain. Dacă tot ce vrei e „schimb providerul dintr-un string", nu-ți trebuie un framework de agenți.
 
 ### Cele trei forme de „agent Claude"
 
@@ -551,6 +613,8 @@ LangChain/LangGraph → „vreau un pipeline model-agnostic cu control flow expl
 - Feedback-ul pe care l-ai dat modelului nu persistă
 
 **Consecința:** Cu cât lucrezi mai mult cu Claude Code, cu atât pierzi mai mult timp re-explicând ceea ce ai deja explicat.
+
+> **Nu ești singurul care vrea asta:** Mozilla.ai a lansat `cq` (1.2k ⭐) — un standard deschis pentru *shared agent learning*. total-recall rezolvă același spațiu cu fișiere `.md` + git + curbă de uitare Ebbinghaus — zero server, zero infrastructură.
 
 ---
 
@@ -940,6 +1004,13 @@ claude plugin install "$(pwd)"
 - **Comandă oficială:** `ollama launch claude` (docs.ollama.com/integrations/claude-code)
 - **Compatibilitate API Anthropic:** docs.ollama.com/api/anthropic-compatibility
 - **Variabile de mediu:** `ANTHROPIC_BASE_URL`, `ANTHROPIC_AUTH_TOKEN` (nu seta `ANTHROPIC_API_KEY` pe calea manuală — v. Slide 10)
+
+### Ecosistemul Mozilla.ai (Slide 7, 9, 11b, 13, 14)
+- **Otari gateway:** github.com/mozilla-ai/otari (+ `docs/use-with-claude-code.md`)
+- **llamafile:** github.com/mozilla-ai/llamafile · docs.mozilla.ai/llamafile
+- **any-llm:** github.com/mozilla-ai/any-llm
+- **cq (shared agent learning):** github.com/mozilla-ai/cq
+- **Articolul „AI Got Expensive. Now What?":** blog.mozilla.ai/ai-got-expensive-now-what
 
 ---
 
