@@ -5,20 +5,20 @@ date: 2026-07-16
 layout: docs
 ---
 
-# Total Recall Plugin & Claude vs Ollama
+# Claude vs Ollama & Total Recall Plugin
 
 **Autor:** Adrian Balaban  
 **Data:** 16 iulie 2026
 
 Două subiecte practice despre cum extindem și alegem uneltele AI în workflow-ul de zi cu zi:
-- primul despre decizia „cloud sau local" când lucrezi cu LLM-uri; 
+- primul despre decizia „cloud sau local" când lucrezi cu LLM-uri
 - al doilea despre persistența memoriei în Claude/Copilot/Gemini printr-un plugin MCP
 
 ---
 
 ## Slide 0 — Ce iei din această sesiune
 
-> Nu teorie generică — decizii concrete pe care le poți lua mâine dimineață.
+> Nu teorie generică — decizii concrete pe care le poți folosi azi.
 
 Cinci lucruri pe care le iei de aici:
 
@@ -63,8 +63,8 @@ Cinci lucruri pe care le iei de aici:
 > 💡 **WOW:** Ollama a depășit **100 de milioane de descărcări** pe GitHub/Docker Hub în 2026. Este cel mai popular runtime local pentru LLM-uri (dar nu singurul — v. Slide 7 pentru llama.cpp și llamafile).
 
 **Ce face Ollama:**
-- Descarcă și rulează modele quantizate local (Llama, Mistral, Gemma, Phi, Qwen, etc.)
-- Expune o **API REST compatibilă cu OpenAI** pe `http://localhost:11434`
+- Descarcă și rulează modele quantizate local (Llama, Mistral, Gemma, Phi, Qwen, etc.) TODO: adauga ce face pentru modele gen Claude, Gemini etc
+- Expune o **API REST compatibilă cu OpenAI** pe `http://localhost:11434` TODO verifica daca nu e si pentru Claude etc
 - Gestionează memoria GPU/CPU, contextul și concurența
 - Funcționează pe macOS, Linux, Windows (cu/fără GPU)
 
@@ -74,7 +74,7 @@ Cinci lucruri pe care le iei de aici:
 # Instalare (ghid oficial): https://docs.ollama.com/quickstart
 #   → download de pe ollama.com/download (macOS / Windows / Linux)
 
-# După instalare, descarcă și pornește un model
+# După instalare, descarcă și pornește un model TODO adauga si ce face pentru cele ca Claude etc
 ollama pull llama3.2
 ollama run llama3.2
 # sau direct via API:
@@ -82,7 +82,7 @@ curl http://localhost:11434/api/generate \
   -d '{"model":"llama3.2","prompt":"Salut!"}'
 ```
 
-**Modele populare disponibile:**
+**Modele populare disponibile:** TODO verifica in web si adauga si de la claude etc
 
 | Model | Dimensiune | VRAM necesar | Calitate |
 |---|---|---|---|
@@ -93,14 +93,14 @@ curl http://localhost:11434/api/generate \
 | `deepseek-coder:33b` | ~19 GB | 24+ GB | Specializat cod |
 | `qwen2.5-coder:32b` | ~18 GB | 24+ GB | Cod, multilingual |
 
-> **⚠️ De ce nu vezi Claude, Gemini sau GPT în listă?**
+> **⚠️ De ce nu vezi Claude, Gemini sau GPT în listă?** TODO fix dupa ce completezi TODO-ul anterior
 > Ollama rulează **doar modele open-weight** — adică modele AI ale căror greutăți pot fi descărcate și rulate pe hardware propriu. Claude (Anthropic), Gemini (Google) și GPT (OpenAI) sunt **modele proprietare** — nu pot fi rulate local în Ollama, oricât de mult hardware ai avea.
 
 > **Confuzia frecventă: Gemini ≠ Gemma.** Ambele sunt de la Google, dar:
 > - **Gemini** = model închis, doar API (Google AI Studio / Vertex AI) → ❌ nu intră în Ollama
 > - **Gemma** = fratele open-weight al Gemini (Gemma 2, **Gemma 3** cu multimodal) → ✅ rulează în Ollama: `ollama run gemma3`, `ollama run gemma3:27b`
 >
-> Așadar singura familie Google pe care o poți rula local prin Ollama este **Gemma**, tocmai pentru că e open-weight. Vrei Gemini (modelul de frontieră)? Atunci folosești API-ul Google, nu Ollama.
+> Așadar singura familie Google pe care o poți rula local prin Ollama este **Gemma**, tocmai pentru că e open-weight. Vrei Gemini (modelul de frontieră)? Atunci folosești API-ul Google si client AntigravityIDE, nu Ollama. TODO adauga link ul pentru a instala antigravity IDE si un screenshot local
 
 ---
 
@@ -133,7 +133,7 @@ north-mini-code-1.0:latest    18 GB     12 days ago
 
 ## Slide 4 — Pot adăuga GPU pe laptop? (Bonus)
 
-> **TL;DR:** GPU-ul intern e soldat — singura opțiune e **eGPU extern via Thunderbolt 4**. Cu un enclosure SH + RTX 3060 12GB nou (~3.500 lei), rulezi modele de 7–13B complet pe GPU la 20–50 tok/s. Bottleneck-ul TB4 e irelevant pentru inference LLM (contează VRAM-ul, nu banda).
+> **TL;DR:** GPU-ul intern e soldat — singura opțiune e **eGPU extern via Thunderbolt 4**. Cu un enclosure SH + RTX 3060 12GB nou (~3.500 lei), rulezi modele de 7–13B complet pe GPU la 20–50 tok/s. Bottleneck-ul TB4 e irelevant pentru inference LLM (contează VRAM-ul, nu banda). TODO adauga imaginea existenta si explica vce inseamna banda in contextul de mai sus.
 
 ---
 
@@ -151,13 +151,13 @@ glm-5.2:cloud           —     ← niciun fișier GGUF descarcat
 
 - `SIZE=—` = nu există model local; Ollama trimite cererea la API-ul extern
 - Tokenizarea și inferența se fac **pe serverele furnizorului**, nu pe CPU/GPU-ul tău
-- Avantaj față de API-ul direct: aceeași interfață CLI (`ollama run`) și protocol OpenAI-compatible
+- Avantaj față de API-ul direct: aceeași interfață CLI (`ollama run`) și protocol OpenAI-compatible TODO verifica daca este aceeasi si pentru claude si gemini si corecteaza daca e cazul. TODO adauga link si pentru claude si gemini si clientul antigravity IDE
 
 ---
 
 ### GLM-5.2 — Zhipu AI (Beijing)
 
-- Flagship-ul Z.ai (spin-off Tsinghua); context ~128k, bun la raționament, agentic și cod
+- Flagship-ul Z.ai (spin-off Tsinghua); context ~128k, bun la raționament, agentic și cod TODO verifica , ar trebui sa fie context 1MB
 - Pentru un dev român: română slabă (rămâi pe Claude pentru RO), date sensibile → servere în China
 
 > **Context rapid:** GLM-5.2 (lansat iun 2026) — performanță comparabilă cu Claude Opus 4.8 la ~6× mai ieftin, open-source MIT, 66% pe benchmarks de programare (vs 67% Claude). Modele chineze = 45% din traficul OpenRouter (2026).
@@ -306,7 +306,7 @@ Concret, trei mecanisme:
 
 > 📊 **WOW Metric:** Latența la primul token (TTFT) pe Ollama cu un model 8B pe GPU local este de **~120ms**, în timp ce prin API-ul Claude este de **~650ms** (de ~5 ori mai rapid local).
 
-| Criteriu | Claude (API Anthropic) | Ollama (local) |
+| Criteriu | Claude (API Anthropic) | Ollama (local) | Citeste pe web care sunt numerele la zi si actualizeaza-le
 |---|---|---|
 | **Modele disponibile** | Claude Sonnet 4.6, Opus 4.8, Haiku 4.5 | Llama, Mistral, Gemma, Phi, Qwen, DeepSeek etc. |
 | **Calitate top-tier** | ✅ Claude Opus 4.8 = state of the art | Llama 3.3 70B ≈ GPT-4o, dar sub Opus |
@@ -326,9 +326,9 @@ Concret, trei mecanisme:
 
 ## Slide 9 — Costul real: Claude API vs Ollama
 
-> 💡 **WOW:** un developer agentic intens arde ~$400/lună pe API — un RTX 4090 de $2.000 se amortizează în ~5 luni. Dar dacă ești utilizator light ($30/lună), amortizarea durează ani.
+> 💡 **WOW:** un 'agentic developer' ce lucreaza intens arde ~$400/lună pe API — un RTX 4090 de $2.000 se amortizează în ~5 luni. Dar dacă ești utilizator light ($30/lună), amortizarea durează ani.
 
-> 📊 **WOW (datat):** 1 iunie 2026 — Copilot a mutat Claude Opus de la **3× la 27×** multiplicator și Sonnet de la **1× la 9×**; tier-ul gratuit GPT-4o a dispărut. „Era AI-ului cloud ieftin s-a terminat" (Mozilla.ai, *AI Got Expensive. Now What?*, mai 2026). Ăsta e forcing function-ul întregii discuții cloud-vs-local.
+> 📊 **WOW (datat):** 1 iunie 2026 — Copilot a mutat Claude Opus de la **3× la 27×** multiplicator și Sonnet de la **1× la 9×**; tier-ul gratuit GPT-4o a dispărut. „Era AI-ului cloud ieftin s-a terminat" (Mozilla.ai, *AI Got Expensive. Now What?*, mai 2026). Ăsta e forcing function-ul întregii discuții cloud-vs-local. TODO adauga link referinta pentra aceste numere
 
 ### Claude API (Sonnet 4.6)
 
@@ -377,7 +377,7 @@ Serverele Anthropic (US)
        │
        ├── Procesare → răspuns
        ├── Logging (audit, safety) — politici Anthropic
-       └── Training data? → Implicit NU, dar citiți ToS
+       └── Training data? → Implicit NU, dar citiți ToS TODO ce inseamna ToS ?
 ```
 
 **Ce înseamnă practic:**
@@ -604,7 +604,7 @@ LangChain/LangGraph → „vreau un pipeline model-agnostic cu control flow expl
 > La sfârșitul fiecărei conversații, Claude pierde tot contextul acumulat.
 > Decizii, preferințe, arhitecturi discutate — totul dispare.
 
-> 📊 **WOW Stat:** În medie, un developer agentic **re-explică aceleași preferințe și detalii de proiect de ~15 ori pe lună** în sesiuni noi, pierzând peste 2 ore de productivitate.
+> 📊 **WOW Stat:** În medie, un 'agentic developer'  **re-explică aceleași preferințe și detalii de proiect de ~15 ori pe lună** în sesiuni noi, pierzând peste 2 ore de productivitate.
 
 **Simptomele:**
 - Reexplici același context la fiecare sesiune nouă
@@ -646,7 +646,7 @@ LangChain/LangGraph → „vreau un pipeline model-agnostic cu control flow expl
 ```
 ~/.total-recall/
 ├── index.json               ← index plat: key → MemoryMetadata
-├── invertedIndex.json       ← TF-IDF inverted index: token → {docs, idf}
+├── invertedIndex.json       ← TF-IDF inverted index: token → {docs, idf} TODO explica TF-IDF
 ├── .index-cache.txt         ← rezumat injectat la SessionStart (shell-readable)
 ├── personal-vault/
 │   ├── architecture/
@@ -667,7 +667,7 @@ LangChain/LangGraph → „vreau un pipeline model-agnostic cu control flow expl
 ---
 title: "Preferă PostgreSQL pentru date relaționale"
 tags: [architecture, database, feedback]
-author: adrianb
+author: adrianb 
 importanceScore: 0.8
 created: 2026-06-01T10:00:00Z
 updated: 2026-06-15T14:30:00Z
@@ -833,7 +833,7 @@ Fiecare acces adaugă +20% forță de retenție (`accessCount × 0.2`).
 
 **Provideri configurabili** (în `~/.total-recall/config.json`): `huggingface` (implicit, local MiniLM), `ollama` (API local, `bge-m3`), `vertexai` (Google Cloud, `text-embedding-004`).
 
-**Căutare multilinguală:** flag-ul `enableMultilingualSearch: true` activează expansiune de tokeni EN↔RO (ex. „decizie" găsește și „decision").
+**Căutare multilinguală:** flag-ul `enableMultilingualSearch: true` activează expansiune de tokeni EN↔RO (ex. „decizie" găsește și „decision"). TODO adauga un exemplu de facut la prezentare
 
 ---
 
