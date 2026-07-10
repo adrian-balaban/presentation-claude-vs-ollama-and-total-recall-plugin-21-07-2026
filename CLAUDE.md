@@ -9,10 +9,10 @@ Materiale pentru prezentarea din **16 iulie 2026**, cu două subiecte:
 
 ## Fișiere
 
-| Fișier | Conținut |
-|--------|----------|
-| `prezentare.ro.md` | Prezentarea completă în română (format Markdown cu slide-uri) |
-| `others.md` | Notițe de sprijin — embeddings & vectorizare (versiunea detaliată a Slide 7b) |
+| Fișier             | Conținut                                                                      |
+| ------------------ | ----------------------------------------------------------------------------- |
+| `prezentare.ro.md` | Prezentarea completă în română (format Markdown cu slide-uri)                 |
+| `others.md`        | Notițe de sprijin — embeddings & vectorizare (versiunea detaliată a Slide 7b) |
 
 ## Convenție de fișiere
 
@@ -24,3 +24,10 @@ Versiunile viitoare în engleză vor folosi `.md` sau `.en.md`.
 - **total-recall plugin:** `../total-recall/plugins/total-recall/`
 - **Arhitectura detaliată:** `../total-recall/plugins/total-recall/ARCHITECTURE.md`
 - **Model presentation similar (RO):** `../poc-for-presentation-on-flink-variants-for-cdc-and-outbox/kafka-connect-at-scale-74-connectors-migration.ro.md`
+
+Cauta sa:
+
+- Stergi informatia inutila
+- Stergi informatia ce nu prezinta interes
+- Ca fiecare pagina sa fie cu ceva WAW sau util pentru un developer
+- Simplifici
