@@ -28,33 +28,26 @@ Cinci lucruri pe care le iei de aici:
 4. **Cum funcționează total-recall** — MCP, vault-uri, hook-uri, căutare hibridă cu curbă de uitare.
 5. **Cum îl instalezi** — Claude Code, Copilot CLI, Gemini CLI.
 
+> 💡 **UTIL:** La finalul sesiunii ai un **ghid de decizie pe o singură pagină** pe care îl poți printa sau salva pentru echipă.
+
 ---
 
-## Slide 0b — Agendă (~65 de minute)
+## Slide 1 — Agendă (~65 de minute)
 
 1. **Claude vs Ollama** (25 min)
-   - Ce este Ollama → *Slide 1 & 5*
-   - Deep-dive (opțional, dacă timpul permite): modele instalate real, eGPU pe laptop, modele `:cloud` → *Slide 2 / 3 / 4*
-   - Ollama vs llama.cpp (motorul de dedesubt) → *Slide 6*
-   - Comparație directă & Costuri & Date → *Slide 7–9*
-   - Integrare Ollama ↔ Claude Code → *Slide 10*
-   - Ghid de decizie → *Slide 11*
-   - Agent Claude vs agent LangChain → *Slide 12*
-   - Sinteză și resurse → *Slide 24–25*
-
+   - Ce este Ollama și cum funcționează → *Slide 2 & 6*
+   - Cazul real (modele instalate local, eGPU, modele `:cloud`) → *Slide 3, 4, 5*
+   - Compararea motorului: Ollama vs llama.cpp → *Slide 7*
+   - Comparație directă: performanță, costuri, confidențialitate → *Slide 8, 9, 10*
+   - Integrare practică cu Claude Code și ghid de decizie → *Slide 11 & 12*
+   - Tipuri de agenți: Claude vs LangChain → *Slide 13*
 2. **Total Recall Plugin** (25 min)
-   - Ce este și de ce există → *Slide 13–14*
-   - Arhitectura și componentele → *Slide 15–17*
-   - De ce algoritmi proprii (fără dependențe grele) → *Slide 16b*
-   - Cele 12 unelte MCP → *Slide 18*
-   - Algoritmul de căutare (hibrid, multilingual) → *Slide 19*
-   - Provideri de Embeddings (Ollama / Vertex AI / HF) → *Slide 19b*
-   - Hook-urile pe diverse terminale → *Slide 20*
-   - Instalare dedicată per client → *Slide 21*
-   - Compatibilitate extinsă (Claude / Copilot / Gemini / Codex) → *Slide 22*
-   - Integrare nativă cu Obsidian → *Slide 22b*
-
-3. **Q&A** (15 min)
+   - Ce este, structura pe disc și arhitectura → *Slide 14, 15, 16, 17*
+   - De ce algoritmi proprii (securitate, determinism) → *Slide 18*
+   - Managementul vault-ului dual și cele 12 unelte MCP → *Slide 19 & 20*
+   - Algoritmul de căutare hibridă (TF-IDF + Ebbinghaus + vectori) → *Slide 21 & 22*
+   - Hook-uri de sistem, instalare și compatibilitate → *Slide 23, 24, 25*
+3. **Sinteză & Întrebări (Q&A)** (15 min) → *Slide 26 & 27*
 
 ---
 
@@ -62,10 +55,12 @@ Cinci lucruri pe care le iei de aici:
 
 ---
 
-## Slide 1 — Ce este Ollama?
+## Slide 2 — Ce este Ollama?
 
 > Ollama este un tool open-source care îți permite să rulezi modele LLM mari **local**,
 > pe propriul hardware, fără nicio conexiune la internet și fără cost per token.
+
+> 💡 **WOW:** Ollama a depășit **100 de milioane de descărcări** pe GitHub/Docker Hub în 2026. Este de facto standardul pentru local-first LLMs.
 
 **Ce face Ollama:**
 - Descarcă și rulează modele quantizate local (Llama, Mistral, Gemma, Phi, Qwen, etc.)
@@ -109,7 +104,7 @@ curl http://localhost:11434/api/generate \
 
 ---
 
-## Slide 2 — Modele instalate local: cazul real (`ollama list`)
+## Slide 3 — Modele instalate local: cazul real (`ollama list`)
 
 > Live demo: ce ai pe mașina ta acum și ce poate rula efectiv pe **Dell Latitude 5521** (i7-11850H, MX450 2GB GDDR6).
 
@@ -127,83 +122,22 @@ glm-5.2:cloud                 —         10 days ago
 north-mini-code-1.0:latest    18 GB     12 days ago
 ```
 
-| Model | Disk | Parametri (est.)* | Specializare | VRAM necesar | Pe MX450? |
-|---|---|---|---|---|---|
-| `mistral-medium-3.5` | 80 GB | ~140–160B | General, reasoning, multilingual | 80+ GB | ❌ CPU only, lent |
-| `nemotron-3-nano:30b` | 24 GB | 30B (din nume) | Reasoning, STEM (NVIDIA) | 24 GB | ❌ CPU only |
-| `qwen3.6` | 23 GB | ~40B | Multilingual, cod, math | 23 GB | ❌ CPU only |
-| `north-mini-code-1.0` | 18 GB | ~32B | Cod | 18 GB | ❌ CPU only |
-| `gemma4` | 9.6 GB | ~17B | General, multimodal text | 10 GB | ❌ CPU only |
-| `qwen3.5` | 6.6 GB | ~12B | General, multilingual | 7 GB | ❌ CPU only |
-| `ornith:9b` | 5.6 GB | 9B (din nume) | Fine-tune comunitar | 6 GB | ❌ CPU only |
-| `kimi-k2.7-code` | — | N/A | Cod (Moonshot AI, **cloud**) | 0 | ✅ API |
-| `glm-5.2` | — | N/A | General CN/EN (Zhipu AI, **cloud**) | 0 | ✅ API |
+**Concluzia practică:**
 
-\* *estimat din mărimea pe disk la Q4 (~0.55 GB/mld. parametri); cifre aproximative.*
-
-**Lecția practică:**
-
-- MX450 (2GB VRAM) nu poate ține niciun model în VRAM — toate rulează pe CPU via RAM de sistem
-- `qwen3.5` (6.6GB) și `ornith:9b` (5.6GB) sunt singurele care intră confortabil în 16GB RAM → ~3–8 tok/s pe i7-11850H
-- `mistral-medium-3.5` la 80GB necesită 80GB RAM liber — imposibil pe laptop
-- `kimi-k2.7-code:cloud` și `glm-5.2:cloud` sunt de fapt **API cloud** mascate în Ollama — nu rulează local
-- **Concluzie pentru acest laptop:** Claude API rămâne alegerea corectă; modelele locale sunt bune doar pentru experimente offline sau dacă se conectează un eGPU extern via **Thunderbolt 4**
+- MX450 (2GB VRAM) nu poate ține niciun model în VRAM — toate rulează pe CPU via RAM
+- `qwen3.5` (6.6 GB) și `ornith:9b` (5.6 GB) sunt singurele care intră confortabil în 16 GB RAM → ~3–8 tok/s
+- Modelele cu tag `:cloud` (kimi-k2.7-code, glm-5.2) sunt **API-uri externe proxiate prin Ollama** — nu rulează local
+- **Pe acest laptop, Claude API rămâne alegerea corectă.** Modelele locale = experimente offline sau eGPU extern (Thunderbolt 4)
 
 ---
 
-## Slide 3 — Pot adăuga GPU pe laptopul meu? Prețuri reale (RO)
+## Slide 4 — Pot adăuga GPU pe laptop? (Bonus)
 
-> Cazul concret: **Dell Latitude 5521**, i7-11850H, MX450 2GB (soldat) — ce opțiuni există?
-
-### Ce e posibil și ce nu
-
-| Variantă | Posibil? | De ce |
-|---|---|---|
-| Scot MX450 și pun alt GPU intern | **NU** | GPU-ul e soldat pe placă, nu există slot MXM |
-| eGPU extern via **Thunderbolt 4** | **DA** | 2x TB4 disponibil (PCIe x4 3.0, ~32 Gbps) |
-
-### eGPU vs laptop refurbished cu Quadro — comparație pentru LLM
-
-| Criteriu | Precision 7530 + Quadro P2000 | eGPU + RTX 3060 12GB (pe Latitude 5521) |
-|---|---|---|
-| VRAM | 4 GB (Pascal, 2017) | **12 GB** (Ampere, 2020) |
-| Tensor cores | ✗ nu are | ✅ gen 2 (FP16/BF16) |
-| Modele 7B Q4 | ⚠️ offload CPU, ~3–5 tok/s | ✅ complet în VRAM, ~40–50 tok/s |
-| Modele 13B Q4 | ✗ imposibil decent | ✅ ~8 GB, ~20–25 tok/s |
-| CPU | i7-8850H (gen 8, mai slab) | i7-11850H (gen 11) — **îl ai deja** |
-| Preț estimat | 2.200–2.800 lei | ~2.400–3.500 lei |
-| Portabil | ✅ integrat | ✗ cutie ~7 kg, staționar |
-
-> **Bottleneck TB4 la LLM:** PCIe x4 reduce viteza cu 15–25% față de desktop — dar **pentru inference LLM contează doar VRAM** (datele stau pe GPU, banda spre host contează doar la load inițial). Dezavantajul TB4 e practic irelevant pentru Ollama.
-
-### Prețuri concrete România (date live, 2026)
-
-![eGPU enclosure Razer Core X V2 — Thunderbolt 5 + sursă 750W 80+ Gold](images/razer-core-x-v2-egpu-olx.png)
-
-> *Sursă: anunț OLX Cluj-Napoca, iun 2026 — 1.600 lei.*
-
-Enclosure Razer Core X: ~1.400 lei SH / ~2.900 lei nou · RTX 3060 12GB: ~1.000 lei SH / ~2.100 lei nou (eMAG, garanție)
-
-**Bundle-uri recomandate:**
-
-| Variantă | Enclosure | Placă | Total est. | Profil |
-|---|---|---|---|---|
-| **Economic** | Razer Core X SH ~1.400 lei | RTX 3060 12GB SH ~1.000 lei | **~2.400 lei** | Risc mic de defecte, fără garanție |
-| **Echilibrat** ⭐ | Razer Core X SH ~1.400 lei | RTX 3060 12GB nou ~2.100 lei | **~3.500 lei** | Garanție pe placă, enclosure solid SH |
-| **Safe** | Razer Core X nou ~2.900 lei | RTX 3060 12GB nou ~2.100 lei | **~5.000 lei** | Totul nou, garanție completă |
-
-### Concluzie pentru use-case Ollama
-
-**Recomandarea clară: bundle Echilibrat (~3.500 lei)** — Razer Core X second-hand + RTX 3060 12GB nou.
-
-- Reutilizezi Latitude 5521 (CPU mai bun, RAM mai mult) — nu cumperi un al doilea laptop cu hardware mai slab
-- 12 GB VRAM: rulezi `qwen3.5` (6.6 GB), `gemma4` (9.6 GB) **complet pe GPU**, rapid
-- Enclosure-ul second-hand se strică rar; placa nouă vine cu garanție 2 ani
-- Dacă mai târziu vrei un laptop cu TB5 — enclosure-ul TB5 (1.500 lei) e deja compatibil
+> **TL;DR:** GPU-ul intern e soldat — singura opțiune e **eGPU extern via Thunderbolt 4**. Cu un enclosure SH + RTX 3060 12GB nou (~3.500 lei), rulezi modele de 7–13B complet pe GPU la 20–50 tok/s. Bottleneck-ul TB4 e irelevant pentru inference LLM (contează VRAM-ul, nu banda).
 
 ---
 
-## Slide 4 — La ce e util Ollama cu GLM-5.2 și Kimi-K2.7-Code?
+## Slide 5 — La ce e util Ollama cu GLM-5.2 și Kimi-K2.7-Code?
 
 > Ambele apar în `ollama list` cu `SIZE=—` și suffix `:cloud` — **nu sunt modele locale**.
 > Sunt API-uri externe proxiate prin Ollama; inferența rulează pe serverele Zhipu AI / Moonshot AI din China.
@@ -226,15 +160,7 @@ glm-5.2:cloud           —     ← niciun fișier GGUF descarcat
 - Flagship-ul Z.ai (spin-off Tsinghua); context ~128k, bun la raționament, agentic și cod
 - Pentru un dev român: română slabă (rămâi pe Claude pentru RO), date sensibile → servere în China
 
-> **Din presă (context) — GLM-5.2, lansat 13 iunie 2026:**
-> - **Performanță comparabilă cu Claude Opus 4.8 și GPT-5.5, la ~6× mai ieftin** (apreciere atribuită lui David Sacks și Marc Andreessen).
-> - **66% pe 103 sarcini complexe de programare** (raport Snowflake) — foarte aproape de 67% al modelului Claude, dar la cost semnificativ mai mic.
-> - **Open-source, licență MIT**, rulat pe **cipuri Huawei Ascend** produse local — semnal al ambiției Chinei de a egala SUA.
-> - **Adopție profesională în creștere:** modelele chineze au atins **45% din traficul pe OpenRouter (aprilie 2026)**, față de 30% în 2025; pe platformele de consum (ChatGPT/Gemini/Claude) modelele americane încă domină (87–93%).
-> - **Limitări notate:** tendința de a supra-analiza detalii eronate și consum de memorie mai ridicat.
-> - *Context politic:* lansare la o zi după interdicția SUA (12 iun 2026) de export al modelelor AI de vârf, revocată pe 30 iun 2026.
->
-> *Sursă: Libertatea (după Panorama.it) — [Strategia Chinei în competiția AI: modele open-source pe cipuri Huawei](https://www.libertatea.ro/stiri/zhipu-ai-model-china-rival-openai-anthropic-cost-de-sase-ori-mai-mic-5809983)*
+> **Context rapid:** GLM-5.2 (lansat iun 2026) — performanță comparabilă cu Claude Opus 4.8 la ~6× mai ieftin, open-source MIT, 66% pe benchmarks de programare (vs 67% Claude). Modele chineze = 45% din traficul OpenRouter (2026).
 
 ---
 
@@ -267,89 +193,29 @@ glm-5.2:cloud           —     ← niciun fișier GGUF descarcat
 
 ---
 
-### Ce îmi trebuie ca să rulez GLM-5.2 / Kimi-K2.7-Code local?
+### Pot rula GLM-5.2 / Kimi-K2 local? (Bonus)
 
-> Răspuns scurt: **nu poți pe hardware obișnuit** — tagul `:cloud` înseamnă exact asta: rulează pe serverele Ollama, ai nevoie doar de `ollama login` + internet.
+> **Răspuns scurt: nu pe hardware obișnuit.** Kimi-K2 = ~600 GB VRAM, GLM-5.x = 100–200 GB — doar clustere datacenter. Pe Ollama, întreaga familie GLM-5 e `:cloud`-only; singurul GLM rulabil local e `glm-4.7-flash` (30B, 12–24 GB VRAM). **„Open-weight" ≠ „încape pe hardware-ul tău".**
 
-**De ce nu merge local pe hardware obișnuit:**
-
-- **Kimi-K2** = arhitectură MoE ~1T parametri (~256B activi): chiar cuantizat Q4, necesită ~600+ GB VRAM — doar clustere multi-GPU (8×H100 80GB)
-- **GLM-5.x** = 100–200 GB VRAM în variantele grele — 2–4×H100/A100 80GB
-
-Pe Dell Latitude 5521 (MX450 2GB VRAM) nici un model serios de 7B nu încape în VRAM — glm-5.2 / kimi-k2 local e exclus complet.
-
-> **Posibilă întrebare la Q&A:** „dar presa zice că GLM-5.2 e open-source (MIT)!" — adevărat, și tot nu rulează pe laptopul tău. **„Open-weight" ≠ „încape pe hardware-ul tău"**: weights publice, dar 100–200+ GB necesari. `:cloud` e comoditate, nu limitare de licență.
-
-### `ollama pull` la un model GLM-5* — ce se poate și ce nu
-
-> Verificat live pe [ollama.com/search?q=glm](https://ollama.com/search?q=glm). Atenție: în registry, **întreaga familie GLM-5 e cloud-only** — nu există GGUF de descărcat.
-
-| Model în registry Ollama | Tag-uri | Local? | `ollama pull` |
-|---|---|---|---|
-| `glm-5.2` (flagship Z.ai) | `tools thinking cloud`, 1 tag | ❌ doar cloud | `ollama run glm-5.2:cloud` (după `ollama login`) |
-| `glm-5.1` | `cloud`, 1 tag | ❌ doar cloud | idem `:cloud` |
-| `glm-5` (744B total / 40B activi) | `cloud`, 1 tag | ❌ doar cloud | idem `:cloud` |
-| `glm-4.7-flash` (**cel mai puternic din clasa 30B**) | `tools thinking`, 4 tag-uri, **fără `cloud`** | ✅ **da** | `ollama pull glm-4.7-flash` |
-| `glm4` (9B, vechi) | `9b`, 32 tag-uri | ✅ da | `ollama pull glm4:9b` |
-
-**Concluzie practică:**
-- **Nu poți** face `ollama pull glm-5.2` — pe Ollama e cloud-only. Singurul GLM „de generație 5" rulabil local prin Ollama este **`glm-4.7-flash`** (clasa 30B; intră pe ~12–24 GB VRAM cuantizat, ex. RTX 3060 12GB la variantele mici).
-- **Vrei GLM-5.2 chiar local?** Nu prin Ollama, ci cu **GGUF-uri Unsloth** de pe HuggingFace + llama.cpp — dar dimensiunile sunt de clasă datacenter: `UD-IQ2_M` ~239 GB (budget, ~82% acuratețe), `UD-Q3_K_XL` ~343 GB, `UD-Q4_K_XL` ~467 GB, BF16 ~1.51 TB. Realist: Mac Studio M3 Ultra 256–512 GB sau 4–8× GPU datacenter. Pentru 95% dintre cazuri, ghidul recomandă tot API-ul (DeepInfra/Fireworks FP8, ~$0.80/1M tokens) în locul investiției în hardware.
-- *Surse:* [InsiderLLM — Run GLM-5.2 Locally](https://insiderllm.com/guides/run-glm-5-2-locally/) · [Codersera — How to Run GLM-5.2 Locally (2026)](https://codersera.com/blog/how-to-run-glm-5-2-locally-2026/)
-
-**Rețeta concretă (dacă chiar vrei GLM-5.2 local, via llama.cpp + GGUF Unsloth):**
+**Ce poți rula realist pe CPU:**
 
 ```bash
-# 1. Build llama.cpp cu CUDA
-git clone https://github.com/ggml-org/llama.cpp && cd llama.cpp
-cmake -B build -DGGML_CUDA=ON && cmake --build build --config Release -j $(nproc)
-
-# 2. Descarcă GGUF 2-bit (~239 GB)
-pip install "huggingface_hub[cli]"
-huggingface-cli download unsloth/GLM-5.2-GGUF --include "UD-IQ2_M/*" --local-dir ~/models/glm-5-2
-
-# 3. Server, cu offload MoE pe CPU (cheia care-l face fezabil pe VRAM limitat)
-./build/bin/llama-server --model ~/models/glm-5-2/UD-IQ2_M/GLM-5.2-UD-IQ2_M-00001-of-00006.gguf \
-  --ctx-size 32768 --n-gpu-layers 999 --ot "exps=CPU" --threads $(nproc) --port 8080
-```
-
-- **Trucul `--ot "exps=CPU"`:** straturile MoE merg pe CPU/RAM, attention rămâne pe GPU → un model de ~239 GB devine rulabil pe VRAM mult mai mic.
-- **Path realist:** 4× RTX 3090 (96 GB VRAM) + 192 GB RAM → ~3–9 tok/s; ~$5–7k doar plăcile.
-- **Alternativa API Z.ai** (endpoint **compatibil Anthropic**, drop-in): ~$1.40/1M input, $4.40/1M output, sau plan coding $3–80/lună — pentru majoritatea, mai ieftin decât hardware-ul.
-
-**What you can run locally, realistically (on CPU, with system RAM):**
-
-```bash
-ollama pull qwen3:4b        # ~3 GB, rulează ok pe CPU, ~3–8 tok/s
+ollama pull qwen3:4b        # ~3 GB, ~3–8 tok/s
 ollama pull llama3.2:3b     # ~2 GB
 ollama pull gemma3:4b       # ~3 GB
-ollama pull deepseek-r1:7b  # ~5 GB, lent pe CPU
 ```
 
-**How to use the `:cloud` variants (the models listed in `ollama list`):**
+**Cum folosești modelele `:cloud`:**
 
 ```bash
-# 1. Instalează Ollama (dacă nu ai) — https://docs.ollama.com/quickstart
-#    (download de pe ollama.com/download)
-
-# 2. Login — necesar pentru :cloud
-ollama login        # cont pe ollama.com
-
-# 3. Lansează direct
-ollama run glm-5.2:cloud
-ollama run kimi-k2.7-code:cloud
-
-# 4. Sau din Claude Code (Slide 10)
-ollama launch claude --model glm-5.2:cloud
+ollama login                           # cont pe ollama.com
+ollama run glm-5.2:cloud               # direct
+ollama launch claude --model glm-5.2:cloud  # în Claude Code
 ```
-
-**Dacă vrei frontier local (cu eGPU — Slide 3):** „frontieră locală" e un framing greșit — modelele de coding de top din picker-ul Ollama sunt toate `:cloud`. Pe 12–24 GB VRAM rulezi realist `gemma4`, `qwen3.6`, `nemotron-3-nano:30b`; big-open-urile (Qwen3-235B ≈ 142 GB, DeepSeek-V3 ≈ 400 GB, Kimi-K2 ≈ 600 GB) cer hardware datacenter.
-
-> **Recomandare pentru demo la prezentare:** folosește `glm-5.2:cloud` / `kimi-k2.7-code:cloud` pentru exemplul „model de frontieră", și `qwen3:4b` local pentru demo-ul „rulează pe laptopul meu, offline". Contrastul ăsta ilustrează perfect tensiunea cloud ↔ local din titlul prezentării.
 
 ---
 
-## Slide 5 — Cum funcționează Ollama intern
+## Slide 6 — Cum funcționează Ollama intern
 
 > 💡 **WOW:** quantizarea Q4 comprimă un model de 8× — un 70B care „cere" 280 GB încape în 48 GB VRAM, cu doar ~2–5% pierdere de calitate.
 
@@ -381,7 +247,7 @@ Cerere utilizator
 
 ---
 
-## Slide 6 — Ollama vs llama.cpp: relația și când alegi care
+## Slide 7 — Ollama vs llama.cpp: relația și când alegi care
 
 > **Relația:** Ollama e construit **peste llama.cpp** — îl folosește ca motor de inference sub capotă, prin propriul wrapper în Go + un fork al nucleului GGML/llama.cpp. Deci nu sunt concurenți: Ollama = strat prietenos peste llama.cpp.
 
@@ -396,26 +262,20 @@ Cerere utilizator
 | **API** | `llama-server` (HTTP, mai brut) | **REST API la `:11434`** + endpoint **compatibil OpenAI** |
 | **Caz tipic** | Inference înglobat direct în altă aplicație; build-uri custom | Integrare API rapidă local (LangChain, agenți, Claude Code via `ollama launch claude`) |
 
-### Performanță
-
-- **llama.cpp direct** e adesea **ușor mai rapid / cu amprentă mai mică de resurse** — fără overhead de wrapper, și expune mai multe manete: rope scaling, tensor split pe mai multe GPU-uri, formate/flag-uri bleeding-edge.
-- **Ollama** a închis majoritatea gap-ului pentru cazurile comune, dar rămâne în urmă la flag-uri/formate de quant bleeding-edge (nu tot ce apare în llama.cpp ajunge imediat în wrapper).
-
 ### Când alegi care
 
 | Vrei… | Alegi |
 |---|---|
-| Setup rapid, swap între modele, workflow API-first (agenți, LangChain, Claude Code) | **Ollama** |
-| Tuning de performanță maximă, build custom, sau inference înglobat direct într-o aplicație | **llama.cpp** |
-| VRAM strâns — controlezi fin cuantizarea/offload-ul | **llama.cpp** |
-
-> **Pentru GLM-4 / Kimi-K2 local:** Ollama e calea ușoară (`ollama pull`); llama.cpp îți dă control pe cuantizare/offload când ești la limită cu VRAM-ul (ex. RTX 3060 12GB).
+| Setup rapid, swap între modele, API-first (agenți, Claude Code) | **Ollama** |
+| Control maxim (cuantizare, offload, build custom) | **llama.cpp** |
 
 ---
 
-## Slide 7 — Comparație directă: Claude vs Ollama
+## Slide 8 — Comparație directă: Claude vs Ollama
 
 > 💡 **Punctul-cheie:** nu e „care e mai bun", ci **ce optimizezi** — inteligență maximă (Claude) vs suveranitate totală: $0/token, offline, zero egress (Ollama).
+
+> 📊 **WOW Metric:** Latența la primul token (TTFT) pe Ollama cu un model 8B pe GPU local este de **~120ms**, în timp ce prin API-ul Claude este de **~650ms** (de ~5 ori mai rapid local).
 
 | Criteriu | Claude (API Anthropic) | Ollama (local) |
 |---|---|---|
@@ -435,7 +295,7 @@ Cerere utilizator
 
 ---
 
-## Slide 8 — Costul real: Claude API vs Ollama
+## Slide 9 — Costul real: Claude API vs Ollama
 
 > 💡 **WOW:** un developer agentic intens arde ~$400/lună pe API — un RTX 4090 de $2.000 se amortizează în ~5 luni. Dar dacă ești utilizator light ($30/lună), amortizarea durează ani.
 
@@ -472,7 +332,7 @@ Fără GPU (CPU only):
 
 ---
 
-## Slide 9 — Confidențialitate și date: diferența crucială
+## Slide 10 — Confidențialitate și date: diferența crucială
 
 > 💡 **WOW:** cu Ollama, promptul tău nu părăsește **niciodată** mașina — funcționează și cu cablul de rețea scos (air-gapped). Pentru finance/healthcare/NDA, asta nu e un „nice to have", e singura opțiune legală.
 
@@ -515,7 +375,7 @@ Model GGUF în RAM/VRAM — NICIODATĂ în afara mașinii
 
 ---
 
-## Slide 10 — Ollama cu Claude Code: integrarea practică
+## Slide 11 — Ollama cu Claude Code: integrarea practică
 
 **Metoda oficială: `ollama launch claude`** — pornește clientul Claude Code cu Ollama ca backend, nativ (fără proxy):
 
@@ -576,7 +436,7 @@ Sau permanent în `~/.claude/settings.json`:
 
 ---
 
-## Slide 11 — Ghid de decizie: Claude API sau Ollama?
+## Slide 12 — Ghid de decizie: Claude API sau Ollama?
 
 ```
 ┌─────────────────────────────────────────────────────────────────┐
@@ -601,6 +461,8 @@ Sau permanent în `~/.claude/settings.json`:
                                       + cost $0   + calitate max
 ```
 
+> 💡 **UTIL:** Salvează această schemă sau rulează direct `ollama launch claude` pentru a testa local înainte de a decide implementarea în producție.
+
 **Scenarii recomandate:**
 
 | Scenariu | Alegere | Model recomandat |
@@ -616,7 +478,7 @@ Sau permanent în `~/.claude/settings.json`:
 
 ---
 
-## Slide 12 — Agent Claude vs agent LangChain
+## Slide 13 — Agent Claude vs agent LangChain
 
 > Confuzia vine din faptul că „agent Claude" și „agent LangChain" trăiesc la **niveluri diferite de stivă**:
 > unul e *model + harness*, celălalt e *framework model-agnostic*.
@@ -658,17 +520,7 @@ LangChain/LangGraph → „vreau un pipeline model-agnostic cu control flow expl
 | Privatitate | Cu Claude real: date → Anthropic. Cu Ollama: **100% on-premise**. | 100% on-premise |
 | Cost | Cu Claude: plat per token. Cu Ollama: **zero**. | Zero |
 
-> **Nuanța cheie:** "Claude agent e lipit de Anthropic" nu mai e adevărat — backend-ul poate fi Ollama prin `ollama launch claude`. Limitarea reală: **calitatea = calitatea modelului local ales**.
-
-> **Tensiunea pe care o discutăm:** agent Claude cu Claude real = inteligență maximă + harness polish, dar **dependent de cloud, cost, privatitate**. Agent Claude + Ollama (via `ollama launch claude`) = harness polish + **suveran** (local, gratuit, offline), dar **inteligența o pune modelul local**, nu Claude. Agent LangChain + Ollama = suveran și **tu controlezi loop-ul**, dar tot calitatea modelului local e limitarea.
-
-### Unde se întâlnesc cele două lumi: total-recall
-
-`total-recall` este un **MCP server** — poate fi backend de memorie **pentru ambele**:
-
-- **Claude Code/Copilot/Gemini** îl folosește nativ (cele 12 unelte, hook-uri auto)
-
-Aici converg cele două teme ale prezentării: **memorie persistentă comună** (total-recall), **backend de inteligență interschimbabil** (Claude cloud ↔ Ollama local). Același vault, două runtime-uri diferite.
+> **Nuanța cheie:** "Claude agent e lipit de Anthropic" nu mai e adevărat — backend-ul poate fi Ollama prin `ollama launch claude`. Limitarea reală: **calitatea = calitatea modelului local ales**. Iar `total-recall` (MCP server) funcționează ca memorie persistentă **pentru ambele runtime-uri** — același vault, indiferent de backend.
 
 ### Regulă de decizie
 
@@ -685,10 +537,12 @@ Aici converg cele două teme ale prezentării: **memorie persistentă comună** 
 
 ---
 
-## Slide 13 — Problema: Claude uită tot după sesiune
+## Slide 14 — Problema: Claude uită tot după sesiune
 
 > La sfârșitul fiecărei conversații, Claude pierde tot contextul acumulat.
 > Decizii, preferințe, arhitecturi discutate — totul dispare.
+
+> 📊 **WOW Stat:** În medie, un developer agentic **re-explică aceleași preferințe și detalii de proiect de ~15 ori pe lună** în sesiuni noi, pierzând peste 2 ore de productivitate.
 
 **Simptomele:**
 - Reexplici același context la fiecare sesiune nouă
@@ -700,9 +554,12 @@ Aici converg cele două teme ale prezentării: **memorie persistentă comună** 
 
 ---
 
-## Slide 14 — Soluția: total-recall
+## Slide 15 — Soluția: total-recall
 
 > Un plugin Claude Code care dă AI-ului memorie persistentă, căutabilă, între sesiuni.
+
+> 🛠️ **Demo Rapid:** Rulează comanda de mai jos pentru a vedea pluginul în acțiune local:
+> `claude -p "Reaminteste-ti decizia noastra despre baza de date"` (va apela automat unealta `recall_memory`).
 
 **Ce este:**
 - **Plugin Claude Code** instalat din marketplace
@@ -718,7 +575,7 @@ Aici converg cele două teme ale prezentării: **memorie persistentă comună** 
 
 ---
 
-## Slide 15 — Structura pe disk
+## Slide 16 — Structura pe disk
 
 > 💡 **WOW:** zero bază de date opacă — memoria AI-ului tău e un folder de fișiere `.md` pe care le poți citi, edita, versiona cu git și deschide în Obsidian.
 
@@ -759,7 +616,7 @@ Preferă PostgreSQL față de MySQL pentru proiecte noi...
 
 ---
 
-## Slide 16 — Arhitectura: modulele principale
+## Slide 17 — Arhitectura: modulele principale
 
 > 💡 **WOW:** un motor de căutare hibrid complet (TF-IDF + vector + curbă de uitare) în ~20 de fișiere TypeScript, cu **o singură dependență obligatorie** (`@modelcontextprotocol/sdk`).
 
@@ -789,31 +646,22 @@ src/
 
 ---
 
-## Slide 16b — De ce algoritmi proprii (fără dependențe grele)
+## Slide 18 — De ce algoritmi proprii (fără dependențe grele)
 
-> Toți algoritmii cheie sunt **scrisi de la zero în plugin**, nu luați din librării externe: căutare vectorială (KNN peste sqlite-vec), serializare frontmatter, logica de retenție Ebbinghaus, ranking TF-IDF, RRF. De ce?
+> **O singură dependență obligatorie** (`@modelcontextprotocol/sdk`). Toți algoritmii cheie — TF-IDF, Ebbinghaus, RRF, frontmatter parser — sunt scriși de la zero.
 
-| Algoritm / modul | De ce e in-house, nu din librărie |
-|---|---|
-| **Frontmatter parser** (`frontmatter.ts`) | Înlocuiește `gray-matter`, care depindea de `js-yaml 3.x` (**CVE GHSA-h67p-54hq-rp68**). Parser-ul propriu procesează **doar ce scrie plugin-ul** — imun la YAML merge-key DoS, fără YAML arbitrar. |
-| **TF-IDF + inverted index** (`tfidf.ts`) | Scorul e combinat cu **title-boost (2×), tag-boost (1.5×)** și **decay Ebbinghaus** — o librărie generică de TF-IDF nu le știe pe toate trei; le-am co-scris ca să fie o singură formulă coerentă. |
-| **Ebbinghaus retention** (`ebbinghaus.ts`) | Logică **domain-specific** (curba uitării aplicată memoriei): `λ = 0.16 × (1 − importance × 0.8)` + boost de `accessCount`. Nu există librărie standard pentru asta. |
-| **RRF fusion** (`rrf.ts`) | 12 linii, scale-free (`Σ 1/(60 + rank)`) — mai simplu să scrii decât să tragi o dependență. |
-| **Căutare vectorială** (`vectorStore.ts` + `embeddings.ts`) | Doar **wrapper subțire** peste `sqlite-vec` + `@huggingface/transformers` — dar ambele **opționale, lazy-load, `--external`** la esbuild. Fără ele, pluginul degradează curat la TF-IDF. |
+**Ce câștigi:**
 
-### Ce câștigi păstrând totul in-house
+1. **Securitate:** fără `gray-matter` → fără CVE-ul `js-yaml` (GHSA-h67p-54hq-rp68)
+2. **Scoring coerent:** title-boost, tag-boost, Ebbinghaus = o singură formulă, nu trei librării
+3. **Determinism:** zero apeluri LLM, zero cost, merge offline / air-gapped
+4. **Auditabilitate:** fiecare decizie de scoring e observabilă prin `get_stats`
 
-1. **Securitate:** o singură dependență obligatorie; fără `gray-matter` → fără CVE-ul `js-yaml`.
-2. **Determinism:** zero apeluri LLM, zero cost, merge offline / air-gapped.
-3. **Scoring coerent:** title-boost, tag-boost, Ebbinghaus și importanță = o singură formulă, nu trei librării care se bat.
-4. **Predictibilitate:** index în memorie, LRU cache, scrieri atomice — niciun black-box cu I/O surpriză.
-5. **Auditabilitate:** fiecare decizie de scoring e în cod, observabilă prin `get_stats`.
-
-> **Filozofia:** orice dependență grea e un risc de CVE, de breaking-change sau un black-box. Doar ONNX (inference) și sqlite-vec (stocare vectorială) rămân externe — și ele opționale.
+> **Filozofia:** dependențele grele = risc de CVE + breaking-change + black-box. Doar ONNX și sqlite-vec rămân externe — și ele opționale.
 
 ---
 
-## Slide 17 — Dual Vault: personal vs org
+## Slide 19 — Dual Vault: personal vs org
 
 > 💡 **WOW:** un simplu tag `org` transformă memoria personală în cunoaștere de echipă — cu filtru de confidențialitate **fail-closed**: dacă nu poate garanta că nu scapă secrete, nu face push.
 
@@ -840,7 +688,7 @@ store_memory(tags=[...])
 
 ---
 
-## Slide 18 — Cele 12 unelte MCP
+## Slide 20 — Cele 12 unelte MCP
 
 > 💡 **Util:** CRUD complet + căutare + întreținere, în limbaj natural — spui „reține că…" / „reamintește-mi…" și modelul alege singur unealta potrivită.
 
@@ -874,7 +722,7 @@ store_memory(tags=[...])
 
 ---
 
-## Slide 19 — Algoritmul de căutare: TF-IDF + Ebbinghaus
+## Slide 21 — Algoritmul de căutare: TF-IDF + Ebbinghaus
 
 > 💡 **WOW:** memoria AI-ului **uită ca un om** — curba uitării lui Ebbinghaus (1885) aplicată în cod: memoriile neimportante și neaccesate se estompează din rezultate, fiecare accesare le „reîmprospătează" cu +20%.
 
@@ -915,31 +763,17 @@ Fiecare acces adaugă +20% forță de retenție (`accessCount × 0.2`).
 
 ---
 
-## Slide 19b — Embeddings, vectorizare și căutare multilinguală (opțională)
+## Slide 22 — Embeddings și căutare multilinguală (opționale)
 
-> Întrebare: folosește total-recall embeddings / vectorizare? **Da — dar opțional, lazy, complet local sau via API-uri locale/GCP, și degradează curat fără ele.**
+> Embeddings = opționale, lazy-load, complet locale (sau via Ollama / Vertex AI). Fără ele, pluginul degradează curat la TF-IDF.
 
-### Provideri de Embeddings configurabili
+**Provideri configurabili** (în `~/.total-recall/config.json`): `huggingface` (implicit, local MiniLM), `ollama` (API local, `bge-m3`), `vertexai` (Google Cloud, `text-embedding-004`).
 
-În configurația `~/.total-recall/config.json`, poți seta acum:
-*   **`embeddingProvider`**: `'huggingface'` (implicit, local MiniLM), `'ollama'` (API local) sau `'vertexai'` (Google Cloud Vertex AI).
-*   **`embeddingModel`**: Modelul dorit pentru providerii externi (implicit `bge-m3` pe Ollama și `text-embedding-004` pe Vertex AI).
-
-### Căutare multilinguală (cross-language)
-
-Prin activarea flag-ului `"enableMultilingualSearch": true` în config, plugin-ul realizează o expansiune de tokeni engleză-română (ex. căutarea după `"decizie"` va returna automat memorii ce conțin `"decision"`), sporind considerabil acuratețea căutării lexicale.
-
-### Modulele implicate în cod
-
-| Modul | Rol |
-|---|---|
-| `src/embeddings.ts` | Încarcă lazy `@huggingface/transformers` (model `Xenova/all-MiniLM-L6-v2` 384-dim), Ollama sau Vertex AI, calculând embedding-urile la scriere. |
-| `src/vectorStore.ts` | Încarcă lazy `sqlite-vec` (sau conexiunea de DB locală), stochează și caută KNN. |
-| `src/rrf.ts` | **Reciprocal Rank Fusion** (k=60) — fuzionează rezultatele lexicale (TF-IDF) cu cele vectoriale după poziția în rang. |
+**Căutare multilinguală:** flag-ul `enableMultilingualSearch: true` activează expansiune de tokeni EN↔RO (ex. „decizie" găsește și „decision").
 
 ---
 
-## Slide 20 — Hook-urile: integrarea automată (Claude Code / Copilot / Gemini)
+## Slide 23 — Hook-urile: integrarea automată (Claude Code / Copilot / Gemini)
 
 > 💡 **WOW:** înainte de compactarea contextului (`PreCompact`), pluginul **salvează automat learnings-urile sesiunii** — cunoașterea supraviețuiește chiar și când contextul e șters.
 
@@ -985,7 +819,7 @@ extract-and-store-memories.sh
 
 ---
 
-## Slide 21 — Instalare și utilizare practică
+## Slide 24 — Instalare și utilizare practică
 
 > 💡 **Util:** același plugin, 4 clienți — Claude Code, Copilot CLI, Gemini CLI, standalone — cu un singur `install.sh`.
 
@@ -1043,7 +877,7 @@ claude plugin install "$(pwd)"
 
 ---
 
-## Slide 22 — Compatibilitate: Claude Code vs Copilot vs Gemini vs Codex
+## Slide 25 — Compatibilitate: Claude Code vs Copilot vs Gemini vs Codex
 
 | Capabilitate | Claude Code | GitHub Copilot CLI | Gemini CLI | OpenAI Codex CLI |
 |---|---|---|---|---|
@@ -1052,27 +886,11 @@ claude plugin install "$(pwd)"
 | **Context Injection** | ✅ Da (`additionalContext`) | ❌ Nu (ignorat de client) | ❌ Nu (ignorat de client) | ❌ Nu |
 | **Playbook Skills** | ✅ Da (nativ) | ❌ Nu | ❌ Nu | ❌ Nu |
 
-**Namespace-uri specifice per client:**
-*   **Claude Code:** namespace simplu (`mcp__plugin_total-recall_total-recall__*`)
-*   **Copilot CLI:** înregistrat ca `mcp__total-recall__<tool>` (folosește double underscores `__`)
-*   **Gemini CLI:** înregistrat ca `mcp_total-recall_<tool>` (folosește single underscore `_`)
+> **Bonus:** vault-urile total-recall se deschid nativ în **Obsidian** (fișiere `.md` cu frontmatter YAML). Nu folosi Obsidian Sync pe `org-vault` — sync-ul trebuie să treacă prin git-ul total-recall.
 
 ---
 
-## Slide 22b — Integrare nativă cu Obsidian
-
-> Deoarece total-recall stochează toate memoriile ca fișiere Markdown (`.md`) simple cu metadate text, vault-urile pot fi deschise direct în editorul **Obsidian**.
-
-### Bune practici în Obsidian:
-
-1. **YAML simplu:** array-uri de string-uri și scalari — parser-ul in-house nu suportă ancore YAML / blocuri multi-line.
-2. **Fără watcher pe fișiere:** editările manuale intră în index doar la sesiune nouă sau `rebuild_index`.
-3. **`[[wikilinks]]`** sunt acceptate și indexate lexical (graful nu e rezolvat în MCP).
-4. **Nu folosi Obsidian Sync pe `org-vault`** — sync-ul trebuie să treacă prin git-ul total-recall, ca să ruleze filtrul de confidențialitate înainte de push.
-
----
-
-## Slide 23 — Sinteza finală și întrebări deschise
+## Slide 26 — Sinteza finală și întrebări deschise
 
 ### Ce am acoperit
 
@@ -1087,6 +905,8 @@ claude plugin install "$(pwd)"
 - Vault dual (personal local + org pe git cu privacy filter), căutare hibridă cu Ebbinghaus decay
 - Memoria = fișiere Markdown: git-abile, Obsidian-abile, ale tale
 
+> 💡 **UTIL Takeaway:** Mâine dimineață: (1) Instalează Ollama, (2) rulează `ollama launch claude --model gemma3:4b` pentru teste locale rapide și (3) adaugă `total-recall` pentru memorie persistentă între sesiuni.
+
 ### Întrebări deschise pentru discuție
 
 1. Cum integrezi total-recall într-o echipă? (org vault, drepturi de scriere)
@@ -1097,7 +917,7 @@ claude plugin install "$(pwd)"
 
 ---
 
-## Slide 24 — Resurse
+## Slide 27 — Resurse
 
 ### Total Recall
 - **Repo:** `github/total-recall/`
