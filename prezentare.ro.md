@@ -22,11 +22,11 @@ Două subiecte practice despre cum extindem și alegem uneltele AI în workflow-
 
 Cinci lucruri pe care le iei de aici:
 
-1. **Ce este Ollama și de ce contează** — modele cloud egale ca performanță cu cele de la Anthropic și modele locale, zero cost-per-token, fără date trimise în cloud.
-2. **Comparație directă Claude vs Ollama** — capabilități, confidențialitate, cost, viteză, integrare cu Claude Code (`ollama launch claude`).
-3. **Când să alegi fiecare** — un ghid de decizie cu criterii clare.
-4. **Cum funcționează total-recall** — arhitectura MCP, vaulturile (personal & org), hook-urile automate, integrarea Obsidian și algoritmul de căutare hibrid (TF-IDF + vector + multilingual + Ebbinghaus decay).
-5. **Cum îl instalezi și îl configurezi** — suport multi-client (Claude Code, Copilot CLI, Gemini CLI) și opțiuni avansate (Ollama, Vertex AI, allowlist-uri de email).
+1. **Ce este Ollama** — LLM-uri local, zero cost-per-token, zero date în cloud.
+2. **Claude vs Ollama** — comparație directă + integrarea `ollama launch claude`.
+3. **Când alegi fiecare** — ghid de decizie cu criterii clare.
+4. **Cum funcționează total-recall** — MCP, vault-uri, hook-uri, căutare hibridă cu curbă de uitare.
+5. **Cum îl instalezi** — Claude Code, Copilot CLI, Gemini CLI.
 
 ---
 
@@ -278,7 +278,7 @@ glm-5.2:cloud           —     ← niciun fișier GGUF descarcat
 
 Pe Dell Latitude 5521 (MX450 2GB VRAM) nici un model serios de 7B nu încape în VRAM — glm-5.2 / kimi-k2 local e exclus complet.
 
-> **Împăcarea celor două afirmații (posibilă întrebare la Q&A):** presa (v. Slide 4, GLM-5.2) spune că GLM-5.2 e **open-source, licență MIT** — deci *weights descărcabile liber*. Aici spun că `glm-5.2:cloud` **nu rulează pe laptopul meu**. Ambele sunt adevărate simultan: **„open-weight" ≠ „încape pe hardware-ul tău"**. Weights-urile pot fi publice și totuși modelul să ceară 100–200 GB VRAM (datacenter). De aceea Ollama îl oferă ca `:cloud` (API remote) — comoditate, nu o limitare de licență. Cu destul hardware (sau eGPU + cuantizare agresivă pentru variantele mici) **l-ai putea** rula local; pe MX450 pur și simplu nu încape.
+> **Posibilă întrebare la Q&A:** „dar presa zice că GLM-5.2 e open-source (MIT)!" — adevărat, și tot nu rulează pe laptopul tău. **„Open-weight" ≠ „încape pe hardware-ul tău"**: weights publice, dar 100–200+ GB necesari. `:cloud` e comoditate, nu limitare de licență.
 
 ### `ollama pull` la un model GLM-5* — ce se poate și ce nu
 
@@ -343,9 +343,7 @@ ollama run kimi-k2.7-code:cloud
 ollama launch claude --model glm-5.2:cloud
 ```
 
-**Dacă vrei frontier local (cu eGPU — Slide 3):**
-
-Un RTX 3090/4090 24GB rulează local modele de ~30–70B parametri cuantizate (GGUF Q4). **Dar „frontieră locală" e un framing greșit**: în picker-ul Ollama, modelele de coding de top (glm-5.2, kimi-k2.7-code, minimax-m3, nemotron-3-super) sunt toate `:cloud` — API remote, zero VRAM local. Local-feasibil pe 12–24GB: `gemma4`, `qwen3.6`, `nemotron-3-nano:30b`. Big-open care ar *vrea* local (Qwen3-235B ≈ 142GB ≈ 6×24GB, DeepSeek-V3 ≈ 400GB ≈ 17×24GB, Kimi-K2 ≈ 600GB ≈ 25×24GB) cer hardware datacenter — de aceea le accesezi prin `:cloud`, nu pe GPU propriu.
+**Dacă vrei frontier local (cu eGPU — Slide 3):** „frontieră locală" e un framing greșit — modelele de coding de top din picker-ul Ollama sunt toate `:cloud`. Pe 12–24 GB VRAM rulezi realist `gemma4`, `qwen3.6`, `nemotron-3-nano:30b`; big-open-urile (Qwen3-235B ≈ 142 GB, DeepSeek-V3 ≈ 400 GB, Kimi-K2 ≈ 600 GB) cer hardware datacenter.
 
 > **Recomandare pentru demo la prezentare:** folosește `glm-5.2:cloud` / `kimi-k2.7-code:cloud` pentru exemplul „model de frontieră", și `qwen3:4b` local pentru demo-ul „rulează pe laptopul meu, offline". Contrastul ăsta ilustrează perfect tensiunea cloud ↔ local din titlul prezentării.
 
@@ -566,7 +564,7 @@ Sau permanent în `~/.claude/settings.json`:
 }
 ```
 
-> **⚠️ Gotcha subscription hijack:** NU seta `ANTHROPIC_API_KEY=""` pe calea manuală. Un șir gol e tratat ca „nu e setat" → dacă ai Claude Max/Pro, Claude Code recurge la OAuth-ul abonamentului și trimite cererile la `api.anthropic.com` în loc de Ollama. Lasă `ANTHROPIC_AUTH_TOKEN=ollama` să facă toată treaba (are prioritate și suprascrie fallback-ul OAuth); nu seta deloc `ANTHROPIC_API_KEY`. Verifică cu `/status` în sesiune că base URL-ul e `http://localhost:11434`. (`ollama launch claude` evită capcana setând `ANTHROPIC_AUTH_TOKEN=ollama` + `ANTHROPIC_BASE_URL` pentru tine, plus modelele implicite.)
+> **⚠️ Gotcha subscription hijack:** pe calea manuală NU seta `ANTHROPIC_API_KEY=""` — șirul gol = „nu e setat", iar cu Claude Max/Pro cererile pleacă pe OAuth la `api.anthropic.com` în loc de Ollama. `ANTHROPIC_AUTH_TOKEN=ollama` e suficient. Verifică cu `/status` că base URL-ul e `localhost:11434`.
 
 **Capabilități suportate (toate condiționate de modelul ales):** tool calling, file edits, subagents, web search/fetch, vision, thinking controls.
 
@@ -805,14 +803,13 @@ src/
 
 ### Ce câștigi păstrând totul in-house
 
-1. **Suprafață de atac minimă / securitate.** Singura dependență obligatorie e `@modelcontextprotocol/sdk`. Fără `gray-matter` → fără CVE-ul `js-yaml`. Parser-ul YAML propriu nu acceptă YAML arbitrar → imposibil de injectat chei de frontmatter.
-2. **Zero dependență de LLM.** Pluginul e **determinist** — niciun apel de API, niciun cost, merge **offline / air-gapped**. Retrieval-ul nu depinde de o decizie de model.
-3. **Control complet asupra scoring-ului.** Boost-urile de titlu/tag, decay-ul Ebbinghaus și importanta sunt **o singură formulă**, nu trei librării care se bat. Comportament previzibil, ușor de raționa.
-4. **Performanță și predictibilitate.** Inverted index în memorie, LRU cache (100 intrări / 30 min), persistență debounced (1s), scrieri atomice (write-`.tmp` + rename). Niciun black-box care să facă I/O surpriză.
-5. **Bundle mic, deps native externalizate.** `@huggingface/transformers` și `sqlite-vec` sunt `--external` la esbuild → pluginul se bundle-uiează ușor; runtime-ul de model se instalează/upgrade-ează independent.
-6. **Auditabilitate.** Fiecare decizie de scoring e în cod, observabilă prin `get_stats` (`recentErrors`, `perfSamples`, `vectorSearchEnabled`). Nu există "magie" ascunsă într-o dependență.
+1. **Securitate:** o singură dependență obligatorie; fără `gray-matter` → fără CVE-ul `js-yaml`.
+2. **Determinism:** zero apeluri LLM, zero cost, merge offline / air-gapped.
+3. **Scoring coerent:** title-boost, tag-boost, Ebbinghaus și importanță = o singură formulă, nu trei librării care se bat.
+4. **Predictibilitate:** index în memorie, LRU cache, scrieri atomice — niciun black-box cu I/O surpriză.
+5. **Auditabilitate:** fiecare decizie de scoring e în cod, observabilă prin `get_stats`.
 
-> **Filozofia:** un plugin de memorie pentru Claude Code trebuie să fie **ușor, sigur, determinist și previzibil**. Orice dependență grea e un risc de securitate (CVE), un risc de breaking-change, sau un black-box de performanță. De aceea TF-IDF, Ebbinghaus, RRF, frontmatter și chiar wrapper-ul vectorial sunt **scrise de mână** — doar motorul de inference (ONNX) și stocarea vectorială (sqlite-vec) rămân externe, și ele opționale.
+> **Filozofia:** orice dependență grea e un risc de CVE, de breaking-change sau un black-box. Doar ONNX (inference) și sqlite-vec (stocare vectorială) rămân externe — și ele opționale.
 
 ---
 
@@ -1079,20 +1076,16 @@ claude plugin install "$(pwd)"
 
 ### Ce am acoperit
 
-**Total Recall:**
-- Plugin MCP cu 12 unelte pentru memorie persistentă în Claude Code, Copilot și Gemini CLI
-- Vault dual: personal (local) + org (sync git cu privacy filter)
-- Căutare hibridă: TF-IDF + vector local/Ollama/Vertex AI + expansiune multilinguală + Ebbinghaus decay
-- Hook-uri automate: suport pentru sync și rebuild de cache pe fundal pentru Claude, Copilot și Gemini
-- Integrare nativă cu Obsidian ca editor de documente (vault-uri Markdown)
-
 **Claude vs Ollama:**
-- Claude API: calitate maximă, cost per token, date în cloud
-- Ollama: gratuit pe hardware propriu, 100% local, offline capabil
-- Integrare Ollama ↔ Claude Code: **nativă prin `ollama launch claude`** — Ollama expune endpoint compatibil API Anthropic (fără proxy), client Claude Code + backend Ollama (local sau cloud)
-- Agent Claude (client + harness, format API Anthropic) vs agent LangChain (framework model-agnostic): ambele pot rula pe Ollama — Claude Code via `ollama launch claude`, LangChain via `ChatOllama`; diferența e cine deține loop-ul, nu dacă pot rula local
-- total-recall ca punct de convergență: același vault MCP, consumabil din ambele runtime-uri
-- Decizia cheie: confidențialitate > calitate > cost
+- Claude API: calitate maximă, cost per token, date în cloud · Ollama: gratuit, 100% local, offline
+- `ollama launch claude`: harness-ul Claude Code pe model local — fără proxy
+- Agent Claude vs LangChain: diferența e **cine deține loop-ul**, nu dacă pot rula local
+- Decizia cheie: **confidențialitate > calitate > cost**
+
+**Total Recall:**
+- Plugin MCP (12 unelte) pentru memorie persistentă — Claude Code, Copilot, Gemini CLI
+- Vault dual (personal local + org pe git cu privacy filter), căutare hibridă cu Ebbinghaus decay
+- Memoria = fișiere Markdown: git-abile, Obsidian-abile, ale tale
 
 ### Întrebări deschise pentru discuție
 
