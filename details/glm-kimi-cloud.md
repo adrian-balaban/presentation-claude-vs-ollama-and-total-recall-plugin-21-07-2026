@@ -7,7 +7,7 @@
 - Flagship-ul Z.ai (spin-off Tsinghua); context **~1M tokens** (976K — verificat pe [ollama.com/library/glm-5.2](https://ollama.com/library/glm-5.2)), 756B parametri, bun la raționament, agentic și cod
 - Pentru un dev român: română slabă (rămâi pe Claude pentru RO), date sensibile → servere în China
 
-> **Context rapid:** GLM-5.2 (lansat iun 2026) — performanță comparabilă cu Claude Opus 4.8 la ~6× mai ieftin, open-source MIT, 66% pe benchmarks de programare (vs 67% Claude). Modele chineze = 45% din traficul OpenRouter (2026).
+> **Context rapid:** GLM-5.2 (lansat iun 2026) — aproape de Claude Opus 4.8 pe Terminal-Bench 2.1 (**81.0 vs 85.0**, cifrele publicate de Ollama), la un preț API de aproximativ **12–20× mai mic** (în funcție de input/output), greutăți deschise sub licență MIT.
 
 ## Kimi-K2.7-Code — Moonshot AI (Beijing)
 
@@ -45,7 +45,7 @@ ollama pull gemma3:4b       # ~3 GB
 **Cum folosești modelele `:cloud`:**
 
 ```bash
-ollama login                           # cont pe ollama.com
+ollama signin                          # cont pe ollama.com
 ollama run glm-5.2:cloud               # direct
 ollama launch claude --model glm-5.2:cloud  # în Claude Code
 ```

@@ -11,6 +11,7 @@ layout: docs
 **Data:** 16 iulie 2026
 
 Două subiecte practice despre cum extindem și alegem uneltele AI în workflow-ul de zi cu zi:
+
 - primul despre decizia „cloud sau local" când lucrezi cu LLM-uri
 - al doilea despre persistența memoriei în Claude/Copilot/Gemini printr-un plugin MCP
 
@@ -35,19 +36,19 @@ Cinci lucruri pe care le iei de aici:
 ## Slide 1 — Agendă (~65 de minute)
 
 1. **Claude vs Ollama** (25 min)
-   - Ce este Ollama și cum funcționează → *Slide 2 & 6*
-   - Cazul real (modele instalate local, eGPU, modele `:cloud`) → *Slide 3, 4, 5*
-   - Compararea motorului: Ollama vs llama.cpp vs llamafile → *Slide 7*
-   - Comparație directă: performanță, costuri, confidențialitate → *Slide 8, 9, 10*
-   - Integrare practică cu Claude Code și ghid de decizie → *Slide 11 & 12*
-   - Tipuri de agenți: Claude vs LangChain → *Slide 13*
+   - Ce este Ollama și cum funcționează → _Slide 2 & 6_
+   - Cazul real (modele instalate local, eGPU, modele `:cloud`) → _Slide 3, 4, 5_
+   - Compararea motorului: Ollama vs llama.cpp vs llamafile → _Slide 7_
+   - Comparație directă: performanță, costuri, confidențialitate → _Slide 8, 9, 10_
+   - Integrare practică cu Claude Code și ghid de decizie → _Slide 11 & 12_
+   - Tipuri de agenți: Claude vs LangChain → _Slide 13_
 2. **Total Recall Plugin** (25 min)
-   - Ce este, structura pe disc și arhitectura → *Slide 14, 15, 16, 17*
-   - De ce algoritmi proprii (securitate, determinism) → *Slide 18*
-   - Managementul vault-ului dual și cele 17 unelte MCP → *Slide 19 & 20*
-   - Algoritmul de căutare hibridă (TF-IDF + Ebbinghaus + vectori) → *Slide 21 & 22*
-   - Hook-uri de sistem, instalare și compatibilitate → *Slide 23, 24, 25*
-3. **Sinteză & Întrebări (Q&A)** (15 min) → *Slide 26 & 27*
+   - Ce este, structura pe disc și arhitectura → _Slide 14, 15, 16, 17_
+   - De ce algoritmi proprii (securitate, determinism) → _Slide 18_
+   - Managementul vault-ului dual și cele 17 unelte MCP → _Slide 19 & 20_
+   - Algoritmul de căutare hibridă (TF-IDF + Ebbinghaus + vectori) → _Slide 21 & 22_
+   - Hook-uri de sistem, instalare și compatibilitate → _Slide 23, 24, 25_
+3. **Sinteză & Întrebări (Q&A)** (15 min) → _Slide 26 & 27_
 
 ---
 
@@ -63,6 +64,7 @@ Cinci lucruri pe care le iei de aici:
 > 💡 **WOW:** Ollama a depășit **100 de milioane de descărcări** pe GitHub/Docker Hub în 2026. Este cel mai popular runtime local pentru LLM-uri (dar nu singurul — v. Slide 7 pentru llama.cpp și llamafile).
 
 **Ce face Ollama:**
+
 - Descarcă și rulează modele quantizate local (Llama, Mistral, Gemma, Phi, Qwen, etc.)
 - Pentru modele care nu încap local sau sunt proprietare, oferă **modele `:cloud`** — proxy prin infrastructura Ollama (ex. `glm-5.2:cloud`, `gemini-3-flash-preview:cloud`); aceeași interfață CLI/API, inferența rulează la furnizor
 - Expune API REST pe `http://localhost:11434`, compatibilă atât cu formatul **OpenAI**, cât și cu formatul **Anthropic** (`/v1/messages` — de asta merge `ollama launch claude`)
@@ -90,24 +92,26 @@ ollama run glm-5.2:cloud                  # prea mare pentru local (756B)
 
 **Modele populare disponibile** (local, verificate pe ollama.com/library):
 
-| Model | Dimensiune | VRAM necesar | Calitate |
-|---|---|---|---|
-| `llama3.2:3b` | ~2 GB | 4 GB | Bun pentru sarcini simple |
-| `llama3.1:8b` | ~5 GB | 8 GB | Echilibru bun |
-| `llama3.3:70b` | ~40 GB | 48+ GB | Aproape de GPT-4o |
-| `mistral:7b` | ~4 GB | 8 GB | Bun pentru cod |
-| `deepseek-coder:33b` | ~19 GB | 24+ GB | Specializat cod |
-| `qwen2.5-coder:32b` | ~18 GB | 24+ GB | Cod, multilingual |
+| Model                | Dimensiune | VRAM necesar | Calitate                  |
+| -------------------- | ---------- | ------------ | ------------------------- |
+| `llama3.2:3b`        | ~2 GB      | 4 GB         | Bun pentru sarcini simple |
+| `llama3.1:8b`        | ~5 GB      | 8 GB         | Echilibru bun             |
+| `llama3.3:70b`       | ~40 GB     | 48+ GB       | Aproape de GPT-4o         |
+| `mistral:7b`         | ~4 GB      | 8 GB         | Bun pentru cod            |
+| `deepseek-coder:33b` | ~19 GB     | 24+ GB       | Specializat cod           |
+| `qwen2.5-coder:32b`  | ~18 GB     | 24+ GB       | Cod, multilingual         |
 
 Plus modele `:cloud` (proxy, nu local — verificate pe ollama.com/search?c=cloud): `glm-5.2`, `kimi-k2.7-code`, `minimax-m3`, `deepseek-v4-pro`, `gemini-3-flash-preview`, `gpt-oss:120b` etc.
 
 > **⚠️ Unde sunt Claude, Gemini și GPT?** (verificat pe ollama.com, iul 2026)
+>
 > - **Local (`ollama pull`) rulează doar modele open-weight.** Claude, Gemini și GPT-frontier sunt proprietare — nu pot fi rulate local, oricât hardware ai avea.
-> - **Gemini:** Google a publicat totuși `gemini-3-flash-preview:cloud` — proxy oficial prin Ollama, inferența la Google. Prima fisură în regula „doar open-weight".
-> - **GPT:** doar `gpt-oss` (20B/120B) — modelele *open-weight* ale OpenAI; GPT-5.x proprietar nu există în Ollama.
+> - **Gemini:** Google a publicat totuși `gemini-3-flash-preview:cloud` — proxy oficial prin Ollama, inferența la Google.
+> - **GPT:** doar `gpt-oss` (20B/120B) — modelele _open-weight_ ale OpenAI; GPT-5.x proprietar nu există în Ollama.
 > - **Claude:** nu există oficial, nici local, nici `:cloud` — doar imitații comunitare (fine-tune-uri „claude-style" pe Qwen/Gemma, de evitat). Pentru Claude real: API-ul Anthropic sau `ollama launch claude` cu alt model în spate.
 
 > **Confuzia frecventă: Gemini ≠ Gemma.** Ambele sunt de la Google, dar:
+>
 > - **Gemini** = model închis, doar API (Google AI Studio / Vertex AI) → ❌ nu intră în Ollama
 > - **Gemma** = fratele open-weight al Gemini (Gemma 2, **Gemma 3** cu multimodal) → ✅ rulează în Ollama: `ollama run gemma3`, `ollama run gemma3:27b`
 >
@@ -170,7 +174,7 @@ glm-5.2:cloud           —     ← niciun fișier GGUF descarcat
 
 - `SIZE=—` = nu există model local; Ollama trimite cererea la API-ul extern
 - Tokenizarea și inferența se fac **pe serverele furnizorului**, nu pe CPU/GPU-ul tău
-- Avantaj față de API-ul direct: aceeași interfață CLI (`ollama run <model>:cloud`) pentru toate modelele `:cloud`, cu endpoint-uri atât **OpenAI-compatible**, cât și **Anthropic-compatible** — verificat: pagina fiecărui model listează direct comenzile `ollama launch claude/codex/opencode --model <model>:cloud`
+- Avantaj față de API-ul direct: aceeași interfață CLI (`ollama run <model>:cloud`) pentru toate modelele `:cloud`, cu endpoint-uri atât **OpenAI-compatible**, cât și **Anthropic-compatible** — verificat: pagina fiecărui model listează direct comenzile `ollama launch claude/codex/opencode/copilot --model <model>:cloud`
 - Claude oficial NU există în Ollama (doar prin API Anthropic: [docs.anthropic.com](https://docs.anthropic.com)); Gemini există doar ca [gemini-3-flash-preview:cloud](https://ollama.com/library/gemini-3-flash-preview), iar experiența completă Gemini o dă [Antigravity IDE](https://antigravity.google/)
 
 ---
@@ -193,12 +197,12 @@ glm-5.2:cloud           —     ← niciun fișier GGUF descarcat
 
 ### Comparație rapidă
 
-| Model | Companie | Cel mai bun la | Cost vs Claude | Risc GDPR |
-|---|---|---|---|---|
-| **GLM-5.2** | Zhipu AI 🇨🇳 | Text chinezo-englez, documente lungi | ~50–70% din Haiku | ⚠️ Ridicat |
-| **Kimi-K2.7-Code** | Moonshot AI 🇨🇳 | Code review, generare cod | ~50–60% din Haiku | ⚠️ Ridicat |
-| **Claude Haiku** | Anthropic 🇺🇸 | Sarcini generale rapide, română | Referință | ✅ Scăzut (DPA EU) |
-| **Claude Sonnet** | Anthropic 🇺🇸 | Raționament, arhitectură, cod complex | ~4–5× Haiku | ✅ Scăzut |
+| Model              | Companie       | Cel mai bun la                        | Cost vs Claude    | Risc GDPR          |
+| ------------------ | -------------- | ------------------------------------- | ----------------- | ------------------ |
+| **GLM-5.2**        | Zhipu AI 🇨🇳    | Text chinezo-englez, documente lungi  | ~50–70% din Haiku | ⚠️ Ridicat         |
+| **Kimi-K2.7-Code** | Moonshot AI 🇨🇳 | Code review, generare cod             | ~50–60% din Haiku | ⚠️ Ridicat         |
+| **Claude Haiku**   | Anthropic 🇺🇸   | Sarcini generale rapide, română       | Referință         | ✅ Scăzut (DPA EU) |
+| **Claude Sonnet**  | Anthropic 🇺🇸   | Raționament, arhitectură, cod complex | ~4–5× Haiku       | ✅ Scăzut          |
 
 ---
 
@@ -259,6 +263,7 @@ Cerere utilizator
 ```
 
 **Quantizare** (de ce modelele de 70B încap pe 48GB VRAM):
+
 - Parametrii modelului sunt comprimați de la float32 (4 bytes/param) la int4 (0.5 bytes/param)
 - Pierdere de calitate: ~2-5% față de versiunea completă
 - Format standard: **GGUF** (GPT-Generated Unified Format)
@@ -273,14 +278,14 @@ Cerere utilizator
 
 ### Comparație directă
 
-| Axa | **llama.cpp** (motorul, low-level) | **Ollama** (wrapper/runtime prietenos) |
-|---|---|---|
-| **Nivel** | Motor de inference C/C++ | Wrapper peste llama.cpp (Go + fork GGML) |
-| **Control** | **Maxim** — flag-uri CLI directe, quantizare custom, `llama-server`, grammar-constrained decoding, tuning fin de GPU offload | Mai restrâns — expune ce consideră util |
-| **Management modele** | **Manual** — aduci/convertezi tu fișierele GGUF | **Automat** — registry, versioning, `Modelfile`-uri pentru customizare |
-| **UX** | `./llama-server -m model.gguf ...` (curbă de învățare mai abruptă) | `ollama pull` / `ollama run` (drag-and-start) |
-| **API** | `llama-server` (HTTP, mai brut) | **REST API la `:11434`** + endpoint **compatibil OpenAI** |
-| **Caz tipic** | Inference înglobat direct în altă aplicație; build-uri custom | Integrare API rapidă local (LangChain, agenți, Claude Code via `ollama launch claude`) |
+| Axa                   | **llama.cpp** (motorul, low-level)                                                                                           | **Ollama** (wrapper/runtime prietenos)                                                 |
+| --------------------- | ---------------------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------- |
+| **Nivel**             | Motor de inference C/C++                                                                                                     | Wrapper peste llama.cpp (Go + fork GGML)                                               |
+| **Control**           | **Maxim** — flag-uri CLI directe, quantizare custom, `llama-server`, grammar-constrained decoding, tuning fin de GPU offload | Mai restrâns — expune ce consideră util                                                |
+| **Management modele** | **Manual** — aduci/convertezi tu fișierele GGUF                                                                              | **Automat** — registry, versioning, `Modelfile`-uri pentru customizare                 |
+| **UX**                | `./llama-server -m model.gguf ...` (curbă de învățare mai abruptă)                                                           | `ollama pull` / `ollama run` (drag-and-start)                                          |
+| **API**               | `llama-server` (HTTP, mai brut)                                                                                              | **REST API la `:11434`** + endpoint **compatibil OpenAI**                              |
+| **Caz tipic**         | Inference înglobat direct în altă aplicație; build-uri custom                                                                | Integrare API rapidă local (LangChain, agenți, Claude Code via `ollama launch claude`) |
 
 ### A treia opțiune: llamafile — „modelul E un fișier"
 
@@ -302,20 +307,20 @@ Concret, trei mecanisme:
 
 1. **Registry centralizat.** `ollama pull llama3.2` nu descarcă un fișier de oriunde — trage dintr-un registru controlat de compania Ollama (ollama.com/library), cu un sistem de manifest propriu, non-standard. Ce modele apar acolo, cum sunt denumite, ce tag-uri există — decide vendorul. E exact modelul Docker Hub: cod open source, canal de distribuție proprietar.
 
-2. **Formatul „blob".** Modelele circulă în ecosistem ca fișiere **GGUF** standard — le poți lua de pe Hugging Face și rula cu llama.cpp, LM Studio, llamafile etc. Dar când Ollama le trage, le sparge și le stochează în cache-ul daemonului ca blob-uri cu nume hash (`~/.ollama/models/blobs/sha256-...`), plus manifeste proprii. Fișierul tău de 24 GB nu mai e un „fișier model" pe care să-l copiezi pe alt tool sau pe un stick — e un artefact pe care doar Ollama știe să-l folosească direct. (Tehnic blob-ul *conține* GGUF-ul și poate fi recuperat, dar nu e formatul portabil pe care l-ai descărcat.)
+2. **Formatul „blob".** Modelele circulă în ecosistem ca fișiere **GGUF** standard — le poți lua de pe Hugging Face și rula cu llama.cpp, LM Studio, llamafile etc. Dar când Ollama le trage, le sparge și le stochează în cache-ul daemonului ca blob-uri cu nume hash (`~/.ollama/models/blobs/sha256-...`), plus manifeste proprii. Fișierul tău de 24 GB nu mai e un „fișier model" pe care să-l copiezi pe alt tool sau pe un stick — e un artefact pe care doar Ollama știe să-l folosească direct. (Tehnic blob-ul _conține_ GGUF-ul și poate fi recuperat, dar nu e formatul portabil pe care l-ai descărcat.)
 
 3. **Daemon obligatoriu.** Nu rulezi „un model", rulezi un serviciu de fundal (`ollama serve`) care gestionează registry-ul, cache-ul și API-ul. Ești legat de ciclul lui de viață, update-urile lui, deciziile lui.
 
-**Deci „soft lock-in" înseamnă:** nimic nu te *împiedică legal sau tehnic* să pleci (codul e liber, GGUF-ul e recuperabil) — dar cu cât folosești mai mult, cu atât modelele, scripturile și workflow-ul tău depind de registrul, formatul de stocare și daemonul unui singur vendor. Costul de ieșire crește tăcut. Prin contrast, argumentul llamafile: „modelul e un fișier" — un singur executabil pe care îl copiezi, arhivezi, ștergi, fără registru și fără daemon.
+**Deci „soft lock-in" înseamnă:** nimic nu te _împiedică legal sau tehnic_ să pleci (codul e liber, GGUF-ul e recuperabil) — dar cu cât folosești mai mult, cu atât modelele, scripturile și workflow-ul tău depind de registrul, formatul de stocare și daemonul unui singur vendor. Costul de ieșire crește tăcut. Prin contrast, argumentul llamafile: „modelul e un fișier" — un singur executabil pe care îl copiezi, arhivezi, ștergi, fără registru și fără daemon.
 
 > **Formularea pentru slide:** „Ollama e open source, dar distribuția e a vendorului: registry centralizat + blob-uri în format propriu + daemon obligatoriu. Nu e lacăt — e gravitație."
 
 ### Când alegi care
 
-| Vrei… | Alegi |
-|---|---|
-| Setup rapid, swap între modele, API-first (agenți, Claude Code) | **Ollama** |
-| Control maxim (cuantizare, offload, build custom) | **llama.cpp** |
+| Vrei…                                                                  | Alegi         |
+| ---------------------------------------------------------------------- | ------------- |
+| Setup rapid, swap între modele, API-first (agenți, Claude Code)        | **Ollama**    |
+| Control maxim (cuantizare, offload, build custom)                      | **llama.cpp** |
 | Portabilitate totală: un fișier, zero install, zero daemon, air-gapped | **llamafile** |
 
 ---
@@ -326,21 +331,21 @@ Concret, trei mecanisme:
 
 > 📊 **WOW Metric:** Latența la primul token (TTFT) pe Ollama cu un model 8B pe GPU local este de **~120ms**, în timp ce prin API-ul Claude este de **~650ms** (de ~5 ori mai rapid local).
 
-| Criteriu | Claude (API Anthropic) | Ollama (local) | Citeste pe web care sunt numerele la zi si actualizeaza-le
-|---|---|---|
-| **Modele disponibile** | Claude Sonnet 4.6, Opus 4.8, Haiku 4.5 | Llama, Mistral, Gemma, Phi, Qwen, DeepSeek etc. |
-| **Calitate top-tier** | ✅ Claude Opus 4.8 = state of the art | Llama 3.3 70B ≈ GPT-4o, dar sub Opus |
-| **Cost per token** | $3–$15 / 1M tokens (input $3 / output $15) | $0 — hardware propriu |
-| **Cost infrastructură** | $0 (fără server propriu) | GPU bun: $500–$3000+ |
-| **Confidențialitate** | Date trimise la Anthropic | 100% local, zero egress |
-| **Latență** | ~500ms–2s primul token | ~100ms–500ms (GPU local) |
-| **Context window** | 200K tokens (Sonnet/Opus) | 4K–128K (depinde de model+VRAM) |
-| **Raționament avansat** | ✅ Excelent (extended thinking) | Limitat la modele mici-medii |
-| **Disponibilitate** | Necesită internet + API key | Funcționează offline |
-| **Actualizări model** | Automate (Anthropic) | Manual (`ollama pull`) |
-| **Integrare Claude Code** | ✅ Nativă (este produsul Anthropic) | ✅ Nativă prin `ollama launch claude` (Ollama expune endpoint compatibil API Anthropic, fără proxy) |
-| **Limită rate** | Există (nivel API) | Nelimitată (hardware propriu) |
-| **GDPR / compliante** | Politici Anthropic | On-premise complet |
+| Criteriu                  | Claude (API Anthropic)                     | Ollama (local)                                                                                      | Citeste pe web care sunt numerele la zi si actualizeaza-le |
+| ------------------------- | ------------------------------------------ | --------------------------------------------------------------------------------------------------- | ---------------------------------------------------------- |
+| **Modele disponibile**    | Claude Sonnet 4.6, Opus 4.8, Haiku 4.5     | Llama, Mistral, Gemma, Phi, Qwen, DeepSeek etc.                                                     |
+| **Calitate top-tier**     | ✅ Claude Opus 4.8 = state of the art      | Llama 3.3 70B ≈ GPT-4o, dar sub Opus                                                                |
+| **Cost per token**        | $3–$15 / 1M tokens (input $3 / output $15) | $0 — hardware propriu                                                                               |
+| **Cost infrastructură**   | $0 (fără server propriu)                   | GPU bun: $500–$3000+                                                                                |
+| **Confidențialitate**     | Date trimise la Anthropic                  | 100% local, zero egress                                                                             |
+| **Latență**               | ~500ms–2s primul token                     | ~100ms–500ms (GPU local)                                                                            |
+| **Context window**        | 200K tokens (Sonnet/Opus)                  | 4K–128K (depinde de model+VRAM)                                                                     |
+| **Raționament avansat**   | ✅ Excelent (extended thinking)            | Limitat la modele mici-medii                                                                        |
+| **Disponibilitate**       | Necesită internet + API key                | Funcționează offline                                                                                |
+| **Actualizări model**     | Automate (Anthropic)                       | Manual (`ollama pull`)                                                                              |
+| **Integrare Claude Code** | ✅ Nativă (este produsul Anthropic)        | ✅ Nativă prin `ollama launch claude` (Ollama expune endpoint compatibil API Anthropic, fără proxy) |
+| **Limită rate**           | Există (nivel API)                         | Nelimitată (hardware propriu)                                                                       |
+| **GDPR / compliante**     | Politici Anthropic                         | On-premise complet                                                                                  |
 
 ---
 
@@ -348,7 +353,7 @@ Concret, trei mecanisme:
 
 > 💡 **WOW:** un 'agentic developer' ce lucreaza intens arde ~$400/lună pe API — un RTX 4090 de $2.000 se amortizează în ~5 luni. Dar dacă ești utilizator light ($30/lună), amortizarea durează ani.
 
-> 📊 **WOW (datat):** 1 iunie 2026 — Copilot a mutat Claude Opus de la **3× la 27×** multiplicator și Sonnet de la **1× la 9×**; tier-ul gratuit GPT-4o a dispărut. „Era AI-ului cloud ieftin s-a terminat" (Mozilla.ai, *AI Got Expensive. Now What?*, mai 2026). Ăsta e forcing function-ul întregii discuții cloud-vs-local. Sursa numerelor: [blog.mozilla.ai/ai-got-expensive-now-what](https://blog.mozilla.ai/ai-got-expensive-now-what/) (Anushri Gupta, 26 mai 2026).
+> 📊 **WOW (datat):** 1 iunie 2026 — Copilot a mutat Claude Opus de la **3× la 27×** multiplicator și Sonnet de la **1× la 9×**; tier-ul gratuit GPT-4o a dispărut. „Era AI-ului cloud ieftin s-a terminat" (Mozilla.ai, _AI Got Expensive. Now What?_, mai 2026). Ăsta e forcing function-ul întregii discuții cloud-vs-local. Sursa numerelor: [blog.mozilla.ai/ai-got-expensive-now-what](https://blog.mozilla.ai/ai-got-expensive-now-what/) (Anushri Gupta, 26 mai 2026).
 
 ### Claude API (Sonnet 4.6)
 
@@ -403,6 +408,7 @@ Serverele Anthropic (US)
 ```
 
 **Ce înseamnă practic:**
+
 - Codul tău (parțial sau complet) este trimis la Anthropic
 - Secretele din prompt ajung pe servere externe
 - GDPR: Anthropic are DPA disponibil, dar datele ies din EU
@@ -421,6 +427,7 @@ Model GGUF în RAM/VRAM — NICIODATĂ în afara mașinii
 ```
 
 **Ce înseamnă practic:**
+
 - Codul tău, secretele, datele clientului — rămân pe mașina ta
 - Zero egress de date
 - Funcționează în rețele izolate (air-gapped)
@@ -444,6 +451,7 @@ ollama launch claude --model glm-5.2:cloud --yes -- -p "how does this repo work?
 ```
 
 Ce face comanda automat:
+
 - instalează/pornește **clientul Claude Code**
 - setează `ANTHROPIC_BASE_URL=http://localhost:11434`, `ANTHROPIC_AUTH_TOKEN=ollama`, `ANTHROPIC_API_KEY=""`
 - Ollama expune **endpoint compatibil API Anthropic** la `localhost:11434` → cerere în format Anthropic → model Ollama răspunde → răspuns re-ambalat în format Anthropic
@@ -484,6 +492,7 @@ Sau permanent în `~/.claude/settings.json`:
 **Capabilități suportate (toate condiționate de modelul ales):** tool calling, file edits, subagents, web search/fetch, vision, thinking controls.
 
 **Limitări cunoscute când folosești Ollama cu Claude Code:**
+
 - Endpoint-ul Anthropic-compatibil din Ollama suportă: messages, streaming, system prompts, vision, **tool calling**, **extended thinking**. **Nu** suportă: **prompt caching** (deci fără cache hit-uri / cost savings), `tool_choice`, `metadata`, PDF, citations, `count_tokens`. Computer use nu trece prin acest endpoint.
 - Calitatea output-ului depinde complet de modelul ales — harness-ul e același, inteligența o pune modelul
 - Tool use / function calling: funcționează doar cu modele care suportă (Llama 3.x, Mistral, Qwen 2.5, Qwen3, qwen3-coder)
@@ -497,7 +506,7 @@ Sau permanent în `~/.claude/settings.json`:
 
 **Otari** (Mozilla.ai, open-source, lansat mai 2026, construit peste `any-llm`) e un gateway LLM self-hosted care expune și endpoint-ul Anthropic (`POST /v1/messages`) — deci Claude Code poate rula prin el exact ca prin Ollama, dar cu stratul operațional pe care Ollama nu-l are:
 
-- **Bugete** per user / per cheie, aplicate *înainte* ca cererea să ruleze
+- **Bugete** per user / per cheie, aplicate _înainte_ ca cererea să ruleze
 - **Chei virtuale** — clientul nu vede niciodată cheia reală Anthropic/OpenAI; le poți revoca oricând
 - **Usage & spend tracking** în timp real, pe toate modelele (40+ provideri prin any-llm)
 - Rulezi Claude real, GPT, Mistral sau modele locale prin **același endpoint**
@@ -546,16 +555,16 @@ claude
 
 **Scenarii recomandate:**
 
-| Scenariu | Alegere | Model recomandat |
-|---|---|---|
-| Proiect cu date sensibile / NDA | Ollama | DeepSeek Coder 33B sau Qwen 2.5 Coder 32B |
-| Echipă enterprise cu restricții cloud | Ollama | Llama 3.3 70B (server local) |
-| Prototipare rapidă, calitate maximă | Claude API | Sonnet 4.6 sau Opus 4.8 |
-| Developer indie, buget limitat | Ollama | Llama 3.1 8B sau Qwen 2.5 7B |
-| Sarcini critice de raționament | Claude API | Opus 4.8 cu extended thinking |
-| Cod cu context mare (>50K tokens) | Claude API | Sonnet 4.6 (200K context) |
-| Offline / air-gapped | Ollama | Orice model descărcat prealabil |
-| Echipă cu GPU server partajat | Ollama | Llama 3.3 70B, server central |
+| Scenariu                                                            | Alegere                         | Model recomandat                                             |
+| ------------------------------------------------------------------- | ------------------------------- | ------------------------------------------------------------ |
+| Proiect cu date sensibile / NDA                                     | Ollama                          | DeepSeek Coder 33B sau Qwen 2.5 Coder 32B                    |
+| Echipă enterprise cu restricții cloud                               | Ollama                          | Llama 3.3 70B (server local)                                 |
+| Prototipare rapidă, calitate maximă                                 | Claude API                      | Sonnet 4.6 sau Opus 4.8                                      |
+| Developer indie, buget limitat                                      | Ollama                          | Llama 3.1 8B sau Qwen 2.5 7B                                 |
+| Sarcini critice de raționament                                      | Claude API                      | Opus 4.8 cu extended thinking                                |
+| Cod cu context mare (>50K tokens)                                   | Claude API                      | Sonnet 4.6 (200K context)                                    |
+| Offline / air-gapped                                                | Ollama                          | Orice model descărcat prealabil                              |
+| Echipă cu GPU server partajat                                       | Ollama                          | Llama 3.3 70B, server central                                |
 | Echipă care vrea Claude + modele locale + control buget centralizat | **Otari gateway** (self-hosted) | Claude real + orice provider, chei virtuale, bugete per user |
 
 ---
@@ -563,19 +572,19 @@ claude
 ## Slide 13 — Agent Claude vs agent LangChain
 
 > Confuzia vine din faptul că „agent Claude" și „agent LangChain" trăiesc la **niveluri diferite de stivă**:
-> unul e *model + harness*, celălalt e *framework model-agnostic*.
+> unul e _model + harness_, celălalt e _framework model-agnostic_.
 
 ### Diferența fundamentală
 
-| Axa | Agent Claude (Claude Code / Agent SDK) | Agent LangChain (LangChain / LangGraph) |
-|---|---|---|
-| **Modelul** | Clientul e prins de **Claude/Anthropic** (format API Anthropic), DAR din `ollama launch claude` (vezi mai jos) backend-ul poate fi **Ollama** — client Claude Code + model local. | **Model-agnostic** la nivel de framework — Claude, GPT, Gemini, **Ollama local**, orice |
-| **Cine deține loop-ul** | Anthropic: harness închis, opinat (plan mode, hooks, permisiuni, subagents, MCP, compaction). Configurezi, nu scrii loop-ul. | Tu scrii loop-ul / graful. LangGraph = mașină de stări explicită (noduri, muchii, routing condiționat, checkpointuri). |
-| **Starea** | Conversație + memorie fișier + MCP (ex. total-recall). Compactare de context built-in. | Abstracții pluggable: `BufferMemory`, summary, retriever vectorial; LangGraph are checkpointer (in-mem/SQLite/Postgres) pentru stare durabilă între rulări. |
-| **Tool-uri** | **MCP** e standardul. Subagents (Task), hooks (Pre/PostToolUse), skills. | Funcții `@tool` + integrări (loaders, retrievers, vector stores). Are și adaptoare MCP acum. |
-| **Computer use / mediu** | First-class: bash, edit fișiere, computer use (ecran/tastatură) în Agent SDK. Claude Code = harness specializat cod. | Doar ce-i dai tu ca tool. Fără computer use built-in decât dacă-l wirezi. |
-| **Control flow** | Modelul decide mult; îl direcționezi cu CLAUDE.md, skills, permission mode. | **Tu controlezi** graful — routing forțat, ramuri paralele, human-in-the-loop gates. Mai mult workflow-engine decât agent liber. |
-| **Taxa de abstracție** | Subțire, aproape de API. | Straturi groase, schimbări breaking între versiuni, abstracții leaky (mulți au migrat la LangGraph sau API raw). |
+| Axa                      | Agent Claude (Claude Code / Agent SDK)                                                                                                                                            | Agent LangChain (LangChain / LangGraph)                                                                                                                     |
+| ------------------------ | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **Modelul**              | Clientul e prins de **Claude/Anthropic** (format API Anthropic), DAR din `ollama launch claude` (vezi mai jos) backend-ul poate fi **Ollama** — client Claude Code + model local. | **Model-agnostic** la nivel de framework — Claude, GPT, Gemini, **Ollama local**, orice                                                                     |
+| **Cine deține loop-ul**  | Anthropic: harness închis, opinat (plan mode, hooks, permisiuni, subagents, MCP, compaction). Configurezi, nu scrii loop-ul.                                                      | Tu scrii loop-ul / graful. LangGraph = mașină de stări explicită (noduri, muchii, routing condiționat, checkpointuri).                                      |
+| **Starea**               | Conversație + memorie fișier + MCP (ex. total-recall). Compactare de context built-in.                                                                                            | Abstracții pluggable: `BufferMemory`, summary, retriever vectorial; LangGraph are checkpointer (in-mem/SQLite/Postgres) pentru stare durabilă între rulări. |
+| **Tool-uri**             | **MCP** e standardul. Subagents (Task), hooks (Pre/PostToolUse), skills.                                                                                                          | Funcții `@tool` + integrări (loaders, retrievers, vector stores). Are și adaptoare MCP acum.                                                                |
+| **Computer use / mediu** | First-class: bash, edit fișiere, computer use (ecran/tastatură) în Agent SDK. Claude Code = harness specializat cod.                                                              | Doar ce-i dai tu ca tool. Fără computer use built-in decât dacă-l wirezi.                                                                                   |
+| **Control flow**         | Modelul decide mult; îl direcționezi cu CLAUDE.md, skills, permission mode.                                                                                                       | **Tu controlezi** graful — routing forțat, ramuri paralele, human-in-the-loop gates. Mai mult workflow-engine decât agent liber.                            |
+| **Taxa de abstracție**   | Subțire, aproape de API.                                                                                                                                                          | Straturi groase, schimbări breaking între versiuni, abstracții leaky (mulți au migrat la LangGraph sau API raw).                                            |
 
 > **Alternativa „subțire" la LangChain pentru multi-provider:** **any-llm** (Mozilla.ai, 2.1k ⭐) — un singur `completion()` peste 40+ provideri (OpenAI, Anthropic, Mistral, Ollama…), fără taxa de abstracție LangChain. Dacă tot ce vrei e „schimb providerul dintr-un string", nu-ți trebuie un framework de agenți.
 
@@ -597,23 +606,23 @@ LangChain/LangGraph → „vreau un pipeline model-agnostic cu control flow expl
 
 ### Pentru cazul nostru: de ce contează pe 16 iulie
 
-| | Agent Claude | Agent LangChain |
-|---|---|---|
-| Poate rula pe **Ollama** (RTX 3060 local)? | **DA, din `ollama launch claude`** — client Claude Code + backend Ollama (fără proxy, Ollama vorbește nativ format Anthropic). | **DA** — `ChatOllama`, rulează pe GPU local, zero cost per token, offline, datele nu ies din mașină |
-| Inteligență | Cu Claude real: maximă (Opus 4.8). Cu Ollama: **depinde de modelul local** (mai slab decât Claude; endpoint-ul Anthropic-compatibil suportă extended thinking și tool calling, dar **nu** prompt caching — v. Slide 10). | Depinde de modelul local (mai slab decât Claude) |
-| Privatitate | Cu Claude real: date → Anthropic. Cu Ollama: **100% on-premise**. | 100% on-premise |
-| Cost | Cu Claude: plat per token. Cu Ollama: **zero**. | Zero |
+|                                            | Agent Claude                                                                                                                                                                                                             | Agent LangChain                                                                                     |
+| ------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | --------------------------------------------------------------------------------------------------- |
+| Poate rula pe **Ollama** (RTX 3060 local)? | **DA, din `ollama launch claude`** — client Claude Code + backend Ollama (fără proxy, Ollama vorbește nativ format Anthropic).                                                                                           | **DA** — `ChatOllama`, rulează pe GPU local, zero cost per token, offline, datele nu ies din mașină |
+| Inteligență                                | Cu Claude real: maximă (Opus 4.8). Cu Ollama: **depinde de modelul local** (mai slab decât Claude; endpoint-ul Anthropic-compatibil suportă extended thinking și tool calling, dar **nu** prompt caching — v. Slide 10). | Depinde de modelul local (mai slab decât Claude)                                                    |
+| Privatitate                                | Cu Claude real: date → Anthropic. Cu Ollama: **100% on-premise**.                                                                                                                                                        | 100% on-premise                                                                                     |
+| Cost                                       | Cu Claude: plat per token. Cu Ollama: **zero**.                                                                                                                                                                          | Zero                                                                                                |
 
 > **Nuanța cheie:** "Claude agent e lipit de Anthropic" nu mai e adevărat — backend-ul poate fi Ollama prin `ollama launch claude`. Limitarea reală: **calitatea = calitatea modelului local ales**. Iar `total-recall` (MCP server) funcționează ca memorie persistentă **pentru ambele runtime-uri** — același vault, indiferent de backend.
 
 ### Regulă de decizie
 
-| Vrei… | Alegi |
-|---|---|
-| Cod / inginerie în repo, calitate maximă, accept cloud | **Claude Code** (cu Claude real) |
-| Agent custom cu Claude ca creier, tool-uri proprii | **Claude Agent SDK** |
-| **Harness-ul Claude Code, dar pe model local** (offline, zero cost) | **`ollama launch claude`** (client Claude + backend Ollama) |
-| Control flow explicit, stare durabilă, sau agent model-agnostic pe Ollama | **LangGraph** (nu LangChain clasic) |
+| Vrei…                                                                     | Alegi                                                       |
+| ------------------------------------------------------------------------- | ----------------------------------------------------------- |
+| Cod / inginerie în repo, calitate maximă, accept cloud                    | **Claude Code** (cu Claude real)                            |
+| Agent custom cu Claude ca creier, tool-uri proprii                        | **Claude Agent SDK**                                        |
+| **Harness-ul Claude Code, dar pe model local** (offline, zero cost)       | **`ollama launch claude`** (client Claude + backend Ollama) |
+| Control flow explicit, stare durabilă, sau agent model-agnostic pe Ollama | **LangGraph** (nu LangChain clasic)                         |
 
 ---
 
@@ -626,9 +635,10 @@ LangChain/LangGraph → „vreau un pipeline model-agnostic cu control flow expl
 > La sfârșitul fiecărei conversații, Claude pierde tot contextul acumulat.
 > Decizii, preferințe, arhitecturi discutate — totul dispare.
 
-> 📊 **WOW Stat:** În medie, un 'agentic developer'  **re-explică aceleași preferințe și detalii de proiect de ~15 ori pe lună** în sesiuni noi, pierzând peste 2 ore de productivitate.
+> 📊 **WOW Stat:** În medie, un 'agentic developer' **re-explică aceleași preferințe și detalii de proiect de ~15 ori pe lună** în sesiuni noi, pierzând peste 2 ore de productivitate.
 
 **Simptomele:**
+
 - Reexplici același context la fiecare sesiune nouă
 - Preferințele tale de cod trebuie re-menționate de fiecare dată
 - Deciziile de arhitectură nu se acumulează nicăieri
@@ -636,7 +646,7 @@ LangChain/LangGraph → „vreau un pipeline model-agnostic cu control flow expl
 
 **Consecința:** Cu cât lucrezi mai mult cu Claude Code, cu atât pierzi mai mult timp re-explicând ceea ce ai deja explicat.
 
-> **Nu ești singurul care vrea asta:** Mozilla.ai a lansat `cq` (1.2k ⭐) — un standard deschis pentru *shared agent learning*: agenții propun «knowledge units» (workaround-uri, API-uri nedocumentate) într-un store comun, cu review uman. **Complementar, nu concurent:** cq = lecții operaționale partajate între agenți; total-recall = memoria TA de context (decizii, preferințe, arhitectură) cu curbă de uitare Ebbinghaus — fișiere `.md` + git, fără server și fără review pipeline.
+> **Nu ești singurul care vrea asta:** Mozilla.ai a lansat `cq` (1.2k ⭐) — un standard deschis pentru _shared agent learning_: agenții propun «knowledge units» (workaround-uri, API-uri nedocumentate) într-un store comun, cu review uman. **Complementar, nu concurent:** cq = lecții operaționale partajate între agenți; total-recall = memoria TA de context (decizii, preferințe, arhitectură) cu curbă de uitare Ebbinghaus — fișiere `.md` + git, fără server și fără review pipeline.
 
 ---
 
@@ -648,6 +658,7 @@ LangChain/LangGraph → „vreau un pipeline model-agnostic cu control flow expl
 > `claude -p "Reaminteste-ti decizia noastra despre baza de date"` (va apela automat unealta `recall_memory`).
 
 **Ce este:**
+
 - **Plugin Claude Code** instalat din marketplace
 - **MCP server** cu 17 unelte (stdio, înregistrat via `claude mcp add`)
 - **Vault de fișiere Markdown** stocat local la `~/.total-recall/`
@@ -655,6 +666,7 @@ LangChain/LangGraph → „vreau un pipeline model-agnostic cu control flow expl
 - **Skill `/memory-workflow`** pentru sesiuni structurate de recall/store
 
 **Ce nu este:**
+
 - Nu trimite date în cloud (vaultul personal este complet local)
 - Nu folosește o bază de date opacă — fiecare memorie este un fișier `.md` citibil
 - Nu suprascrie context — injectează, nu înlocuiește
@@ -683,7 +695,7 @@ LangChain/LangGraph → „vreau un pipeline model-agnostic cu control flow expl
             └── team-decision.md   ← memorii partajate cu echipa, sync pe git
 ```
 
-> **Ce e TF-IDF?** Term Frequency × Inverse Document Frequency — algoritmul clasic de căutare text: un cuvânt punctează mult dacă apare **des în documentul respectiv** (TF) dar **rar în restul colecției** (IDF). „postgresql" care apare de 5 ori într-o memorie și aproape nicăieri altundeva = scor mare; „proiect", care apare peste tot = scor aproape zero. *Inverted index* = harta inversă `cuvânt → lista documentelor care îl conțin`, ca indexul de la finalul unei cărți — de asta căutarea nu citește fișierele, doar indexul.
+> **Ce e TF-IDF?** Term Frequency × Inverse Document Frequency — algoritmul clasic de căutare text: un cuvânt punctează mult dacă apare **des în documentul respectiv** (TF) dar **rar în restul colecției** (IDF). „postgresql" care apare de 5 ori într-o memorie și aproape nicăieri altundeva = scor mare; „proiect", care apare peste tot = scor aproape zero. _Inverted index_ = harta inversă `cuvânt → lista documentelor care îl conțin`, ca indexul de la finalul unei cărți — de asta căutarea nu citește fișierele, doar indexul.
 
 **Fiecare memorie** este un fișier `.md` cu frontmatter:
 
@@ -691,7 +703,7 @@ LangChain/LangGraph → „vreau un pipeline model-agnostic cu control flow expl
 ---
 title: "Preferă PostgreSQL pentru date relaționale"
 tags: [architecture, database, feedback]
-author: adrianb 
+author: adrianb
 importanceScore: 0.8
 created: 2026-06-01T10:00:00Z
 updated: 2026-06-15T14:30:00Z
@@ -770,6 +782,7 @@ store_memory(tags=[...])
 **Regulă cheie:** tagurile `personal` și `org` sunt mutual exclusive — `store_memory` aruncă eroare dacă ambele sunt prezente.
 
 **Filtru de confidențialitate (org sync):**
+
 - Blochează token-uri cu entropie ridicată (secrete, chei API)
 - Detectează și **secrete etichetate** — ex. `aws_secret_access_key = …`: un `~/.aws/credentials` lipit din greșeală e blocat înainte de push
 - Blochează toate adresele email (cu excepția domeniilor din allowlist)
@@ -782,37 +795,41 @@ store_memory(tags=[...])
 > 💡 **Util:** CRUD complet + căutare + întreținere, în limbaj natural — spui „reține că…" / „reamintește-mi…" și modelul alege singur unealta potrivită.
 
 ### Scriere
-| Unealtă | Ce face |
-|---|---|
-| `store_memory` | Creează o memorie nouă; `force=true` suprascrie |
-| `update_memory` | Modifică titlu/conținut/taguri/importanceScore |
-| `delete_memory` | Șterge fișierul + intrarea din index + vectorul |
-| `delete_memories` | Bulk delete cu confirmare explicită |
-| `confirm_memory` | Bump `confirmations`/`flags` — feedback de calitate integrat în scorul Ebbinghaus |
+
+| Unealtă           | Ce face                                                                           |
+| ----------------- | --------------------------------------------------------------------------------- |
+| `store_memory`    | Creează o memorie nouă; `force=true` suprascrie                                   |
+| `update_memory`   | Modifică titlu/conținut/taguri/importanceScore                                    |
+| `delete_memory`   | Șterge fișierul + intrarea din index + vectorul                                   |
+| `delete_memories` | Bulk delete cu confirmare explicită                                               |
+| `confirm_memory`  | Bump `confirmations`/`flags` — feedback de calitate integrat în scorul Ebbinghaus |
 
 ### Căutare / Citire
-| Unealtă | Ce face |
-|---|---|
-| `recall_memory` | TF-IDF + Ebbinghaus + opțional vector search via RRF |
-| `search_index` | TF-IDF doar pe metadate (fără citire fișiere, fără bump accessCount) |
-| `get_memories_by_keys` | Lookup direct după cheie; trece prin LRU cache |
-| `rerank_memories` | Semantic rerank: top-N din `recall_memory`, reordonat de LLM-ul apelant |
+
+| Unealtă                | Ce face                                                                 |
+| ---------------------- | ----------------------------------------------------------------------- |
+| `recall_memory`        | TF-IDF + Ebbinghaus + opțional vector search via RRF                    |
+| `search_index`         | TF-IDF doar pe metadate (fără citire fișiere, fără bump accessCount)    |
+| `get_memories_by_keys` | Lookup direct după cheie; trece prin LRU cache                          |
+| `rerank_memories`      | Semantic rerank: top-N din `recall_memory`, reordonat de LLM-ul apelant |
 
 ### Listare / Interogare
-| Unealtă | Ce face |
-|---|---|
-| `list_memories` | Inventar paginat cu filtre pe categorie/tag |
-| `get_related_memories` | Similaritate Jaccard pe taguri + boost categorie (0.2) |
-| `get_timeline` | Memorii ordonate după `updated` |
-| `get_stats` | Contoare, statistici cache, percentile performanță, erori recente |
+
+| Unealtă                | Ce face                                                           |
+| ---------------------- | ----------------------------------------------------------------- |
+| `list_memories`        | Inventar paginat cu filtre pe categorie/tag                       |
+| `get_related_memories` | Similaritate Jaccard pe taguri + boost categorie (0.2)            |
+| `get_timeline`         | Memorii ordonate după `updated`                                   |
+| `get_stats`            | Contoare, statistici cache, percentile performanță, erori recente |
 
 ### Întreținere
-| Unealtă | Ce face |
-|---|---|
-| `rebuild_index` | `reconcileIndex()` + rebuild TF-IDF; păstrează `accessCount`/`lastAccessed` |
-| `prune_memories` | **Listează** candidații cu retenție scăzută (Ebbinghaus); NU șterge automat |
-| `export_memories` | Export portabil al vault-ului (scenariul „schimb laptopul") |
-| `import_memories` | Import dintr-un export, cu dedup |
+
+| Unealtă           | Ce face                                                                     |
+| ----------------- | --------------------------------------------------------------------------- |
+| `rebuild_index`   | `reconcileIndex()` + rebuild TF-IDF; păstrează `accessCount`/`lastAccessed` |
+| `prune_memories`  | **Listează** candidații cu retenție scăzută (Ebbinghaus); NU șterge automat |
+| `export_memories` | Export portabil al vault-ului (scenariul „schimb laptopul")                 |
+| `import_memories` | Import dintr-un export, cu dedup                                            |
 
 ---
 
@@ -847,11 +864,11 @@ query (text liber)
 decay = importanceScore × exp(−λ × daysSince) × (1 + accessCount × 0.2)
 ```
 
-| importanceScore | λ (viteza de uitare) | Comportament |
-|---|---|---|
-| 1.0 (critic) | 0.032 | Decay lent — memoria rămâne relevantă săptămâni |
-| 0.5 (normal) | 0.096 | Decay mediu |
-| 0.3 (scăzut) | 0.122 | Decay rapid — dispare din rezultate în zile |
+| importanceScore | λ (viteza de uitare) | Comportament                                    |
+| --------------- | -------------------- | ----------------------------------------------- |
+| 1.0 (critic)    | 0.032                | Decay lent — memoria rămâne relevantă săptămâni |
+| 0.5 (normal)    | 0.096                | Decay mediu                                     |
+| 0.3 (scăzut)    | 0.122                | Decay rapid — dispare din rezultate în zile     |
 
 Fiecare acces adaugă +20% forță de retenție (`accessCount × 0.2`).
 
@@ -888,9 +905,10 @@ Fiecare acces adaugă +20% forță de retenție (`accessCount × 0.2`).
 > Deși inițial create exclusiv pentru Claude Code, hook-urile de lifecycle rulează acum și pe **GitHub Copilot CLI** și **Gemini CLI** (prin `hooks.copilot.json` și `hooks.gemini.json`).
 
 ### Execuția pe clienți non-Claude (Copilot și Gemini CLI)
-*   **Cum funcționează:** La pornirea sau pe parcursul sesiunii, clientul Copilot sau Gemini apelează hook-ul corespunzător.
-*   **Side-effects executate:** Hook-urile de fundal rulează normal (trag ultimele memorii din git, reconstruiesc cache-ul indexului local, execută push/sync automat în org-vault).
-*   **Limitare (graceful degradation):** Deoarece acești clienți drops/ignoră output-ul stdout al hook-urilor, **injectarea automată a indexului de context (`additionalContext`) în memoria de conversație este dezactivată**. Modelul nu vede rezumatul memoriilor la pornire, însă le poate interoga oricând manual prin uneltele MCP.
+
+- **Cum funcționează:** La pornirea sau pe parcursul sesiunii, clientul Copilot sau Gemini apelează hook-ul corespunzător.
+- **Side-effects executate:** Hook-urile de fundal rulează normal (trag ultimele memorii din git, reconstruiesc cache-ul indexului local, execută push/sync automat în org-vault).
+- **Limitare (graceful degradation):** Deoarece acești clienți drops/ignoră output-ul stdout al hook-urilor, **injectarea automată a indexului de context (`additionalContext`) în memoria de conversație este dezactivată**. Modelul nu vede rezumatul memoriilor la pornire, însă le poate interoga oricând manual prin uneltele MCP.
 
 ### `SessionStart` (4 pași, secvențiali)
 
@@ -987,12 +1005,12 @@ claude plugin install "$(pwd)"
 
 ## Slide 25 — Compatibilitate: Claude Code vs Copilot vs Gemini vs Codex
 
-| Capabilitate | Claude Code | GitHub Copilot CLI | Gemini CLI | OpenAI Codex CLI |
-|---|---|---|---|---|
-| **MCP Server (17 unelte)** | ✅ Nativ | ✅ stdio MCP suportat | ✅ stdio MCP suportat | ✅ `~/.codex/config.toml` |
-| **Side Effects (Sync/Index)** | ✅ Da | ✅ Da (hooks automate) | ✅ Da (hooks automate) | ❌ Nu (manual) |
-| **Context Injection** | ✅ Da (`additionalContext`) | ❌ Nu (ignorat de client) | ❌ Nu (ignorat de client) | ❌ Nu |
-| **Playbook Skills** | ✅ Da (nativ) | ❌ Nu | ❌ Nu | ❌ Nu |
+| Capabilitate                  | Claude Code                 | GitHub Copilot CLI        | Gemini CLI                | OpenAI Codex CLI          |
+| ----------------------------- | --------------------------- | ------------------------- | ------------------------- | ------------------------- |
+| **MCP Server (17 unelte)**    | ✅ Nativ                    | ✅ stdio MCP suportat     | ✅ stdio MCP suportat     | ✅ `~/.codex/config.toml` |
+| **Side Effects (Sync/Index)** | ✅ Da                       | ✅ Da (hooks automate)    | ✅ Da (hooks automate)    | ❌ Nu (manual)            |
+| **Context Injection**         | ✅ Da (`additionalContext`) | ❌ Nu (ignorat de client) | ❌ Nu (ignorat de client) | ❌ Nu                     |
+| **Playbook Skills**           | ✅ Da (nativ)               | ❌ Nu                     | ❌ Nu                     | ❌ Nu                     |
 
 > **Bonus:** vault-urile total-recall se deschid nativ în **Obsidian** (fișiere `.md` cu frontmatter YAML). Nu folosi Obsidian Sync pe `org-vault` — sync-ul trebuie să treacă prin git-ul total-recall.
 
@@ -1004,17 +1022,17 @@ claude plugin install "$(pwd)"
 
 Șapte îmbunătățiri recent implementate în plugin:
 
-| # | Îmbunătățire | De ce contează |
-|---|---|---|
-| 1 | **Semantic rerank** (`rerank_memories`) — ia top-N din `recall_memory` și cere LLM-ului apelant să reordoneze rezultatele | Plafonul calității de recall — exact produsul. Ieftin, fără dependențe noi. |
-| 2 | **Reconcile după `git pull`** — `pull-org-vault.sh` declanșează rebuild de index după un pull reușit | Înainte, memoriile push-uite de colegi nu apăreau până la restart/`rebuild_index`. Fix mic, impact mare pe „team memory". |
-| 3 | **Re-embed la update de tags/importanceScore** | Înainte se re-embedda doar la schimbarea de `content` — vectorul rămânea stale la update de metadate. |
-| 4 | **Coalescing pe sync hook** — sentinel + un singur proces de sync per sesiune | Hook-ul PostToolUse forka node+git la fiecare store/update/delete. |
-| 5 | **`export_memories` / `import_memories`** + bulk delete cu confirmare (`delete_memories`) | Închide loop-ul `prune_memories` (care doar lista) și scenariul „schimb laptopul". |
-| 6 | **Semnale confirm/flag** (`confirm_memory`) — câmp `confirmations`/`flags` pe memorie, integrat în scorul Ebbinghaus | Idee validată de `cq` (endorsement ca semnal de calitate): o memorie accesată des dar flag-uită „greșită" nu mai rămâne sus — semnalele o corectează. |
-| 7 | **Test property-based pe frontmatter** (fast-check) | Cea mai ieftină asigurare contra următoarei regresii clasa js-yaml. |
+| #   | Îmbunătățire                                                                                                              | De ce contează                                                                                                                                        |
+| --- | ------------------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------- |
+| 1   | **Semantic rerank** (`rerank_memories`) — ia top-N din `recall_memory` și cere LLM-ului apelant să reordoneze rezultatele | Plafonul calității de recall — exact produsul. Ieftin, fără dependențe noi.                                                                           |
+| 2   | **Reconcile după `git pull`** — `pull-org-vault.sh` declanșează rebuild de index după un pull reușit                      | Înainte, memoriile push-uite de colegi nu apăreau până la restart/`rebuild_index`. Fix mic, impact mare pe „team memory".                             |
+| 3   | **Re-embed la update de tags/importanceScore**                                                                            | Înainte se re-embedda doar la schimbarea de `content` — vectorul rămânea stale la update de metadate.                                                 |
+| 4   | **Coalescing pe sync hook** — sentinel + un singur proces de sync per sesiune                                             | Hook-ul PostToolUse forka node+git la fiecare store/update/delete.                                                                                    |
+| 5   | **`export_memories` / `import_memories`** + bulk delete cu confirmare (`delete_memories`)                                 | Închide loop-ul `prune_memories` (care doar lista) și scenariul „schimb laptopul".                                                                    |
+| 6   | **Semnale confirm/flag** (`confirm_memory`) — câmp `confirmations`/`flags` pe memorie, integrat în scorul Ebbinghaus      | Idee validată de `cq` (endorsement ca semnal de calitate): o memorie accesată des dar flag-uită „greșită" nu mai rămâne sus — semnalele o corectează. |
+| 7   | **Test property-based pe frontmatter** (fast-check)                                                                       | Cea mai ieftină asigurare contra următoarei regresii clasa js-yaml.                                                                                   |
 
-> 💡 **WOW:** punctul 6 e locul unde cele două lumi se întâlnesc — mecanismul de *endorsement* din cq (Mozilla.ai) aplicat pe curba de uitare Ebbinghaus din total-recall: memoria nu doar „îmbătrânește", ci primește feedback.
+> 💡 **WOW:** punctul 6 e locul unde cele două lumi se întâlnesc — mecanismul de _endorsement_ din cq (Mozilla.ai) aplicat pe curba de uitare Ebbinghaus din total-recall: memoria nu doar „îmbătrânește", ci primește feedback.
 
 ---
 
@@ -1023,12 +1041,14 @@ claude plugin install "$(pwd)"
 ### Ce am acoperit
 
 **Claude vs Ollama:**
+
 - Claude API: calitate maximă, cost per token, date în cloud · Ollama: gratuit, 100% local, offline
 - `ollama launch claude`: harness-ul Claude Code pe model local — fără proxy
 - Agent Claude vs LangChain: diferența e **cine deține loop-ul**, nu dacă pot rula local
 - Decizia cheie: **confidențialitate > calitate > cost**
 
 **Total Recall:**
+
 - Plugin MCP (17 unelte) pentru memorie persistentă — Claude Code, Copilot, Gemini CLI
 - Vault dual (personal local + org pe git cu privacy filter), căutare hibridă cu Ebbinghaus decay
 - Memoria = fișiere Markdown: git-abile, Obsidian-abile, ale tale
@@ -1048,28 +1068,33 @@ claude plugin install "$(pwd)"
 ## Slide 27 — Resurse
 
 ### Total Recall
+
 - **Repo:** `github/total-recall/`
 - **Arhitectura detaliată:** `plugins/total-recall/ARCHITECTURE.md`
 - **Instalare:** `plugins/total-recall/install.sh --help`
 - **README:** `plugins/total-recall/README.md`
 
 ### Ollama
+
 - **Site oficial:** ollama.com
 - **Hub modele:** ollama.com/library
 - **API reference:** ollama.com/docs (compatibilă OpenAI)
 
 ### Claude API
+
 - **Documentație:** docs.anthropic.com
 - **Modele curente:** claude-sonnet-4-6, claude-opus-4-8, claude-haiku-4-5
 - **Prețuri:** anthropic.com/pricing
 - **DPA / GDPR:** anthropic.com/legal
 
 ### Integrare Claude Code ↔ Ollama
+
 - **Comandă oficială:** `ollama launch claude` (docs.ollama.com/integrations/claude-code)
 - **Compatibilitate API Anthropic:** docs.ollama.com/api/anthropic-compatibility
 - **Variabile de mediu:** `ANTHROPIC_BASE_URL`, `ANTHROPIC_AUTH_TOKEN` (nu seta `ANTHROPIC_API_KEY` pe calea manuală — v. Slide 10)
 
 ### Ecosistemul Mozilla.ai (Slide 7, 9, 11b, 13, 14)
+
 - **Otari gateway:** github.com/mozilla-ai/otari (+ `docs/use-with-claude-code.md`)
 - **llamafile:** github.com/mozilla-ai/llamafile · docs.mozilla.ai/llamafile
 - **any-llm:** github.com/mozilla-ai/any-llm

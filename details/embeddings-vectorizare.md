@@ -50,5 +50,5 @@ query
 ## Ce NU face
 
 - **Nu folosește cloud APIs:** Modelul rulează 100% local via ONNX pe CPU/placă locală.
-- **Fără re-embed la citire:** Vectorii se calculează doar o dată, la scrierea memoriei, și se stochează în `vectors.db`.
-- **Fără chei API:** Zero configurări de securitate sau credențiale externe.
+- **Fără re-embed la citire:** Vectorii nu sunt recalculați la citire — se recalculează la scriere și la actualizarea memoriei (inclusiv tags/importanceScore, din v recentă) și se stochează în `vectors.db`.
+- **Fără chei API externe:** Nu sunt necesare chei API sau credențiale pentru servicii externe.
