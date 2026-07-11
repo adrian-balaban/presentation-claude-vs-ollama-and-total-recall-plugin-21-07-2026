@@ -10,15 +10,19 @@ Am verificat ce s-a închis deja din review-ul funcțional existent (FUNCTIONAL-
 5	export_memories / import_memories (G15) + bulk delete cu confirmare (G14)	Verificat: nu există în server.ts. Închide loop-ul prune_memories (care doar listează) și scenariul „schimb laptopul".
 6	Idee nouă, inspirată din cq: semnale confirm/flag — un câmp confirmations/flags pe memorie, bump-uit când modelul confirmă că o memorie a fost utilă/greșită, integrat în scorul Ebbinghaus	cq validează exact acest mecanism (endorsement ca semnal de calitate). La total-recall ar rafina retenția dincolo de simplul accessCount — o memorie accesată des dar flag-uită greșită azi rămâne sus.
 7	Test property-based pe frontmatter (G16, fast-check)	Cea mai ieftină asigurare contra următoarei regresii clasa js-yaml.
+** sa functioneze si pe windows: install.sh si tot pluginul (path-uri windows)
 ** TODO adauga in Readme.md -uri de unde m-am inspirat ; unele info-uri sunt in README.md si acum la comparare cu alte pluginuri
+** TODO extras INSTALL.md din README.md
+** TODO README.md sa fie exhaustiv ;sa preia info lipsa de la prezentare
 ** install sa aiba 2 optiuni si sa intrebe la inceput: a.default fara dependinte si fara LLM local b. complet (cum e acum instalata in local)
 ** actualizare *.md
+** proba mii de fisiere: download 1- 2 sites -> incarcare ca memorii locale si org
 
 ** instalare si proba
 
 * prezentare.ro.md
-** IN_PROGRESS fix TODO's
-** actualizare cu  urmatoarele, dupa ce sunt aplicate la pluginul total-recall.md
+** DONE fix TODO's
+** DONE actualizare cu  urmatoarele, dupa ce sunt aplicate la pluginul total-recall.md
 #	Propunere	Stare / motivare
 1	Semantic rerank (G1) — tool nou care ia top-N din recall_memory și cere LLM-ului apelant să reordoneze	Încă lipsește; e plafonul calității de recall — exact produsul. Start ieftin, fără dependențe noi.
 2	Reconcile după git pull (G4) — pull-org-vault.sh să declanșeze rebuild după un pull reușit	Verificat: scriptul nu face reconcile — memoriile push-uite de colegi nu apar până la restart/rebuild_index. Fix mic, impact mare pe povestea „team memory" din prezentare.
@@ -28,6 +32,7 @@ Am verificat ce s-a închis deja din review-ul funcțional existent (FUNCTIONAL-
 6	Idee nouă, inspirată din cq: semnale confirm/flag — un câmp confirmations/flags pe memorie, bump-uit când modelul confirmă că o memorie a fost utilă/greșită, integrat în scorul Ebbinghaus	cq validează exact acest mecanism (endorsement ca semnal de calitate). La total-recall ar rafina retenția dincolo de simplul accessCount — o memorie accesată des dar flag-uită greșită azi rămâne sus.
 7	Test property-based pe frontmatter (G16, fast-check)	Cea mai ieftină asigurare contra următoarei regresii clasa js-yaml.
 
-** asa cum am simplificat si am dus info in PCIExpress.md, de analizat ce alte informatii din cslide-uri se poate duce in cite un singur fisier md care sa fie referentiat in slide-ul de unde s-a extras informatia
+** DONE asa cum am simplificat si am dus info in PCIExpress.md, de analizat ce alte informatii din cslide-uri se poate duce in cite un singur fisier md care sa fie referentiat in slide-ul de unde s-a extras informatia
+** review
 ** adaugare referinte incrucisate intre cele 2 repo-uri
 ** adaugare .md in engleza

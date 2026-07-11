@@ -44,7 +44,7 @@ Cinci lucruri pe care le iei de aici:
 2. **Total Recall Plugin** (25 min)
    - Ce este, structura pe disc și arhitectura → *Slide 14, 15, 16, 17*
    - De ce algoritmi proprii (securitate, determinism) → *Slide 18*
-   - Managementul vault-ului dual și cele 12 unelte MCP → *Slide 19 & 20*
+   - Managementul vault-ului dual și cele 17 unelte MCP → *Slide 19 & 20*
    - Algoritmul de căutare hibridă (TF-IDF + Ebbinghaus + vectori) → *Slide 21 & 22*
    - Hook-uri de sistem, instalare și compatibilitate → *Slide 23, 24, 25*
 3. **Sinteză & Întrebări (Q&A)** (15 min) → *Slide 26 & 27*
@@ -649,7 +649,7 @@ LangChain/LangGraph → „vreau un pipeline model-agnostic cu control flow expl
 
 **Ce este:**
 - **Plugin Claude Code** instalat din marketplace
-- **MCP server** cu 12 unelte (stdio, înregistrat via `claude mcp add`)
+- **MCP server** cu 17 unelte (stdio, înregistrat via `claude mcp add`)
 - **Vault de fișiere Markdown** stocat local la `~/.total-recall/`
 - **Hook-uri automate** care injectează contextul la fiecare sesiune nouă
 - **Skill `/memory-workflow`** pentru sesiuni structurate de recall/store
@@ -777,7 +777,7 @@ store_memory(tags=[...])
 
 ---
 
-## Slide 20 — Cele 12 unelte MCP
+## Slide 20 — Cele 17 unelte MCP
 
 > 💡 **Util:** CRUD complet + căutare + întreținere, în limbaj natural — spui „reține că…" / „reamintește-mi…" și modelul alege singur unealta potrivită.
 
@@ -787,6 +787,8 @@ store_memory(tags=[...])
 | `store_memory` | Creează o memorie nouă; `force=true` suprascrie |
 | `update_memory` | Modifică titlu/conținut/taguri/importanceScore |
 | `delete_memory` | Șterge fișierul + intrarea din index + vectorul |
+| `delete_memories` | Bulk delete cu confirmare explicită |
+| `confirm_memory` | Bump `confirmations`/`flags` — feedback de calitate integrat în scorul Ebbinghaus |
 
 ### Căutare / Citire
 | Unealtă | Ce face |
@@ -794,6 +796,7 @@ store_memory(tags=[...])
 | `recall_memory` | TF-IDF + Ebbinghaus + opțional vector search via RRF |
 | `search_index` | TF-IDF doar pe metadate (fără citire fișiere, fără bump accessCount) |
 | `get_memories_by_keys` | Lookup direct după cheie; trece prin LRU cache |
+| `rerank_memories` | Semantic rerank: top-N din `recall_memory`, reordonat de LLM-ul apelant |
 
 ### Listare / Interogare
 | Unealtă | Ce face |
@@ -808,6 +811,8 @@ store_memory(tags=[...])
 |---|---|
 | `rebuild_index` | `reconcileIndex()` + rebuild TF-IDF; păstrează `accessCount`/`lastAccessed` |
 | `prune_memories` | **Listează** candidații cu retenție scăzută (Ebbinghaus); NU șterge automat |
+| `export_memories` | Export portabil al vault-ului (scenariul „schimb laptopul") |
+| `import_memories` | Import dintr-un export, cu dedup |
 
 ---
 
@@ -984,7 +989,7 @@ claude plugin install "$(pwd)"
 
 | Capabilitate | Claude Code | GitHub Copilot CLI | Gemini CLI | OpenAI Codex CLI |
 |---|---|---|---|---|
-| **MCP Server (12 unelte)** | ✅ Nativ | ✅ stdio MCP suportat | ✅ stdio MCP suportat | ✅ `~/.codex/config.toml` |
+| **MCP Server (17 unelte)** | ✅ Nativ | ✅ stdio MCP suportat | ✅ stdio MCP suportat | ✅ `~/.codex/config.toml` |
 | **Side Effects (Sync/Index)** | ✅ Da | ✅ Da (hooks automate) | ✅ Da (hooks automate) | ❌ Nu (manual) |
 | **Context Injection** | ✅ Da (`additionalContext`) | ❌ Nu (ignorat de client) | ❌ Nu (ignorat de client) | ❌ Nu |
 | **Playbook Skills** | ✅ Da (nativ) | ❌ Nu | ❌ Nu | ❌ Nu |
@@ -992,6 +997,24 @@ claude plugin install "$(pwd)"
 > **Bonus:** vault-urile total-recall se deschid nativ în **Obsidian** (fișiere `.md` cu frontmatter YAML). Nu folosi Obsidian Sync pe `org-vault` — sync-ul trebuie să treacă prin git-ul total-recall.
 
 > **„De ce nu folosiți cq?"** — comparație onestă: `cq` (Mozilla.ai) acoperă **7 host-uri** (Claude, Codex, Copilot, Cursor, OpenCode, Pi, Windsurf), dar **fără context injection** — agentul trebuie să interogheze explicit store-ul. total-recall acoperă 3 clienți cu hooks automate (+ context injection nativ în Claude Code) și obiect diferit: memorie de context, nu knowledge units partajate.
+
+---
+
+## Slide 25b — Noutăți: ultimele 7 îmbunătățiri din total-recall
+
+Șapte îmbunătățiri recent implementate în plugin:
+
+| # | Îmbunătățire | De ce contează |
+|---|---|---|
+| 1 | **Semantic rerank** (`rerank_memories`) — ia top-N din `recall_memory` și cere LLM-ului apelant să reordoneze rezultatele | Plafonul calității de recall — exact produsul. Ieftin, fără dependențe noi. |
+| 2 | **Reconcile după `git pull`** — `pull-org-vault.sh` declanșează rebuild de index după un pull reușit | Înainte, memoriile push-uite de colegi nu apăreau până la restart/`rebuild_index`. Fix mic, impact mare pe „team memory". |
+| 3 | **Re-embed la update de tags/importanceScore** | Înainte se re-embedda doar la schimbarea de `content` — vectorul rămânea stale la update de metadate. |
+| 4 | **Coalescing pe sync hook** — sentinel + un singur proces de sync per sesiune | Hook-ul PostToolUse forka node+git la fiecare store/update/delete. |
+| 5 | **`export_memories` / `import_memories`** + bulk delete cu confirmare (`delete_memories`) | Închide loop-ul `prune_memories` (care doar lista) și scenariul „schimb laptopul". |
+| 6 | **Semnale confirm/flag** (`confirm_memory`) — câmp `confirmations`/`flags` pe memorie, integrat în scorul Ebbinghaus | Idee validată de `cq` (endorsement ca semnal de calitate): o memorie accesată des dar flag-uită „greșită" nu mai rămâne sus — semnalele o corectează. |
+| 7 | **Test property-based pe frontmatter** (fast-check) | Cea mai ieftină asigurare contra următoarei regresii clasa js-yaml. |
+
+> 💡 **WOW:** punctul 6 e locul unde cele două lumi se întâlnesc — mecanismul de *endorsement* din cq (Mozilla.ai) aplicat pe curba de uitare Ebbinghaus din total-recall: memoria nu doar „îmbătrânește", ci primește feedback.
 
 ---
 
@@ -1006,7 +1029,7 @@ claude plugin install "$(pwd)"
 - Decizia cheie: **confidențialitate > calitate > cost**
 
 **Total Recall:**
-- Plugin MCP (12 unelte) pentru memorie persistentă — Claude Code, Copilot, Gemini CLI
+- Plugin MCP (17 unelte) pentru memorie persistentă — Claude Code, Copilot, Gemini CLI
 - Vault dual (personal local + org pe git cu privacy filter), căutare hibridă cu Ebbinghaus decay
 - Memoria = fișiere Markdown: git-abile, Obsidian-abile, ale tale
 
