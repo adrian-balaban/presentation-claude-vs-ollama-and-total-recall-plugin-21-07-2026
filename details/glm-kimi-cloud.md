@@ -20,13 +20,14 @@
 |---|---|---|---|---|
 | **GLM-5.2** | Zhipu AI 🇨🇳 | Text chinezo-englez, documente lungi | ~50–70% din Haiku | ⚠️ Ridicat |
 | **Kimi-K2.7-Code** | Moonshot AI 🇨🇳 | Code review, generare cod | ~50–60% din Haiku | ⚠️ Ridicat |
-| **Claude Haiku** | Anthropic 🇺🇸 | Sarcini generale rapide, română | Referință | ✅ Scăzut (DPA EU) |
-| **Claude Sonnet** | Anthropic 🇺🇸 | Raționament, arhitectură, cod complex | ~4–5× Haiku | ✅ Scăzut |
+| **Claude Haiku** | Anthropic 🇺🇸 | Sarcini generale rapide, română | Referință | ⚠️ Mediu (DPA+SCC, procesare US) |
+| **Claude Sonnet** | Anthropic 🇺🇸 | Raționament, arhitectură, cod complex | ~4–5× Haiku | ⚠️ Mediu (DPA+SCC, procesare US) |
 
 ## ⚠️ Atenție: confidențialitate și GDPR
 
 - Ambele modele procesează datele pe **servere în China** (Zhipu AI Beijing, Moonshot AI Beijing)
-- China = jurisdicție fără echivalent adecvat GDPR recunoscut de EU (spre deosebire de US post-Privacy Shield reînnoit)
+- China = jurisdicție fără decizie de adecvare GDPR recunoscută de EU (spre deosebire de US, acoperit de EU-US Data Privacy Framework — decizie de adecvare 10 iulie 2023; Privacy Shield a fost invalidat de CJEU în Schrems II, 2020)
+- Notă și pentru Claude: Anthropic are DPA cu SCC, dar procesarea e pe infrastructură US; rezidență EU doar via AWS Bedrock (eu-central-1 etc.) sau Vertex AI regiuni EU
 - **Nu trimite prin aceste API-uri:** cod cu date personale ale clienților, IP proprietar, credențiale, contracte
 - Pentru echipe enterprise EU: verificați DPA (Data Processing Agreement) înainte de utilizare
 

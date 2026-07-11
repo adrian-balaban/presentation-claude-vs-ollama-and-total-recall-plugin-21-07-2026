@@ -1,0 +1,13 @@
+# total-recall — ultimele 7 îmbunătățiri, în detaliu
+
+> Material de sprijin pentru **Slide 25b** din `prezentare.ro.md`.
+
+| #   | Îmbunătățire                                                                                                              | De ce contează                                                                                                                                        |
+| --- | ------------------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------- |
+| 1   | **Semantic rerank** (`rerank_memories`) — re-embeddează query-ul + candidații top-N din `recall_memory` și îi reordonează local după scor cosine (fără apel LLM) | Plafonul calității de recall — exact produsul. Ieftin, fără dependențe noi.                                                                           |
+| 2   | **Reconcile după `git pull`** — `pull-org-vault.sh` declanșează rebuild de index după un pull reușit                      | Înainte, memoriile push-uite de colegi nu apăreau până la restart/`rebuild_index`. Fix mic, impact mare pe „team memory".                             |
+| 3   | **Re-embed la update de tags/importanceScore**                                                                            | Înainte se re-embedda doar la schimbarea de `content` — vectorul rămânea stale la update de metadate.                                                 |
+| 4   | **Coalescing pe sync hook** — sentinel + un singur proces de sync per sesiune                                             | Hook-ul PostToolUse forka node+git la fiecare store/update/delete.                                                                                    |
+| 5   | **`export_memories` / `import_memories`** + bulk delete cu confirmare (`delete_memories`)                                 | Închide loop-ul `prune_memories` (care doar lista) și scenariul „schimb laptopul".                                                                    |
+| 6   | **Semnale confirm/flag** (`confirm_memory`) — câmp `confirmations`/`flags` pe memorie, integrat în scorul Ebbinghaus      | Idee validată de `cq` (endorsement ca semnal de calitate): o memorie accesată des dar flag-uită „greșită" nu mai rămâne sus — semnalele o corectează. |
+| 7   | **Test property-based pe frontmatter** (fast-check)                                                                       | Cea mai ieftină asigurare contra următoarei regresii clasa js-yaml.                                                                                   |

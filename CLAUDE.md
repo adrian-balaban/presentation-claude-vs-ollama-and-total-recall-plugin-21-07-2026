@@ -9,10 +9,10 @@ Materiale pentru prezentarea din **16 iulie 2026**, cu două subiecte:
 
 ## Fișiere
 
-| Fișier             | Conținut                                                                      |
-| ------------------ | ----------------------------------------------------------------------------- |
-| `prezentare.ro.md` | Prezentarea completă în română (format Markdown cu slide-uri)                 |
-| `others.md`        | Notițe de sprijin — embeddings & vectorizare (versiunea detaliată a Slide 7b) |
+| Fișier             | Conținut                                                                       |
+| ------------------ | ------------------------------------------------------------------------------ |
+| `prezentare.ro.md` | Prezentarea completă în română (format Markdown cu slide-uri)                  |
+| `details/`         | Materiale de sprijin per slide, linkate din prezentare (📄 **Detalii**); include handout-urile `decizie-o-pagina.md` și `primele-10-minute.md` |
 
 ## Convenție de fișiere
 
