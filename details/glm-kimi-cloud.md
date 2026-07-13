@@ -1,6 +1,6 @@
 # GLM-5.2 și Kimi-K2.7-Code — modelele `:cloud` chinezești în detaliu
 
-> Material de sprijin pentru **Slide 5** din `prezentare.ro.md`.
+> Material de sprijin pentru **Slide 6** din `prezentare.ro.md`.
 
 ## GLM-5.2 — Zhipu AI (Beijing)
 

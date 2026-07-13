@@ -1,6 +1,6 @@
 # Claude vs Ollama — comparația completă pe 13 criterii
 
-> Material de sprijin pentru **Slide 8** din `prezentare.ro.md`.
+> Material de sprijin pentru **Slide 7** din `prezentare.ro.md`.
 
 | Criteriu                  | Claude (API Anthropic)                     | Ollama (local)                                                                                      |
 | ------------------------- | ------------------------------------------ | --------------------------------------------------------------------------------------------------- |

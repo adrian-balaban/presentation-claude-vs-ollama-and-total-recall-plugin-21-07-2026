@@ -1,6 +1,6 @@
 # Claude Code ↔ Ollama — capabilități, limitări și mecanica variabilelor de mediu
 
-> Material de sprijin pentru **Slide 11** din `prezentare.ro.md`.
+> Material de sprijin pentru **Slide 10** din `prezentare.ro.md`.
 
 ## De ce contează diferența dintre cele două variabile
 

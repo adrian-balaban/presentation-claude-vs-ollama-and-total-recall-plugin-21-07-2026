@@ -1,6 +1,6 @@
 # PCIe vs Thunderbolt 4 — de ce banda nu contează la inference LLM
 
-> Material de sprijin pentru Slide 4 din `prezentare.ro.md`.
+> Material de sprijin pentru Slide 5 din `prezentare.ro.md`.
 > Explică afirmația: **TB4 ≈ 40 Gbps (PCIe x4) vs PCIe x16 desktop**.
 
 Explicația pe scurt — e o comparație între „grosimea țevii" prin care GPU-ul comunică cu restul calculatorului:

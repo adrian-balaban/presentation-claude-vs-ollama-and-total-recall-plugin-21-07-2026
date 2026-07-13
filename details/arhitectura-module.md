@@ -1,6 +1,6 @@
 # total-recall — arborele complet al modulelor (src/)
 
-> Material de sprijin pentru **Slide 17** din `prezentare.ro.md`.
+> Material de sprijin pentru **Slide 16** din `prezentare.ro.md`.
 
 
 ```

@@ -2,6 +2,16 @@
 
 > Material de sprijin pentru **Slide 2** din `prezentare.ro.md`.
 
+## Surse oficiale
+
+**Site:** [ollama.com](https://ollama.com)
+
+![ollama.com — homepage](../images/ollama-com-homepage.png)
+
+**Repo:** [github.com/ollama/ollama](https://github.com/ollama/ollama) — 176k stars, 17k forks
+
+![ollama/ollama pe GitHub](../images/ollama-github-repo.png)
+
 ## Modele populare disponibile local (verificate pe ollama.com/library)
 
 | Model | Dimensiune | VRAM necesar | Calitate |

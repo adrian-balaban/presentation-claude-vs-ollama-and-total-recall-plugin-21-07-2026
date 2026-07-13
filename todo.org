@@ -1,38 +1,26 @@
 * ../total-recall.md 
-** IN_PROGRESS Îmbunătățiri propuse la pluginul total-recall (v1.0.88)
-Am verificat ce s-a închis deja din review-ul funcțional existent (FUNCTIONAL-REVIEW.txt, făcut pe v1.0.68): filtrul de privacy a evoluat (base64 etichetat — G5 parțial rezolvat), dar restul gap-urilor majore sunt încă deschise. Prioritizat:
-
-#	Propunere	Stare / motivare
-1	Semantic rerank (G1) — tool nou care ia top-N din recall_memory și cere LLM-ului apelant să reordoneze	Încă lipsește; e plafonul calității de recall — exact produsul. Start ieftin, fără dependențe noi.
-2	Reconcile după git pull (G4) — pull-org-vault.sh să declanșeze rebuild după un pull reușit	Verificat: scriptul nu face reconcile — memoriile push-uite de colegi nu apar până la restart/rebuild_index. Fix mic, impact mare pe povestea „team memory" din prezentare.
-3	Re-embed la update de tags/importanceScore (G6)	Verificat în mutate.ts:114: încă re-embeddează doar când se schimbă content. Vectorul rămâne stale la update de metadate. Fix de o linie.
-4	Coalescing pe sync hook (G11) — sentinel + un singur proces de sync per sesiune	Hook-ul PostToolUse tot forkează node+git la fiecare store/update/delete.
-5	export_memories / import_memories (G15) + bulk delete cu confirmare (G14)	Verificat: nu există în server.ts. Închide loop-ul prune_memories (care doar listează) și scenariul „schimb laptopul".
-6	Idee nouă, inspirată din cq: semnale confirm/flag — un câmp confirmations/flags pe memorie, bump-uit când modelul confirmă că o memorie a fost utilă/greșită, integrat în scorul Ebbinghaus	cq validează exact acest mecanism (endorsement ca semnal de calitate). La total-recall ar rafina retenția dincolo de simplul accessCount — o memorie accesată des dar flag-uită greșită azi rămâne sus.
-7	Test property-based pe frontmatter (G16, fast-check)	Cea mai ieftină asigurare contra următoarei regresii clasa js-yaml.
-** sa functioneze si pe windows: install.sh si tot pluginul (path-uri windows)
-** TODO adauga in Readme.md -uri de unde m-am inspirat ; unele info-uri sunt in README.md si acum la comparare cu alte pluginuri
-** TODO extras INSTALL.md din README.md
-** TODO README.md sa fie exhaustiv ;sa preia info lipsa de la prezentare
-** install sa aiba 2 optiuni si sa intrebe la inceput: a.default fara dependinte si fara LLM local b. complet (cum e acum instalata in local)
+** 
+** corectare/adaugare in README 
+  inspirat din alte pluginuri cu acelasi nume si dat lista
+  sters/corectat paragrafe cu aceste pluginuri
+  specificat ca sunt si altele  
 ** actualizare *.md
 ** proba mii de fisiere: download 1- 2 sites -> incarcare ca memorii locale si org
-
 ** instalare si proba
 
 * prezentare.ro.md
-** DONE fix TODO's
-** DONE actualizare cu  urmatoarele, dupa ce sunt aplicate la pluginul total-recall.md
-#	Propunere	Stare / motivare
-1	Semantic rerank (G1) — tool nou care ia top-N din recall_memory și cere LLM-ului apelant să reordoneze	Încă lipsește; e plafonul calității de recall — exact produsul. Start ieftin, fără dependențe noi.
-2	Reconcile după git pull (G4) — pull-org-vault.sh să declanșeze rebuild după un pull reușit	Verificat: scriptul nu face reconcile — memoriile push-uite de colegi nu apar până la restart/rebuild_index. Fix mic, impact mare pe povestea „team memory" din prezentare.
-3	Re-embed la update de tags/importanceScore (G6)	Verificat în mutate.ts:114: încă re-embeddează doar când se schimbă content. Vectorul rămâne stale la update de metadate. Fix de o linie.
-4	Coalescing pe sync hook (G11) — sentinel + un singur proces de sync per sesiune	Hook-ul PostToolUse tot forkează node+git la fiecare store/update/delete.
-5	export_memories / import_memories (G15) + bulk delete cu confirmare (G14)	Verificat: nu există în server.ts. Închide loop-ul prune_memories (care doar listează) și scenariul „schimb laptopul".
-6	Idee nouă, inspirată din cq: semnale confirm/flag — un câmp confirmations/flags pe memorie, bump-uit când modelul confirmă că o memorie a fost utilă/greșită, integrat în scorul Ebbinghaus	cq validează exact acest mecanism (endorsement ca semnal de calitate). La total-recall ar rafina retenția dincolo de simplul accessCount — o memorie accesată des dar flag-uită greșită azi rămâne sus.
-7	Test property-based pe frontmatter (G16, fast-check)	Cea mai ieftină asigurare contra următoarei regresii clasa js-yaml.
-
-** DONE asa cum am simplificat si am dus info in PCIExpress.md, de analizat ce alte informatii din cslide-uri se poate duce in cite un singur fisier md care sa fie referentiat in slide-ul de unde s-a extras informatia
 ** review
 ** adaugare referinte incrucisate intre cele 2 repo-uri
 ** adaugare .md in engleza
+
+
+* pregatire pt prezentare
+** DONE Verified — here's how to see it rendered exactly like the real presentation:
+npx @marp-team/marp-cli prezentare.ro.md --html -o prezentare.html --allow-local-files
+** TODO Then open prezentare.html in a browser. Use ←/→ or click the arrows at the bottom to navigate slides (it opened directly to "Slide 5" with the Razer image, confirmed working).
+
+Important: run this from inside the prezentare-claude-vs-ollama... folder (or -o to a path inside it) — the image paths (images/*.png) are relative to wherever the HTML file ends up, so if you output it elsewhere the pictures break.
+
+Faster alternative for day-to-day editing: install the Marp for VS Code extension — it gives you a live side-by-side preview in the editor that updates as you type, no CLI command needed each time.
+
+(I generated a one-off prezentare.html in the folder to verify this works, then deleted it — nothing was left behind in your repo.)
