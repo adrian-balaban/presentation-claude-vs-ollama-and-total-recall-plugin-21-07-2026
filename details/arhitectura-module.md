@@ -1,7 +1,7 @@
 # total-recall — arborele complet al modulelor (src/)
 
 > Material de sprijin pentru **Slide 17** din `prezentare.ro.md`.
-> ~24 de fișiere TypeScript (fără `__tests__`), o singură dependență obligatorie (`@modelcontextprotocol/sdk`).
+
 
 ```
 src/

@@ -19,11 +19,11 @@ Două subiecte practice despre cum extindem și alegem uneltele AI în workflow-
 
 ## Slide 0 — Ce iei din această sesiune
 
-> Nu teorie generică — decizii concrete pe care le poți folosi azi.
+> Nu teorie ci informatii pe care le poți folosi astazi.
 
 Cinci lucruri pe care le iei de aici:
 
-1. **Ce este Ollama** — LLM-uri local, zero cost-per-token, zero date în cloud.
+1. **Ce este Ollama** — LLM-uri locale ( zero cost-per-token, zero date în cloud) si remote
 2. **Claude vs Ollama** — comparație directă + integrarea `ollama launch claude`.
 3. **Când alegi fiecare** — ghid de decizie cu criterii clare.
 4. **Cum funcționează total-recall** — MCP, vault-uri, hook-uri, căutare hibridă cu curbă de uitare.
@@ -48,7 +48,7 @@ Cinci lucruri pe care le iei de aici:
    - De ce algoritmi proprii (securitate, determinism) → _Slide 18_
    - Managementul vault-ului dual și cele 17 unelte MCP → _Slide 19 & 20_
    - Algoritmul de căutare hibridă (TF-IDF + Ebbinghaus + vectori) → _Slide 21 & 22_
-   - Hook-uri de sistem, instalare și compatibilitate → _Slide 23, 24, 25_ (+ Bonus: noutățile din plugin → _Slide 25b_)
+   - Hook-uri de sistem, instalare și compatibilitate → _Slide 23, 24, 25_ 
 3. **Sinteză & Întrebări (Q&A)** (15 min) → _Slide 26 & 27_
 
 ---
@@ -250,13 +250,13 @@ Cerere utilizator
 
 Cele 5 axe care contează (cifre orientative, iul 2026 — depind de model, hardware și quantizare):
 
-| Criteriu                  | Claude (API Anthropic)                | Ollama (local)                                       |
-| ------------------------- | ------------------------------------- | ----------------------------------------------------- |
-| **Calitate top-tier**     | ✅ Opus 4.8 = state of the art        | Llama 3.3 70B ≈ GPT-4o, dar sub Opus                 |
-| **Cost**                  | $3–$15 / 1M tokens                    | $0/token — dar GPU bun: $500–$3000+                  |
-| **Confidențialitate**     | Date trimise la Anthropic (US)        | 100% local, zero egress, merge air-gapped            |
-| **Latență (TTFT)**        | ~500ms–2s                             | ~100–500ms pe GPU local                              |
-| **Integrare Claude Code** | ✅ Nativă                             | ✅ Nativă prin `ollama launch claude` (fără proxy)   |
+| Criteriu                  | Claude (API Anthropic)         | Ollama (local)                                     |
+| ------------------------- | ------------------------------ | -------------------------------------------------- |
+| **Calitate top-tier**     | ✅ Opus 4.8 = state of the art | Llama 3.3 70B ≈ GPT-4o, dar sub Opus               |
+| **Cost**                  | $3–$15 / 1M tokens             | $0/token — dar GPU bun: $500–$3000+                |
+| **Confidențialitate**     | Date trimise la Anthropic (US) | 100% local, zero egress, merge air-gapped          |
+| **Latență (TTFT)**        | ~500ms–2s                      | ~100–500ms pe GPU local                            |
+| **Integrare Claude Code** | ✅ Nativă                      | ✅ Nativă prin `ollama launch claude` (fără proxy) |
 
 📄 **Detalii** (comparația completă pe 13 criterii — context window, rate limits, actualizări, GDPR): [details/comparatie-claude-ollama.md](details/comparatie-claude-ollama.md)
 
@@ -299,11 +299,11 @@ Fără GPU (CPU only):
 
 ### Găsește-ți tier-ul
 
-| Profil                | Cheltuială API tipică | Amortizare hardware local           |
-| --------------------- | --------------------- | ------------------------------------ |
-| Indie / light         | ~$30/lună             | ani — rămâi pe API sau CPU-only     |
-| Daily driver          | ~$100/lună            | ~6 luni (RTX 3080 SH ~$600)         |
-| **Agentic developer** | **~$400/lună**        | **~5 luni (RTX 4090 ~$2.000)**      |
+| Profil                | Cheltuială API tipică | Amortizare hardware local       |
+| --------------------- | --------------------- | ------------------------------- |
+| Indie / light         | ~$30/lună             | ani — rămâi pe API sau CPU-only |
+| Daily driver          | ~$100/lună            | ~6 luni (RTX 3080 SH ~$600)     |
+| **Agentic developer** | **~$400/lună**        | **~5 luni (RTX 4090 ~$2.000)**  |
 
 **Concluzie financiară:** Pentru un developer cu utilizare agentică intensă (~$400/lună API), Ollama devine mai ieftin decât API-ul Claude în 2-6 luni cu un GPU decent. Utilizatorii light (~$30/lună) recuperează hardware-ul în câțiva ani, nu luni — ROI-ul în luni presupune utilizare intensă. Sub un GPU de ~$600, diferența de calitate poate să nu merite.
 
@@ -511,7 +511,7 @@ claude
 
 ## TEMA 2 — TOTAL RECALL PLUGIN
 
-> **Puntea între teme:** ai ales runtime-ul (cloud sau local). Acum să-l faci să țină minte cine ești — altfel fiecare sesiune o iei de la zero.
+> **Puntea între teme:** ai ales runtime-ul (cloud sau local). Acum să-l faci să țină minte cine ești si ce ai facut — altfel fiecare sesiune o iei de la zero.
 
 ---
 
@@ -520,18 +520,15 @@ claude
 > La sfârșitul fiecărei conversații, Claude pierde tot contextul acumulat.
 > Decizii, preferințe, arhitecturi discutate — totul dispare.
 
-> 📊 **WOW Stat:** În medie, un 'agentic developer' **re-explică aceleași preferințe și detalii de proiect de ~15 ori pe lună** în sesiuni noi, pierzând peste 2 ore de productivitate.
-
 **Simptomele:**
 
 - Reexplici același context la fiecare sesiune nouă
 - Preferințele tale de cod trebuie re-menționate de fiecare dată
-- Deciziile de arhitectură nu se acumulează nicăieri
-- Feedback-ul pe care l-ai dat modelului nu persistă
+- Deciziile de arhitectură, info. de infra. si alte categorii de informatii nu se acumulează nicăieri
 
-**Consecința:** Cu cât lucrezi mai mult cu Claude Code, cu atât pierzi mai mult timp re-explicând ceea ce ai deja explicat.
+**Consecința:** Cu cât lucrezi mai mult cu un agent (Claude Code...), cu atât pierzi mai mult timp re-explicând ceea ce ai deja explicat.
 
-> **Nu ești singurul care vrea asta:** Mozilla.ai a lansat `cq` (1.2k ⭐) — un standard deschis pentru _shared agent learning_: agenții propun «knowledge units» (workaround-uri, API-uri nedocumentate) într-un store comun, cu review uman. **Complementar, nu concurent:** cq = lecții operaționale partajate între agenți; total-recall = memoria TA de context (decizii, preferințe, arhitectură) cu curbă de uitare Ebbinghaus — fișiere `.md` + git, fără server și fără review pipeline.
+> **Cine mai vrea aceasta:** Mozilla.ai a lansat [`cq`](https://github.com/mozilla-ai/cq) (1.2k ⭐) — un standard deschis pentru _shared agent learning_: agenții propun «knowledge units» (workaround-uri, API-uri nedocumentate) într-un store comun, cu review uman. **Complementar, nu concurent:** cq = lecții operaționale partajate între agenți; total-recall = memoria (TA si A ECHIPEI TALE) de context (decizii, preferințe, arhitectură) — fișiere `.md` + git, fără server și fără review pipeline.
 
 ---
 
@@ -539,17 +536,23 @@ claude
 
 > 🎬 **Beat live** (sau clip pre-înregistrat de 20 de secunde, dacă live e riscant) — payoff-ul emoțional al întregii teme.
 >
-> _Pregătire înainte de prezentare:_ stochează memoria-fixture („reține că am ales PostgreSQL față de MySQL pentru JSONB" → `architecture/db-choice.md`) într-o sesiune cu total-recall, ca recall-ul din panoul drept să aibă ce găsi.
+> _Pregătire înainte de prezentare:_ stochează memoria ca mai jos.
 
+stochează memoria urmatoare  de architecture pentru db-choice:  am ales PostgreSQL față de MySQL pentru JSONB
+
+Stocat: architecture/db-choice (personal vault, importanceScore: 0.7, taguri: database, postgresql, mysql, jsonb, adr, decision).
+
+Am verificat întâi duplicatele cu search_index — nu exista nimic similar. Memoria include Executive Summary cu WHY (interogări eficiente pe date semi-structurate) și HOW (orice discuție viitoare de schemă/ORM pornește de la PostgreSQL + JSONB).
+
+Dacă vrei să fie imutabilă ca un ADR formal (protejată de prune și ștergere accidentală), pot să-i adaug tagul no-prune. Și dacă e o decizie de echipă, spune-mi și o mut în org vault (tag org).
 ```
+
 FĂRĂ total-recall (sesiune Claude nouă):          CU total-recall (sesiune nouă, același prompt):
 ──────────────────────────────────────            ──────────────────────────────────────────────
 > care DB am ales pentru proiect?                 > care DB am ales pentru proiect?
 
 „Nu am context despre o decizie                   → recall_memory(query="DB proiect")
-anterioară legată de baza de date.                „Ați ales PostgreSQL față de MySQL,
-Îmi poți da mai multe detalii?"                   pentru suportul JSONB — decizie stocată
-                                                  pe 1 iunie (architecture/db-choice.md)."
+anterioară legată de baza de date.                „Conform memoriei architecture/db-choice (creatÄ azi, 13 iulie 2026):Ai ales PostgreSQL (respins MySQL). Motivul decisiv: JSONB e stocare binarÄ a documentelor JSON cu indexare ... 
 ```
 
 Publicul nu trebuie să creadă pe cuvânt — vede diferența pe ecran în 20 de secunde.
@@ -574,13 +577,13 @@ Publicul nu trebuie să creadă pe cuvânt — vede diferența pe ecran în 20 d
 
 - Nu trimite date în cloud (vaultul personal este complet local)
 - Nu folosește o bază de date opacă — fiecare memorie este un fișier `.md` citibil
-- Nu suprascrie context — injectează, nu înlocuiește
+- Nu suprascrie context — injectează, nu înlocuiește (Modelul vede: system prompt + CLAUDE.md + memoriile tale (index) + mesajul tău — toate coexistă.)
 
 ---
 
-## Slide 16 — Structura pe disk
+## Slide 16 — Structura pe disc
 
-> 💡 **WOW:** zero bază de date opacă — memoria AI-ului tău e un folder de fișiere `.md` pe care le poți citi, edita, versiona cu git și deschide în Obsidian.
+> 💡 **WOW:** zero bază de date — memoria AI-ului tău e un folder de fișiere `.md` pe care le poți citi, edita, versiona cu git și deschide în Obsidian.
 
 ```
 ~/.total-recall/
@@ -644,9 +647,8 @@ Preferă PostgreSQL față de MySQL pentru proiecte noi...
 
 ---
 
-## Slide 18 — De ce algoritmi proprii (fără dependențe grele)
+## Slide 18 — De ce algoritmi proprii (fără hard dependencies)
 
-> **O singură dependență obligatorie** (`@modelcontextprotocol/sdk`). Toți algoritmii cheie — TF-IDF, Ebbinghaus, RRF, frontmatter parser — sunt scriși de la zero.
 
 **Ce câștigi:**
 
@@ -714,7 +716,7 @@ Harta pe 4 cadrane (cu uneltele-erou):
 
 ## Slide 21 — Algoritmul de căutare: TF-IDF + Ebbinghaus
 
-> 💡 **WOW:** memoria AI-ului **uită ca un om** — curba uitării lui Ebbinghaus (1885) aplicată în cod: memoriile neimportante și neaccesate se estompează din rezultate, fiecare accesare le „reîmprospătează" cu +20%.
+> 💡 **WOW:** memoria AI-ului **uită ca un om** — [curba uitării lui Ebbinghaus](https://en.wikipedia.org/wiki/Forgetting_curve) (1885) aplicată în cod: memoriile neimportante și neaccesate se estompează din rezultate, fiecare accesare le „reîmprospătează" cu +20%.
 
 > **Ce e TF-IDF?** Term Frequency × Inverse Document Frequency — algoritmul clasic de căutare text: un cuvânt punctează mult dacă apare **des în documentul respectiv** (TF) dar **rar în restul colecției** (IDF). „postgresql" care apare de 5 ori într-o memorie și aproape nicăieri altundeva = scor mare; „proiect", care apare peste tot = scor aproape zero. _Inverted index_ = harta inversă `cuvânt → lista documentelor care îl conțin`, ca indexul de la finalul unei cărți — de asta căutarea nu citește fișierele, doar indexul.
 
@@ -759,9 +761,9 @@ Fiecare acces adaugă +20% forță de retenție (`accessCount × 0.2`); fiecare 
 
 ## Slide 22 — Embeddings și căutare multilinguală (opționale)
 
-> Embeddings = opționale, lazy-load, complet locale (sau via Ollama / Vertex AI). Fără ele, pluginul degradează curat la TF-IDF.
+> Embeddings = opționale, lazy-load, complet locale (sau via Ollama cu model local). Fără ele, pluginul downgrades la TF-IDF.
 
-**Provideri configurabili** (în `~/.total-recall/config.json`): `huggingface` (implicit, local MiniLM), `ollama` (API local, `bge-m3`), `vertexai` (Google Cloud, `text-embedding-004`).
+**Provideri configurabili** (în `~/.total-recall/config.json`): `huggingface` (implicit, local MiniLM), `ollama` (API local, `bge-m3`).
 
 **Căutare multilinguală:** flag-ul `enableMultilingualSearch: true` activează expansiune de tokeni EN↔RO (ex. „decizie" găsește și „decision").
 
@@ -859,6 +861,8 @@ claude plugin install "$(pwd)"
 ./install.sh --standalone
 ```
 
+> **Org vault = opțional, dezactivat implicit** (pasul 6 din `install.sh`, default „n"). Cine instalează doar pentru uz personal poate ignora complet acest pas — memoria locală (`personal-vault`) funcționează 100% de la prima rulare, fără git. Vaultul org e strict pentru cine vrea memorie partajată de echipă pe git (necesită `gh` CLI autentificat, cerut **doar** la acest pas).
+
 ### Utilizare în sesiune Claude Code
 
 ```
@@ -877,14 +881,6 @@ claude plugin install "$(pwd)"
 # Skill dedicat
 > /total-recall:memory-workflow
 ```
-
-### Ordinea de recuperare (din eficiență → completitudine)
-
-1. Index injectat la SessionStart (gratuit — deja în context)
-2. `get_memories_by_keys(summary=true)` — dacă știi cheia
-3. `search_index(query=...)` — metadate rapid, fără citire fișiere
-4. `recall_memory(query=..., full=false)` — TF-IDF + Ebbinghaus
-5. `recall_memory(query=..., full=true)` — cu conținut complet
 
 ---
 
@@ -906,22 +902,6 @@ claude plugin install "$(pwd)"
 > **Bonus:** vault-urile total-recall se deschid nativ în **Obsidian** (fișiere `.md` cu frontmatter YAML). Nu folosi Obsidian Sync pe `org-vault` — sync-ul trebuie să treacă prin git-ul total-recall.
 
 > **„De ce nu folosiți cq?"** — comparație onestă: `cq` (Mozilla.ai) acoperă **7 host-uri** (Claude, Codex, Copilot, Cursor, OpenCode, Pi, Windsurf), dar **fără context injection** — agentul trebuie să interogheze explicit store-ul. total-recall acoperă 3 clienți cu hooks automate (+ context injection nativ în Claude Code) și obiect diferit: memorie de context, nu knowledge units partajate.
-
----
-
-## Slide 25b — Noutăți: ce s-a închis de curând în total-recall (Bonus)
-
-> 💡 **WOW — cq se întâlnește cu Ebbinghaus:** noul `confirm_memory` aduce mecanismul de _endorsement_ validat de cq (Mozilla.ai) direct în curba de uitare: memoria nu doar „îmbătrânește", ci **primește feedback** — o memorie accesată des dar flag-uită „greșită" nu mai rămâne sus.
-
-Trei găuri închise, spuse ca poveste:
-
-1. **Team memory stale** → reconcile automat după `git pull`: memoriile push-uite de colegi apar imediat, nu la restart.
-2. **Vector stale** → re-embed la orice update (inclusiv tags/importanceScore), nu doar la schimbarea de conținut.
-3. **Feedback fără efect** → semnalele confirm/flag intră în scorul Ebbinghaus (WOW-ul de mai sus).
-
-Plus: semantic rerank local (`rerank_memories`, embeddings + cosine, fără apel LLM), `export_memories`/`import_memories` pentru „schimb laptopul", coalescing pe sync hook și test property-based pe frontmatter.
-
-📄 **Detalii** (toate cele 7 îmbunătățiri, cu motivarea fiecăreia): [details/changelog.md](details/changelog.md)
 
 ---
 
@@ -958,13 +938,6 @@ Plus: semantic rerank local (`rerank_memories`, embeddings + cosine, fără apel
 
 ## Slide 27 — Resurse
 
-### Total Recall
-
-- **Repo:** `github/total-recall/`
-- **Arhitectura detaliată:** `plugins/total-recall/ARCHITECTURE.md`
-- **Instalare:** `plugins/total-recall/install.sh --help`
-- **README:** `plugins/total-recall/README.md`
-
 ### Ollama
 
 - **Site oficial:** ollama.com
@@ -991,6 +964,13 @@ Plus: semantic rerank local (`rerank_memories`, embeddings + cosine, fără apel
 - **any-llm:** github.com/mozilla-ai/any-llm
 - **cq (shared agent learning):** github.com/mozilla-ai/cq
 - **Articolul „AI Got Expensive. Now What?":** blog.mozilla.ai/ai-got-expensive-now-what
+
+### Total Recall
+
+- **Repo:** `github/total-recall/`
+- **Arhitectura detaliată:** `plugins/total-recall/ARCHITECTURE.md`
+- **Instalare:** `plugins/total-recall/install.sh --help`
+- **README:** `plugins/total-recall/README.md`
 
 ### Handout-uri (folderul `details/` din acest repo)
 
