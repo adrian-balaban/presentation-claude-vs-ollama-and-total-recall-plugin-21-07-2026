@@ -31,22 +31,20 @@ TEMA 2 : Plugin de memorie persistentă in agent AI via plugin MCP (total-recall
 
 ---
 
-## Agendă (~65 de minute)
+## Agendă (~60 de minute)
 
-1. **Claude vs Ollama** (25 min)
-2. **Total Recall Plugin** (25 min)
+1. **Claude vs Ollama** (28 min)
+2. **Total Recall Plugin** (22 min)
 3. **Sinteză & Întrebări (Q&A)** (10 min)
 
 <!--
-Expansion joints — dacă timpul scade la ~45 min, taie în ordinea:
-1. „Pot adăuga GPU pe laptop?" (eGPU, Bonus)
-2. „A treia cale: Otari" (Bonus)
-4. Scurtează algoritmul de căutare la WOW + tabelul de comportament.
+🎬 Regie timp: demo-urile live au hard-cap — 5 min (4 agenți, Tema 1) și 3 min (cu/fără memorie, Tema 2);
+dacă depășesc, treci la GIF/rezultate statice. Sinteza și resursele nu se citesc: o idee vorbită per slide.
 -->
 
 ---
 
-## TEMA 1 din 2 — CLAUDE vs OLLAMA (~25 min)
+## TEMA 1 din 2 — CLAUDE vs OLLAMA (~28 min)
 
 > **Firul roșu:** AI-ul cloud a devenit scump și cu 'lock-in'; Ollama permite alternative open, accesibile — și e doar una dintre alternative.
 
@@ -84,6 +82,14 @@ Aceleași comenzi de verificare, 4 agenți în paralel:
 ---
 
 ## Demo-uri față în față · Memorie, review, model local
+
+<!--
+🎬 Regie (buget de timp): UN singur demo live per temă.
+Tema 1 live: cei 4 agenți față în față. Review-ul și modelul local: GIF pre-înregistrat sau doar rezultatele din REVIEW-<model>.txt.
+Tema 2 live: demo-ul cu/fără memorie. Demo-ul EN↔RO: GIF-ul pre-înregistrat (images/demo-multilingv.gif).
+
+propunerea din nota de regie: rulezi live doar demo-ul celor 4 agenți (Tema 1) și demo-ul cu/fără memorie (Tema 2); pentru review-ul paralel, modelul local și demo-ul EN↔RO arăți GIF-ul pre-înregistrat (ex. images/demo-multilingv.gif, menționat deja pe slide-ul EN↔RO).
+-->
 
 **Memoria (total-recall), pe cel 4 console/clienti:**
 
@@ -212,19 +218,9 @@ north-mini-code-1.0:latest    18 GB     12 days ago
 **Extinderi posibile pentru a rula local:**
 
 - GLM-5.2 necesita investitie de minim ~7000 euro conform [insiderllm.com/guides/run-glm-5-2-locally](https://insiderllm.com/guides/run-glm-5-2-locally/)
-- realist: un LLM local mic (`qwen3.5`, `gemma4`) plus eGPU extern (slide-ul următor) necesita investitie de minim ~700 euro
+- realist: un LLM local mic (`qwen3.5`, `gemma4`) plus eGPU extern necesita investitie de minim ~700 euro — 📄 [details/egpu-pe-laptop.md](details/egpu-pe-laptop.md)
 
 **Concluzia practică:** pe acest laptop, Claude API rămâne alegerea corectă; modelele locale = experimente offline.
-
----
-
-## Cum pot adăuga GPU pe laptop? (Bonus)
-
-> **TL;DR:** Teoretic: GPU-ul intern e soldat — singura opțiune e **eGPU extern via Thunderbolt 4**. Cu un enclosure + RTX 3060 12GB nou (minim ~3.500 lei), rulezi modele de 7–13B complet pe GPU la 20–50 tok/s. Bottleneck-ul TB4 e irelevant pentru inference LLM (contează VRAM-ul, nu banda).
-
-**Ce modele?** Cu 12 GB VRAM: Llama 3.1 8B, Mistral 7B, Qwen 7–14B, DeepSeek-Coder 6.7B — complet pe GPU.
-
-![Razer Core X V2 — enclosure eGPU second-hand pe OLX](images/razer-core-x-v2-egpu-olx.png)
 
 ---
 
@@ -298,44 +294,9 @@ Serverele Anthropic (US)
 - GDPR: Anthropic are DPA disponibil, dar datele ies din EU
 - Contracte enterprise pot restricționa utilizarea API-ului cloud
 
----
+**Pe scurt, Ollama:** local = zero egress, merge air-gapped; `:cloud` = datele pleacă la furnizor exact ca la orice API (v. slide-ul GDPR).
 
-## Confidențialitate și date · Ollama remote (`:cloud`)
-
-```
-Cerere utilizator
-       │
-       ▼
-localhost:11434 (daemon Ollama)
-       │  (HTTPS către furnizor)
-       ▼
-Serverele furnizorului: Ollama Cloud / Zhipu AI / Moonshot AI
-```
-
-**Practic:** `:cloud` ≠ local — datele **pleacă** de pe mașină exact ca la orice API cloud; pentru furnizorii din China, fără decizie de adecvare GDPR (v. slide-ul GDPR).
-
----
-
-## Confidențialitate și date · Ollama (local)
-
-### Ollama (local)
-
-```
-Cerere utilizator
-       │
-       ▼
-localhost:11434
-       │
-       ▼
-Model GGUF în RAM/VRAM — NICIODATĂ în afara mașinii
-```
-
-**Ce înseamnă practic:**
-
-- Codul tău, secretele, datele clientului — rămân pe mașina ta
-- Zero egress de date
-- Funcționează în rețele izolate (air-gapped)
-- Util în: finance, healthcare, proiecte cu NDA strict, codebases proprietare
+📄 **Detalii** (fluxurile complete Ollama local și `:cloud`, diagrame): [details/confidentialitate-fluxuri.md](details/confidentialitate-fluxuri.md)
 
 ---
 
@@ -343,63 +304,12 @@ Model GGUF în RAM/VRAM — NICIODATĂ în afara mașinii
 
 > 💡 **WOW — gotcha-ul „subscription hijack":** configurezi manual Claude Code pe Ollama, totul pare OK… dar cu abonament Claude Max/Pro cererile pleacă **silențios pe OAuth la api.anthropic.com**, nu la Ollama. Cauza: `ANTHROPIC_API_KEY=""` — șirul gol înseamnă „nu e setat". Fix-ul pe o linie: setează doar `ANTHROPIC_AUTH_TOKEN=ollama` și verifică cu `/status` că base URL-ul e `localhost:11434`.
 
----
-
-## Ollama cu Claude Code · Metoda oficială
-
-**Metoda oficială: `ollama launch claude`** — pornește clientul Claude Code cu Ollama ca backend, nativ (fără proxy):
+**Metoda oficială: `ollama launch claude`** — Claude Code cu Ollama ca backend, nativ (Ollama vorbește formatul API Anthropic direct, fără proxy):
 
 ```bash
-# Model local (pe GPU propriu, ex. RTX 3060)
-ollama launch claude --model qwen3.5
-
-# Model cloud (fără download local)
-ollama launch claude --model glm-5.2:cloud
-
-# Non-interactiv / scriptat
-ollama launch claude --model glm-5.2:cloud --yes -- -p "how does this repo work?"
-```
-
----
-
-## Ollama cu Claude Code · Ce face comanda
-
-Ce face comanda automat:
-
-- instalează/pornește **clientul Claude Code**
-- setează `ANTHROPIC_BASE_URL=http://localhost:11434`, `ANTHROPIC_AUTH_TOKEN=ollama`, `ANTHROPIC_API_KEY=""`
-
-### Distincția cheie: formatul e Anthropic, inteligența e Ollama
-
-Ollama vorbește **nativ** formatul API Anthropic la `localhost:11434` — **nu există proxy separat**. Clientul Claude Code „crede" că vorbește cu Anthropic; de fapt răspunde modelul ales cu `--model`:
-
-```
-cerere în format Anthropic → Ollama traduce intern → modelul Ollama răspunde
-      → răspuns re-ambalat în format Anthropic → clientul Claude Code îl consumă
-```
-
----
-
-## Ollama cu Claude Code · Metoda manuală
-
-**Metoda manuală (alternativă, fără `launch`):**
-
-```bash
-ollama pull qwen3.5
-export ANTHROPIC_BASE_URL=http://localhost:11434
-export ANTHROPIC_AUTH_TOKEN=ollama
-claude --model qwen3.5
-```
-
-Sau permanent în `~/.claude/settings.json`:
-
-```json
-{
-  "env": {
-    "ANTHROPIC_BASE_URL": "http://localhost:11434",
-    "ANTHROPIC_AUTH_TOKEN": "ollama"
-  }
-}
+ollama launch claude --model qwen3.5           # model local
+ollama launch claude --model glm-5.2:cloud     # model cloud, fără download
+ollama launch claude --model glm-5.2:cloud --yes -- -p "how does this repo work?"   # scriptat
 ```
 
 ---
@@ -408,22 +318,7 @@ Sau permanent în `~/.claude/settings.json`:
 
 **Esențialul limitărilor:** endpoint-ul Anthropic-compatibil suportă tool calling și extended thinking (suport basic — `budget_tokens` acceptat dar **neaplicat**), dar **nu** prompt caching; calitatea = calitatea modelului local ales.
 
-📄 **Detalii** (mecanica `x-api-key` vs `Bearer`, lista completă de capabilități și limitări, modele cu tool calling): [details/integrare-claude-code-ollama.md](details/integrare-claude-code-ollama.md)
-
----
-
-## A treia cale: Otari de la Mozilla, gateway Anthropic-compatibil (Bonus)
-
-<!-- Expansion joint: al doilea slide de tăiat la 45 min. -->
-
-> 💡 **WOW:** același truc `ANTHROPIC_BASE_URL`, dar cu **buget enforcement ÎNAINTE de request, nu după factură.**
-
-**Otari** (Mozilla.ai, open-source, lansat mai 2026, construit peste `any-llm`) e un gateway LLM self-hosted care expune și endpoint-ul Anthropic (`POST /v1/messages`) — deci Claude Code poate rula prin el exact ca prin Ollama, dar cu stratul operațional pe care Ollama nu-l are:
-
-- **Bugete** per user / per cheie, aplicate _înainte_ ca cererea să ruleze
-- **Chei virtuale** — clientul nu vede niciodată cheia reală Anthropic/OpenAI; le poți revoca oricând
-- **Usage & spend tracking** în timp real, pe toate modelele (40+ provideri prin any-llm)
-- Rulezi Claude real, GPT, Mistral sau modele locale prin **același endpoint**
+📄 **Detalii** (ce face `launch` sub capotă, metoda manuală cu env vars, mecanica `x-api-key` vs `Bearer`, lista completă de capabilități): [details/integrare-claude-code-ollama.md](details/integrare-claude-code-ollama.md)
 
 ---
 
@@ -436,9 +331,12 @@ Datele tale pot ieși din infrastructura ta?
             ├── DA → Claude API (Sonnet/Opus)
             └── NU → Ollama cu model remote
 ```
+
+📄 **A treia cale — Otari (Mozilla.ai):** gateway Anthropic-compatibil cu bugete enforce-uite înainte de request: [details/otari-gateway.md](details/otari-gateway.md)
+
 ---
 
-## TEMA 2 din 2 — TOTAL RECALL PLUGIN (~25 min)
+## TEMA 2 din 2 — TOTAL RECALL PLUGIN (~22 min)
 
 > **Puntea între teme:** ai ales runtime-ul (cloud sau local). Acum să-l faci să țină minte cine ești si ce ai facut — altfel fiecare sesiune o iei de la zero.
 
@@ -501,25 +399,20 @@ Publicul nu trebuie să creadă pe cuvânt — vede diferența pe ecran în 20 d
 
 ---
 
-## Soluția: total-recall · Ce este
+## Soluția: total-recall · Ce este și ce NU este
 
 **Ce este:**
 
 - **Plugin Claude Code** instalat din marketplace
-- **MCP server** cu 17 unelte (stdio, înregistrat via `claude mcp add`)
+- **MCP server** cu 17 unelte (stdio) + **hook-uri automate** care injectează contextul la fiecare sesiune
 - **Vault de fișiere Markdown** stocat local la `~/.total-recall/`
-- **Hook-uri automate** care injectează contextul la fiecare sesiune nouă
 - **Skill `/total-recall:memory-workflow`** pentru sesiuni structurate de recall/store
 
----
-
-## Soluția: total-recall · Ce NU este
-
-**Ce nu este:**
+**Ce NU este:**
 
 - Nu trimite date în cloud (vaultul personal este complet local)
-- Nu folosește o bază de date opacă — fiecare memorie este un fișier `.md` citibil
-- Nu suprascrie context — injectează, nu înlocuiește (Modelul vede: system prompt + CLAUDE.md + memoriile tale (index) + mesajul tău — toate coexistă.)
+- Nu folosește o bază de date opacă — fiecare memorie e un fișier `.md` citibil
+- Nu suprascrie context — injectează, nu înlocuiește (system prompt + CLAUDE.md + index memorii + mesajul tău coexistă)
 
 ---
 
@@ -733,62 +626,16 @@ Stochezi memoria în **engleză**, apoi într-o sesiune nouă întrebi în **rom
 
 > 💡 **WOW:** înainte de compactarea contextului (`PreCompact`), pluginul **salvează automat learnings-urile sesiunii** — cunoașterea supraviețuiește chiar și când contextul e șters.
 
-> Deși inițial create exclusiv pentru Claude Code, hook-urile de lifecycle rulează acum și pe **GitHub Copilot CLI** și **Gemini CLI** (prin `hooks.copilot.json` și `hooks.gemini.json`).
+| Hook           | Ce face                                                                  |
+| -------------- | ------------------------------------------------------------------------ |
+| `SessionStart` | pull org-vault → rebuild index → injectează rezumatul memoriilor în context |
+| `PostToolUse`  | la `store/update/delete_memory`: filtru confidențialitate + push org-vault |
+| `PreCompact`   | extrage 0–3 learnings din transcript → le scrie în personal-vault          |
+| `SessionEnd`   | loghează sesiunea, flush embeddings                                       |
 
----
+Rulează și pe **Copilot CLI** și **Gemini CLI** (`hooks.copilot.json` / `hooks.gemini.json`) — dar fără injectarea contextului (clienții ignoră stdout-ul).
 
-## Hook-urile · Pe Copilot și Gemini CLI
-
-### Execuția pe clienți non-Claude (Copilot și Gemini CLI)
-
-- **Cum funcționează:** La pornirea sau pe parcursul sesiunii, clientul Copilot sau Gemini apelează hook-ul corespunzător.
-- **Side-effects executate:** Hook-urile de fundal rulează normal (trag ultimele memorii din git, reconstruiesc cache-ul indexului local, execută push/sync automat în org-vault).
-- **Limitare (graceful degradation):** acești clienți ignoră stdout-ul hook-urilor → **injectarea automată a contextului (`additionalContext`) e dezactivată**; modelul poate interoga memoriile oricând prin uneltele MCP.
-
----
-
-## Hook-urile · SessionStart
-
-### `SessionStart` (4 pași, secvențiali)
-
-```
-1. pull-org-vault.sh       — git pull pe branch-ul org-vault (dacă e configurat)
-2. build-memory-index.sh   — scanare awk a frontmatter-ului → .index-cache.txt
-3. load-memory-index.sh    — cat .index-cache.txt → injectat în context (doar Claude Code)
-4. load-open-questions.sh  — cat open-questions.md → injectat în context (doar Claude Code)
-```
-
-**Efect:** La fiecare nouă sesiune Claude, modelul primește automat rezumatul tuturor memoriilor tale — fără să ceri explicit.
-
----
-
-## Hook-urile · PostToolUse
-
-### `PostToolUse` (declanșator: `store_memory|update_memory|delete_memory`)
-
-```
-sync-org-memory.sh
-  ├─ verifică dacă memoria are tag "org"
-  ├─ aplică filtrul de confidențialitate
-  └─ git add/commit/push → branch org-vault al echipei
-  + rebuild .index-cache.txt
-```
-
----
-
-## Hook-urile · PreCompact și SessionEnd
-
-### `PreCompact` (când contextul e aproape de limită)
-
-```
-extract-and-store-memories.sh
-  ├─ citește transcriptul sesiunii din stdin JSON (transcript_path)
-  ├─ cere lui Claude să extragă 0–3 learnings cheie ca JSON lines
-  └─ store-learning.mjs → scrie direct ca fișiere .md în personal-vault
-       (fără round-trip MCP; nu suprascrie memorii existente)
-```
-
-### `SessionEnd` — cleanup: loghează sesiunea și asigură flush-ul embeddings-urilor înainte de exit.
+📄 **Detalii** (pașii fiecărui hook, scripturile, graceful degradation pe non-Claude): [details/hooks-lifecycle.md](details/hooks-lifecycle.md)
 
 ---
 
@@ -796,69 +643,17 @@ extract-and-store-memories.sh
 
 > 💡 **Util:** același plugin, 4 clienți — Claude Code, Copilot CLI, Gemini CLI, standalone — cu un singur `install.sh`.
 
----
-
-## Instalare · Build din marketplace
-
-### Instalare bazată pe client
-
-Scriptul `install.sh` este acum conștient de starea clientului și acceptă argumente specifice:
-
 ```bash
-# 1. Clonează marketplace-ul și construiește pluginul
 git clone https://github.com/adrian-balaban/my-claude-plugins-marketplace.git
-cd my-claude-plugins-marketplace/plugins/total-recall
-npm install && npm run build
+cd my-claude-plugins-marketplace/plugins/total-recall && npm install && npm run build
+
+claude plugin install "$(pwd)"    # Claude Code; Copilot/Gemini/standalone: ./install.sh --<client>
 ```
 
----
+- **Org vault = opțional, dezactivat implicit** — `personal-vault` merge 100% local, fără git
+- În sesiune: „reține că…" → `store_memory`, „reamintește-mi…" → `recall_memory`
 
-## Instalare · Per client
-
-```bash
-# 2. Înregistrează în funcție de clientul tău:
-
-# Pentru Claude Code (nativ):
-claude plugin install "$(pwd)"
-
-# Pentru GitHub Copilot CLI (MCP + hooks.copilot.json):
-./install.sh --copilot
-
-# Pentru Gemini CLI (MCP + hooks.gemini.json):
-./install.sh --gemini
-
-# Pentru instalare Standalone (scrie căi absolute în settings.json):
-./install.sh --standalone
-```
-
----
-
-## Instalare · Org vault = opțional
-
-> **Org vault = opțional, dezactivat implicit** (pasul 6 din `install.sh`, default „n"). Cine instalează doar pentru uz personal poate ignora complet acest pas — memoria locală (`personal-vault`) funcționează 100% de la prima rulare, fără git. Vaultul org e strict pentru cine vrea memorie partajată de echipă pe git (necesită `gh` CLI autentificat, cerut **doar** la acest pas).
-
----
-
-## Instalare · Utilizare în sesiune
-
-### Utilizare în sesiune Claude Code
-
-```
-# Caută memorii
-> "reamintește-mi decizia despre baza de date"
-→ recall_memory(query="decizie baza de date")
-
-# Stochează o memorie
-> "reține că preferăm PostgreSQL cu partitionare pe lună"
-→ store_memory(title="...", content="...", tags=["architecture", "database"])
-
-# Listează tot
-> "arată-mi toate memoriile de arhitectură"
-→ list_memories(category="architecture")
-
-# Skill dedicat
-> /total-recall:memory-workflow
-```
+📄 **Detalii** (pașii compleți per client, org vault, exemple de utilizare): [details/instalare-total-recall.md](details/instalare-total-recall.md)
 
 ---
 
@@ -879,22 +674,7 @@ claude plugin install "$(pwd)"
 | **MCP Server (17 unelte)**    | ✅ Nativ    | ✅ stdio MCP suportat  | ✅ stdio MCP suportat  | ✅ `~/.codex/config.toml` |
 | **Side Effects (Sync/Index)** | ✅ Da       | ✅ Da (hooks automate) | ✅ Da (hooks automate) | ❌ Nu (manual)            |
 
----
-
-## Compatibilitate · Matricea (2/2)
-
-| Capabilitate          | Claude Code                 | GitHub Copilot CLI        | Gemini CLI                | OpenAI Codex CLI |
-| --------------------- | --------------------------- | ------------------------- | ------------------------- | ---------------- |
-| **Context Injection** | ✅ Da (`additionalContext`) | ❌ Nu (ignorat de client) | ❌ Nu (ignorat de client) | ❌ Nu            |
-| **Playbook Skills**   | ✅ Da (nativ)               | ❌ Nu                     | ❌ Nu                     | ❌ Nu            |
-
----
-
-## Compatibilitate · Obsidian și cq
-
-> **Bonus:** vault-urile total-recall se deschid nativ în **Obsidian** (fișiere `.md` cu frontmatter YAML). Nu folosi Obsidian Sync pe `org-vault` — sync-ul trebuie să treacă prin git-ul total-recall.
-
-> **„De ce nu folosiți cq?"** (promis la începutul temei) — `cq` acoperă **7 host-uri** (Claude, Codex, Copilot, Cursor, OpenCode, Pi, Windsurf), dar **fără context injection**; total-recall acoperă 3 clienți cu hooks automate + context injection nativ în Claude Code. Obiecte diferite: memorie de context vs knowledge units partajate.
+📄 **Detalii** (matricea completă — context injection, skills; Obsidian; comparația cu `cq`): [details/compatibilitate-clienti.md](details/compatibilitate-clienti.md)
 
 ---
 
@@ -1014,5 +794,4 @@ claude plugin install "$(pwd)"
 Regie Q&A:
 - Echo Chamber: repetă fiecare întrebare înainte să răspunzi — confirmi că ai auzit-o și câștigi timp de gândire.
 - Seeding the First Question: roagă un coleg să deschidă cu „poate total-recall să ruleze complet offline, cu embeddings prin Ollama?" — face puntea între cele două teme.
-- Posse: dacă ai colegi în sală, așază-i în față — fețe prietenoase + backup la întrebări dificile.
 -->

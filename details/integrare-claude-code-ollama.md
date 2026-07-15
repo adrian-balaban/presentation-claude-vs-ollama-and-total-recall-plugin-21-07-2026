@@ -18,3 +18,37 @@ Toate condiționate de modelul ales: tool calling, file edits, subagents, web se
 - Calitatea output-ului depinde complet de modelul ales — harness-ul e același, inteligența o pune modelul.
 - Tool use / function calling: funcționează doar cu modele care suportă (Llama 3.x, Mistral, Qwen 2.5, Qwen3, qwen3-coder).
 - Context window mai mic poate trunchia fișiere mari (recomandat 64K+ pentru repo-uri mari).
+
+## Ce face `ollama launch claude` automat
+
+- instalează/pornește **clientul Claude Code**
+- setează `ANTHROPIC_BASE_URL=http://localhost:11434`, `ANTHROPIC_AUTH_TOKEN=ollama`, `ANTHROPIC_API_KEY=""`
+
+### Distincția cheie: formatul e Anthropic, inteligența e Ollama
+
+Ollama vorbește **nativ** formatul API Anthropic la `localhost:11434` — **nu există proxy separat**. Clientul Claude Code „crede" că vorbește cu Anthropic; de fapt răspunde modelul ales cu `--model`:
+
+```
+cerere în format Anthropic → Ollama traduce intern → modelul Ollama răspunde
+      → răspuns re-ambalat în format Anthropic → clientul Claude Code îl consumă
+```
+
+## Metoda manuală (alternativă, fără `launch`)
+
+```bash
+ollama pull qwen3.5
+export ANTHROPIC_BASE_URL=http://localhost:11434
+export ANTHROPIC_AUTH_TOKEN=ollama
+claude --model qwen3.5
+```
+
+Sau permanent în `~/.claude/settings.json`:
+
+```json
+{
+  "env": {
+    "ANTHROPIC_BASE_URL": "http://localhost:11434",
+    "ANTHROPIC_AUTH_TOKEN": "ollama"
+  }
+}
+```
