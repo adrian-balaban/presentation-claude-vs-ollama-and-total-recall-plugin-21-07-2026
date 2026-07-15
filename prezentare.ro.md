@@ -19,7 +19,6 @@ Două teme despre unelte AI:
 TEMA 1 : LLM+agent proprietar si remote (Claude) sau proxy open (Ollama) catre LLM open, remote si local
 TEMA 2 : Plugin de memorie persistentă in agent AI via plugin MCP (total-recall)
 
-
 ---
 
 ## Ce iei din această sesiune
@@ -34,8 +33,8 @@ TEMA 2 : Plugin de memorie persistentă in agent AI via plugin MCP (total-recall
 
 ## Agendă (~65 de minute)
 
-1. **Claude vs Ollama** (25 min) 
-2. **Total Recall Plugin** (25 min) 
+1. **Claude vs Ollama** (25 min)
+2. **Total Recall Plugin** (25 min)
 3. **Sinteză & Întrebări (Q&A)** (10 min)
 
 <!--
@@ -49,86 +48,140 @@ Expansion joints — dacă timpul scade la ~45 min, taie în ordinea:
 
 ## TEMA 1 din 2 — CLAUDE vs OLLAMA (~25 min)
 
-> **Firul roșu:** AI-ul a devenit scump și cu 'lock-in'; Ollama este unul dintre proiectele ce construiește o alternativa 'open'.
+> **Firul roșu:** AI-ul cloud a devenit scump și cu 'lock-in'; Ollama permite alternative open, accesibile — și e doar una dintre alternative.
+
+---
+
+## Ce este Claude?
+
+> **Claude** = LLM-uri **remote proprietare** (Fable, Sonnet, Opus, Haiku — rulează exclusiv pe serverele Anthropic) + **agent local proprietar** (Claude Code — CLI-ul de pe mașina ta, care cheamă modelele remote).
+
+**Setări necesare, rulare și verificare:**
+
+```bash
+claude       # pornește agentul (cont claude.ai sau API key)
+
+/status      # ce model, ce endpoint, ce cont — sursa adevărului
+/models      # modelele disponibile
+/effort      # nivelul de raționament
+```
+
+---
+
+## Pregătire: 4 agenți față în față, în consolă
+
+**Pregătire:** conturi active pe **Claude**, **Ollama**, **Copilot** și **Gemini**.
+
+Aceleași comenzi de verificare, 4 agenți în paralel:
+
+| Agent                   | Lansare                 | Verificare                      |
+| ----------------------- | ----------------------- | ------------------------------- |
+| Claude Code             | `claude`                | `/status`, `/models`, `/effort` |
+| Claude Code prin Ollama | `ollama launch claude`  | `/status`, `/models`, `/effort` |
+| Copilot CLI pe Ollama   | `ollama launch copilot` | `/status`, `/models`, `/effort` |
+| Gemini CLI              | `gemini`                | `/status`, `/models`, `/effort` |
+
+---
+
+## Demo-uri față în față · Memorie, review, model local
+
+**Memoria (total-recall), pe cel 4 console/clienti:**
+
+- același prompt de afișare a memoriilor disponibile + `/total-recall:status`, în paralel
+- pe unul: adaugă o memorie **org** și una **personală**; pe altul, după repornire: afișează-le după cheie
+
+**Review pe LLM remote, în paralel:**
+
+- același prompt de review pe toți 4 → rezultate scrise în `REVIEW-<model>.txt`
+- comparăm **rezultatul** și **timpul de răspuns**
+
+**Model local prin Ollama:**
+
+- același prompt de memorii + `/total-recall:status`
+- prompt simplu („what day is today") prin clientul Claude Code vs direct în `ollama run`
 
 ---
 
 ## Ce este Ollama?
 
-> Ollama este un tool open-source care îți permite să rulezi modele LLM mari **local**,
+> Ollama este un tool open-source care îți permite să rulezi modele LLM **local**,
 > pe propriul hardware, fără nicio conexiune la internet și fără cost per token.
 >
-> Pentru modelele **proprietare** (Gemini, GPT-oss mari) sau prea mari ca să încapă pe hardware-ul tău, Ollama nu rulează local — face **proxy** către infrastructura sa cloud, prin aceleași comenzi CLI/API (`ollama run <model>:cloud`).
+> Pentru modelele prea mari ca să încapă pe hardware-ul tău, Ollama nu rulează local — face **proxy** către infrastructura sa cloud, prin aceleași comenzi CLI/API (`ollama run <model>:cloud`).
 
-> 💡 **WOW:** peste **100 de milioane de descărcări** pe [Docker Hub](https://hub.docker.com/r/ollama/ollama) (imaginea `ollama/ollama`) și **176k stars** pe [GitHub](https://github.com/ollama/ollama) *(verificat iul 2026)*. Este cel mai popular runtime local pentru LLM-uri.
+> 💡 **WOW:** peste **100 de milioane de descărcări** pe [Docker Hub](https://hub.docker.com/r/ollama/ollama) (imaginea `ollama/ollama`) și **176k stars** pe [GitHub](https://github.com/ollama/ollama) _(verificat iul 2026)_. Este cel mai popular runtime local pentru LLM-uri.
 
----
+![Docker Hub — ollama/ollama, 100M+ descărcări](images/ollama-dockerhub.png)
 
-## Ce este Ollama? · Ce face
+![GitHub — ollama/ollama, 176k stars](images/ollama-github.png)
 
-**Ce face Ollama:**
+**Practic:**
 
-- Descarcă și rulează modele in local (Llama, Mistral, Gemma, Phi, Qwen, etc.)
-- Modelele `:cloud` (ex. `glm-5.2:cloud`, `gemini-3-flash-preview:cloud`) — inferența rulează la furnizor, nu pe hardware-ul tău
-- Expune API REST pe `http://localhost:11434`, compatibilă atât cu formatul **OpenAI**, cât și cu formatul **Anthropic** (`/v1/messages` — de asta merge `ollama launch claude`)
-
-**Site:** [ollama.com](https://ollama.com) · **Repo:** [github.com/ollama/ollama](https://github.com/ollama/ollama) (176k stars)
+- Disponibil pe toate cele **3 SO-uri** (Linux, macOS, Windows) — [ollama.com/download](https://ollama.com/download)
+- Se instalează ca **serviciu** (daemon-ul ascultă pe `localhost:11434`)
+- Modelele **remote** (`:cloud`) necesită **cont** pe ollama.com (`ollama signin`)
 
 ---
 
-## Ce este Ollama? · Instalare
+## Avantajul Ollama: o interfață, modele locale si remote, multiple integrari API (Claude,Codex,Copilot...) si asistenti
 
-**Instalare — o singură comandă după download** (ollama.com/download):
+- aceeași interfață CLI (`ollama run <model>:cloud`) pentru toate modelele
+- endpoint-uri compatibile cu multiple API-uri: **OpenAI**, **Anthropic**,...
+- lista completă de integrări: [docs.ollama.com/integrations](https://docs.ollama.com/integrations)
+
+![Ollama Integrations — Claude Code, OpenCode, OpenClaw, Hermes Agent](images/ollama-integrations.png)
+
+---
+
+## Ce este Ollama? · Modelele disponibile
+
+**Catalogul:** [ollama.com/library](https://ollama.com/library) (screenshot-uri în handout). Cum le alegem:
+
+- **Locale**: Llama, Mistral, Gemma, Phi, Qwen etc. — le alegi după VRAM/RAM-ul disponibil
+- **Remote** (`:cloud`, cont necesar): `glm-5.2:cloud`, `kimi-k2.7-code:cloud`, `gemini-3-flash-preview:cloud`, `gpt-oss:120b-cloud`
+- API compatibil Claude: [ollama.com/library/glm-5.2](https://ollama.com/library/glm-5.2) — Terminal-Bench 2.1: 81.0 vs 85.0 (Opus 4.8)
+
+![ollama.com/library/glm-5.2 — 976K context, 756B parametri, ollama launch claude/codex/openclaw/hermes](images/ollama-glm-5.2.png)
+
+**Ce am instalat până acum?** → `ollama list` pe mașina reală, câteva slide-uri mai încolo.
+
+---
+
+## Ollama · Comenzi
 
 ```bash
-ollama run llama3.2          # pull + run, gata de conversație
+ollama list                    # modelele instalate
+ollama pull llama3.2           # doar download
+ollama run llama3.2            # download + rulare, gata de conversație
 
-# Modele proprietare/mari — NU se descarcă; rulează prin proxy :cloud (cont ollama.com)
+# Modele remote (:cloud) — nimic de descărcat, cont ollama.com:
 ollama signin
-ollama run gemini-3-flash-preview:cloud   # Gemini, servit prin Ollama Cloud
+ollama run glm-5.2:cloud
 ```
 
 ---
 
-## Ce este Ollama? · Unde sunt Claude, Gemini și GPT?
+## Integrare Ollama cu Claude și Gemini
 
-> **⚠️ Unde sunt Claude, Gemini și GPT?** Local rulează doar modele **open-weight**. Gemini frontier există doar ca `gemini-3-flash-preview:cloud`; GPT doar ca `gpt-oss` open-weight (varianta cloud: `gpt-oss:120b-cloud`); **Claude nu există în Ollama deloc** — doar imitații comunitare, de evitat. Pentru Claude real: API-ul Anthropic sau `ollama launch claude` cu alt model în spate.
-
-📄 **Detalii** (tabelul modelelor locale cu VRAM, lista `:cloud` completă, confuzia Gemini ≠ Gemma, Antigravity IDE, screenshot-uri): [details/ollama-modele-locale-si-cloud.md](details/ollama-modele-locale-si-cloud.md)
-
----
-
-## Cum funcționează Ollama intern
-
-> 💡 **WOW:** quantizarea Q4 comprimă un model de 8× — un 70B care „cere" 280 GB încape în 48 GB VRAM (GPU), cu doar ~2–5% pierdere de calitate.
-
-```
-Cerere utilizator
-       │
-       ▼
-┌─────────────────────────────────────────────────────────────┐
-│                    Ollama daemon (local)                     │
-│                                                             │
-│   ┌─────────────┐     ┌──────────────┐    ┌─────────────┐  │
-│   │  API REST   │────►│  Model mgr   │───►│  llama.cpp  │  │
-│   │ :11434      │     │  (GGUF/Q4)   │    │  inference  │  │
-│   └─────────────┘     └──────────────┘    └──────┬──────┘  │
-│                                                   │         │
-│                                          GPU (CUDA/Metal)   │
-│                                          sau CPU fallback   │
-└───────────────────────────────────────────────────┼─────────┘
-                                                    │
-                                               Răspuns tokenizat
-```
+> - **Claude nu există în Ollama** — doar imitații comunitare, de evitat. Pentru Claude real: API-ul Anthropic sau `ollama launch claude` cu alt model în spate
+> - Gemini există doar cu versiunea remote: `ollama launch claude --model gemini-3-flash-preview:cloud`
 
 ---
 
-## Modele instalate local: cazul real (`ollama list`)
+## Modele de top remote în Ollama
 
-<!--
-🎬 Regie: rulează `ollama list` live (10 secunde — coloana SIZE face punctul singură).
-Lipsync: varianta primară sigură e un GIF pre-înregistrat (images/demo-ollama-list.gif); live doar dacă sala permite. Output-ul de pe slide e fallback-ul static.
--->
+Filtrul de căutare: [ollama.com/search?c=cloud&c=tools&c=thinking](https://ollama.com/search?c=cloud&c=tools&c=thinking)
+
+![Ollama search — modele cloud cu tools & thinking: glm-5.2, gemma4, qwen3.5, glm-5.1](images/ollama-search-cloud-tools-thinking.png)
+
+- **GLM-5.2** — context ~1M tokens (976K), 756B parametri. Aproape de Claude Opus 4.8 pe Terminal-Bench 2.1 (**81.0 vs 85.0** — verificat pe [ollama.com/library/glm-5.2](https://ollama.com/library/glm-5.2) la 11 iul 2026), la preț API de **~12–20× mai mic**.
+- **Kimi-K2.7-Code** — specializat pe generare și analiză de cod; puncte forte: code review, explicare cod legacy ([ollama.com/library/kimi-k2.7-code](https://ollama.com/library/kimi-k2.7-code)).
+
+**Comparația din rulările anterioare:** demo-ul `REVIEW-<model>.txt` de la început — același prompt de review, rezultat și timp de răspuns, față în față.
+
+---
+
+## Modele locale în Ollama instalate (`ollama list`)
 
 Mașina: **Dell Latitude 5521** (i7-11850H, MX450 2GB GDDR6).
 
@@ -148,77 +201,30 @@ north-mini-code-1.0:latest    18 GB     12 days ago
 
 ---
 
-## Modele instalate local · Concluzia practică
+## Modele locale · Limitări și concluzia practică
 
-**Concluzia practică:**
+**Limitări pe acest hardware:**
 
 - MX450 (2GB VRAM) nu poate ține niciun model în VRAM — toate rulează pe CPU via RAM
 - `qwen3.5` (6.6 GB) și `ornith:9b` (5.6 GB) sunt singurele care intră confortabil în 16 GB RAM → ~3–8 tok/s
 - Modelele cu tag `:cloud` (kimi-k2.7-code, glm-5.2) sunt **API-uri externe proxiate prin Ollama** — nu rulează local
-- **Pe acest laptop, Claude API rămâne alegerea corectă.** Modelele locale = experimente offline sau eGPU extern (Thunderbolt 4)
+
+**Extinderi posibile pentru a rula local:**
+
+- GLM-5.2 necesita investitie de minim ~7000 euro conform [insiderllm.com/guides/run-glm-5-2-locally](https://insiderllm.com/guides/run-glm-5-2-locally/)
+- realist: un LLM local mic (`qwen3.5`, `gemma4`) plus eGPU extern (slide-ul următor) necesita investitie de minim ~700 euro
+
+**Concluzia practică:** pe acest laptop, Claude API rămâne alegerea corectă; modelele locale = experimente offline.
 
 ---
 
-## Pot adăuga GPU pe laptop? (Bonus)
-
-<!-- Expansion joint: primul slide de tăiat dacă timpul scade. -->
+## Cum pot adăuga GPU pe laptop? (Bonus)
 
 > **TL;DR:** Teoretic: GPU-ul intern e soldat — singura opțiune e **eGPU extern via Thunderbolt 4**. Cu un enclosure + RTX 3060 12GB nou (minim ~3.500 lei), rulezi modele de 7–13B complet pe GPU la 20–50 tok/s. Bottleneck-ul TB4 e irelevant pentru inference LLM (contează VRAM-ul, nu banda).
 
+**Ce modele?** Cu 12 GB VRAM: Llama 3.1 8B, Mistral 7B, Qwen 7–14B, DeepSeek-Coder 6.7B — complet pe GPU.
+
 ![Razer Core X V2 — enclosure eGPU second-hand pe OLX](images/razer-core-x-v2-egpu-olx.png)
-
----
-
-## La ce e util Ollama cu GLM-5.2 și Kimi-K2.7-Code?
-
-> Ambele apar în `ollama list` cu `SIZE=—` și suffix `:cloud` — **nu sunt modele locale**.
-> Sunt API-uri externe proxiate prin Ollama; inferența rulează pe serverele Zhipu AI / Moonshot AI din China.
-
-### Ce înseamnă `:cloud` în Ollama?
-
-```
-kimi-k2.7-code:cloud    —     ← niciun fișier GGUF descarcat
-glm-5.2:cloud           —     ← niciun fișier GGUF descarcat
-```
-
----
-
-## GLM-5.2 și Kimi-K2.7-Code · Mecanica proxy-ului
-
-- `SIZE=—` = nu există model local; Ollama trimite cererea la API-ul extern
-- Tokenizarea și inferența se fac **pe serverele furnizorului**, nu pe CPU/GPU-ul tău
-- Avantaj față de API-ul direct: aceeași interfață CLI (`ollama run <model>:cloud`) pentru toate modelele `:cloud`, cu endpoint-uri atât **OpenAI-compatible**, cât și **Anthropic-compatible** — verificat: pagina fiecărui model listează direct comenzile `ollama launch claude/codex/opencode/copilot --model <model>:cloud`
-- Claude oficial NU există în Ollama (doar prin API Anthropic: [docs.anthropic.com](https://docs.anthropic.com)); Gemini există doar ca [gemini-3-flash-preview:cloud](https://ollama.com/library/gemini-3-flash-preview), iar experiența completă Gemini o dă [Antigravity IDE](https://antigravity.google/)
-
----
-
-## GLM-5.2 și Kimi-K2.7-Code · Ce sunt cele două modele
-
-- **GLM-5.2** (Zhipu AI, Beijing) — flagship-ul Z.ai; context ~1M tokens (976K), 756B parametri. Aproape de Claude Opus 4.8 pe Terminal-Bench 2.1 (**81.0 vs 85.0** — re-verificat pe ollama.com/library/glm-5.2 la 11 iul 2026), la preț API de **~12–20× mai mic**, greutăți deschise MIT. Română slabă — rămâi pe Claude pentru RO.
-- **Kimi-K2.7-Code** (Moonshot AI, Beijing) — specializat pe generare și analiză de cod; puncte forte: code review, explicare cod legacy.
-
----
-
-## GLM-5.2 și Kimi-K2.7-Code · Regula GDPR
-
-### ⚠️ Regula GDPR (partea cu adevărat utilă)
-
-- Ambele procesează datele pe **servere în China** — jurisdicție fără decizie de adecvare GDPR
-- Nici Claude nu e „gratuit" GDPR — pentru rezidență EU: AWS Bedrock / Vertex AI pe regiuni EU (nuanțele complete, în handout)
-- **Nu trimite prin API-urile chinezești:** cod cu date personale ale clienților, IP proprietar, credențiale, contracte
-
----
-
-## GLM-5.2 și Kimi-K2.7-Code · Regula scurtă
-
-**Regula scurtă:** cod ne-sensibil + buget → `:cloud` chinezesc; română, date sensibile, raționament critic → Claude.
-
-```bash
-ollama signin                          # cont pe ollama.com
-ollama launch claude --model glm-5.2:cloud  # în Claude Code
-```
-
-📄 **Detalii** (comparația pe 4 modele, riscul GDPR pe larg, ce poți rula local pe CPU): [details/glm-kimi-cloud.md](details/glm-kimi-cloud.md)
 
 ---
 
@@ -228,21 +234,23 @@ ollama launch claude --model glm-5.2:cloud  # în Claude Code
 
 > 📊 **WOW Metric:** Latența la primul token (TTFT) pe Ollama cu un model 8B pe GPU local este de **~120ms**, în timp ce prin API-ul Claude este de **~650ms** (de ~5 ori mai rapid local).
 
+**Cum se măsoară** — același script pe ambele endpoint-uri ([scripts/ttft.sh](scripts/ttft.sh)): cronometrezi primul byte din răspunsul streaming.
+
+```bash
+# local:  ./scripts/ttft.sh http://localhost:11434/api/generate '{"model":"gemma3:4b","prompt":"Salut","stream":true}'
+# Claude: ./scripts/ttft.sh https://api.anthropic.com/v1/messages '{...,"stream":true}' -H "x-api-key: $ANTHROPIC_API_KEY" ...
+```
+
+⚠️ Măsurat pe laptopul de demo (CPU-only): local ~800–900 ms — cifra de ~120ms cere GPU cu VRAM suficient.
+
+📄 **Detalii** (script complet, protocol, rezultate măsurate): [details/masurare-ttft.md](details/masurare-ttft.md)
+
 ---
 
-## Comparație directă · Cele 5 axe
+## GDPR: unde ajung datele
 
-Cele 5 axe care contează (cifre orientative, iul 2026 — depind de model, hardware și quantizare):
-
-| Criteriu                  | Claude (API Anthropic)         | Ollama (local)                                     |
-| ------------------------- | ------------------------------ | -------------------------------------------------- |
-| **Calitate top-tier**     | ✅ Opus 4.8 = state of the art | Llama 3.3 70B ≈ GPT-4o, dar sub Opus               |
-| **Cost**                  | $3–$15 / 1M tokens             | $0/token — dar GPU bun: $500–$3000+                |
-| **Confidențialitate**     | Date trimise la Anthropic (US) | 100% local, zero egress, merge air-gapped          |
-| **Latență (TTFT)**        | ~500ms–2s                      | ~100–500ms pe GPU local                            |
-| **Integrare Claude Code** | ✅ Nativă                      | ✅ Nativă prin `ollama launch claude` (fără proxy) |
-
-📄 **Detalii** (comparația completă pe 13 criterii — context window, rate limits, actualizări, GDPR): [details/comparatie-claude-ollama.md](details/comparatie-claude-ollama.md)
+- Modelele `:cloud` GLM-5.2, Kimi-K2.7-Code procesează datele pe **servere în China** — jurisdicție fără GDPR
+- Nici Claude nu e „gratuit" GDPR — pentru rezidență EU: AWS Bedrock / Vertex AI pe regiuni EU (nuanțele complete, în handout)
 
 ---
 
@@ -250,66 +258,19 @@ Cele 5 axe care contează (cifre orientative, iul 2026 — depind de model, hard
 
 > 💡 **WOW:** un 'agentic developer' ce lucreaza intens arde ~$400/lună pe API — un RTX 4090 de $2.000 se amortizează în ~5 luni. Dar dacă ești utilizator light ($30/lună), amortizarea durează ani.
 
-> 📊 **WOW (datat):** 1 iunie 2026 — Copilot a mutat Claude Opus de la **3× la 27×** multiplicator și Sonnet de la **1× la 9×**; tier-ul gratuit GPT-4o a dispărut. „Era AI-ului cloud ieftin s-a terminat" (Mozilla.ai, _AI Got Expensive. Now What?_, mai 2026). Ăsta e forcing function-ul întregii discuții cloud-vs-local. Sursa numerelor: [blog.mozilla.ai/ai-got-expensive-now-what](https://blog.mozilla.ai/ai-got-expensive-now-what/) (Anushri Gupta, 26 mai 2026).
-
----
-
-## Costul real · Claude API
-
-### Claude API (Sonnet 4.6 — prețuri verificate la 11 iul 2026)
-
-```
-Input:  $3.00 / 1M tokens
-Output: $15.00 / 1M tokens
-
-Sesiune agentică intensă (8h/zi, multe tool calls, context re-reads):
-  Input:  ~3M tokens/zi    → $9/zi
-  Output: ~600K tokens/zi  → $9/zi
-  TOTAL:  ~$18/zi → ~$400/lună (22 zile lucrătoare)
-```
-
----
-
-## Costul real · Ollama pe hardware local
-
-### Ollama pe hardware local
-
-```
-GPU RTX 4090 (24GB VRAM): ~$2,000 hardware
-  → rulează Llama 3.3 70B Q4, DeepSeek-Coder 33B
-  → ROI față de API la nivel developer: ~5-6 luni de utilizare intensă
-
-GPU RTX 3080 (10GB VRAM): ~$600 second-hand
-  → rulează Llama 3.1 8B, Mistral 7B, Qwen 7B
-  → calitate mai mică, dar zero cost operațional
-  → ROI: ~1-2 luni
-
-Fără GPU (CPU only):
-  → Phi-3 mini 3.8B, Gemma 2B: lent (3-8 tok/s) dar funcțional
-  → Hardware cost: $0
-```
-
----
-
-## Costul real · Găsește-ți tier-ul
-
-### Găsește-ți tier-ul
-
 | Profil                | Cheltuială API tipică | Amortizare hardware local       |
 | --------------------- | --------------------- | ------------------------------- |
 | Indie / light         | ~$30/lună             | ani — rămâi pe API sau CPU-only |
 | Daily driver          | ~$100/lună            | ~6 luni (RTX 3080 SH ~$600)     |
 | **Agentic developer** | **~$400/lună**        | **~5 luni (RTX 4090 ~$2.000)**  |
 
-**Concluzia:** ROI-ul în luni presupune utilizare agentică intensă; sub un GPU de ~$600, diferența de calitate poate să nu merite.
-
-> **Notă (verificat 11 iul 2026):** Sonnet 5 (lansat 30 iun 2026): preț introductiv **$2/$10 per MTok până la 31 aug 2026**, apoi $3/$15 — profilul agentic scade la ~$265/lună în fereastra introductivă.
+📄 **Detalii** (calculul $400/lună, tier-uri hardware, „AI Got Expensive" Mozilla.ai, nota Sonnet 5): [details/costul-real-claude-vs-ollama.md](details/costul-real-claude-vs-ollama.md)
 
 ---
 
 ## Confidențialitate și date: diferența crucială
 
-> 💡 **WOW:** cu Ollama, promptul tău nu părăsește **niciodată** mașina — funcționează și cu cablul de rețea scos (air-gapped). Pentru finance/healthcare/NDA, asta nu e un „nice to have", e singura opțiune legală.
+> 💡 **WOW:** cu Ollama si model local, promptul si datele nu părăsesc **niciodată** mașina — funcționează și cu cablul de rețea scos (air-gapped). Pentru finance/healthcare/NDA, asta nu e un „nice to have", e singura opțiune legală.
 
 ### Claude API
 
@@ -336,6 +297,22 @@ Serverele Anthropic (US)
 - Secretele din prompt ajung pe servere externe
 - GDPR: Anthropic are DPA disponibil, dar datele ies din EU
 - Contracte enterprise pot restricționa utilizarea API-ului cloud
+
+---
+
+## Confidențialitate și date · Ollama remote (`:cloud`)
+
+```
+Cerere utilizator
+       │
+       ▼
+localhost:11434 (daemon Ollama)
+       │  (HTTPS către furnizor)
+       ▼
+Serverele furnizorului: Ollama Cloud / Zhipu AI / Moonshot AI
+```
+
+**Practic:** `:cloud` ≠ local — datele **pleacă** de pe mașină exact ca la orice API cloud; pentru furnizorii din China, fără decizie de adecvare GDPR (v. slide-ul GDPR).
 
 ---
 
@@ -435,7 +412,7 @@ Sau permanent în `~/.claude/settings.json`:
 
 ---
 
-## A treia cale: Otari, gateway Anthropic-compatibil (Bonus)
+## A treia cale: Otari de la Mozilla, gateway Anthropic-compatibil (Bonus)
 
 <!-- Expansion joint: al doilea slide de tăiat la 45 min. -->
 
@@ -450,29 +427,7 @@ Sau permanent în `~/.claude/settings.json`:
 
 ---
 
-## Otari · Pornire în 60 de secunde
-
-```bash
-docker run --rm -p 8000:8000 \
-  -e OTARI_MASTER_KEY=... -e ANTHROPIC_API_KEY=... \
-  mzdotai/otari:latest otari serve
-
-export ANTHROPIC_BASE_URL=http://localhost:8000   # root, fără /v1
-export ANTHROPIC_AUTH_TOKEN=<cheia-ta-otari>      # Bearer, nu x-api-key
-export ANTHROPIC_MODEL="anthropic:claude-sonnet-4-6"
-claude
-```
-
-**Când are sens:** echipă care vrea Claude real + modele alternative + control central de buget și chei — fără să dea fiecărui developer cheia API brută.
-
----
-
-## Ghid de decizie: Claude API sau Ollama?
-
-> 💡 **UTIL:** arborele de decizie, scenariile și tier-urile de cost sunt în ghidul printabil promis la început. Rulează direct `ollama launch claude` pentru a testa local înainte de a decide implementarea în producție.
-
-📄 **Detalii:** [details/decizie-o-pagina.md](details/decizie-o-pagina.md)
-
+## Ghid de decizie: Claude sau Ollama?
 
 ```
 Datele tale pot ieși din infrastructura ta?
@@ -481,7 +436,6 @@ Datele tale pot ieși din infrastructura ta?
             ├── DA → Claude API (Sonnet/Opus)
             └── NU → Ollama cu model remote
 ```
-
 ---
 
 ## TEMA 2 din 2 — TOTAL RECALL PLUGIN (~25 min)
@@ -530,7 +484,7 @@ FĂRĂ total-recall (sesiune Claude nouă):          CU total-recall (sesiune no
 > care DB am ales pentru proiect?                 > care DB am ales pentru proiect?
 
 „Nu am context despre o decizie                   → recall_memory(query="DB proiect")
-anterioară legată de baza de date.                „Conform memoriei architecture/db-choice (creată azi, 13 iulie 2026):Ai ales PostgreSQL (respins MySQL). Motivul decisiv: JSONB e stocare binară a documentelor JSON cu indexare ... 
+anterioară legată de baza de date.                „Conform memoriei architecture/db-choice (creată azi, 13 iulie 2026):Ai ales PostgreSQL (respins MySQL). Motivul decisiv: JSONB e stocare binară a documentelor JSON cu indexare ...
 ```
 
 Publicul nu trebuie să creadă pe cuvânt — vede diferența pe ecran în 20 de secunde.
@@ -640,7 +594,6 @@ Preferă PostgreSQL față de MySQL pentru proiecte noi...
 ---
 
 ## De ce algoritmi proprii (fără hard dependencies)
-
 
 **Ce câștigi:**
 
@@ -921,19 +874,19 @@ claude plugin install "$(pwd)"
 
 ## Compatibilitate · Matricea (1/2)
 
-| Capabilitate                  | Claude Code                 | GitHub Copilot CLI        | Gemini CLI                | OpenAI Codex CLI          |
-| ----------------------------- | --------------------------- | ------------------------- | ------------------------- | ------------------------- |
-| **MCP Server (17 unelte)**    | ✅ Nativ                    | ✅ stdio MCP suportat     | ✅ stdio MCP suportat     | ✅ `~/.codex/config.toml` |
-| **Side Effects (Sync/Index)** | ✅ Da                       | ✅ Da (hooks automate)    | ✅ Da (hooks automate)    | ❌ Nu (manual)            |
+| Capabilitate                  | Claude Code | GitHub Copilot CLI     | Gemini CLI             | OpenAI Codex CLI          |
+| ----------------------------- | ----------- | ---------------------- | ---------------------- | ------------------------- |
+| **MCP Server (17 unelte)**    | ✅ Nativ    | ✅ stdio MCP suportat  | ✅ stdio MCP suportat  | ✅ `~/.codex/config.toml` |
+| **Side Effects (Sync/Index)** | ✅ Da       | ✅ Da (hooks automate) | ✅ Da (hooks automate) | ❌ Nu (manual)            |
 
 ---
 
 ## Compatibilitate · Matricea (2/2)
 
-| Capabilitate                  | Claude Code                 | GitHub Copilot CLI        | Gemini CLI                | OpenAI Codex CLI          |
-| ----------------------------- | --------------------------- | ------------------------- | ------------------------- | ------------------------- |
-| **Context Injection**         | ✅ Da (`additionalContext`) | ❌ Nu (ignorat de client) | ❌ Nu (ignorat de client) | ❌ Nu                     |
-| **Playbook Skills**           | ✅ Da (nativ)               | ❌ Nu                     | ❌ Nu                     | ❌ Nu                     |
+| Capabilitate          | Claude Code                 | GitHub Copilot CLI        | Gemini CLI                | OpenAI Codex CLI |
+| --------------------- | --------------------------- | ------------------------- | ------------------------- | ---------------- |
+| **Context Injection** | ✅ Da (`additionalContext`) | ❌ Nu (ignorat de client) | ❌ Nu (ignorat de client) | ❌ Nu            |
+| **Playbook Skills**   | ✅ Da (nativ)               | ❌ Nu                     | ❌ Nu                     | ❌ Nu            |
 
 ---
 
@@ -995,6 +948,7 @@ claude plugin install "$(pwd)"
 - **Site oficial:** ollama.com
 - **Hub modele:** ollama.com/library
 - **API reference:** ollama.com/docs (compatibilă OpenAI)
+- **Integrări:** [docs.ollama.com/integrations](https://docs.ollama.com/integrations)
 
 ---
 
