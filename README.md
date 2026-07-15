@@ -14,7 +14,8 @@ Materiale pentru prezentarea din **16 iulie 2026**.
 | [`prezentare.ro.md`](prezentare.ro.md) | Prezentare completă în română |
 | [`details/`](details/) | Materiale de sprijin per slide (linkate din prezentare cu 📄 **Detalii**) |
 | [`details/decizie-o-pagina.md`](details/decizie-o-pagina.md) | Ghidul de decizie printabil (handout) |
-| [`details/embeddings-vectorizare.md`](details/embeddings-vectorizare.md) | Embeddings & vectorizare — versiunea detaliată a Slide 22 |
+| [`details/embeddings-vectorizare.md`](details/embeddings-vectorizare.md) | Embeddings & vectorizare — versiunea detaliată a secțiunii „Embeddings și căutare multilinguală" |
+| [`details/algoritm-cautare.md`](details/algoritm-cautare.md) | Algoritmul de căutare (TF-IDF + Ebbinghaus) — pipeline complet, RRF, formula λ |
 
 ## Autor
 

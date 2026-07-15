@@ -1,6 +1,6 @@
 # GLM-5.2 și Kimi-K2.7-Code — modelele `:cloud` chinezești în detaliu
 
-> Material de sprijin pentru **Slide 6** din `prezentare.ro.md`.
+> Material de sprijin pentru secțiunea „La ce e util Ollama cu GLM-5.2 și Kimi-K2.7-Code?” din `prezentare.ro.md`.
 
 ## GLM-5.2 — Zhipu AI (Beijing)
 

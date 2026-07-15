@@ -1,6 +1,6 @@
 # total-recall — cele 17 unelte MCP, complet
 
-> Material de sprijin pentru **Slide 19** din `prezentare.ro.md`.
+> Material de sprijin pentru secțiunea „Cele 17 unelte MCP” din `prezentare.ro.md`.
 
 ## Scriere
 

@@ -1,6 +1,6 @@
 # Ollama — modele locale și `:cloud`: ce există și ce nu
 
-> Material de sprijin pentru **Slide 2** din `prezentare.ro.md`.
+> Material de sprijin pentru secțiunea „Ce este Ollama?” din `prezentare.ro.md`.
 
 ## Surse oficiale
 

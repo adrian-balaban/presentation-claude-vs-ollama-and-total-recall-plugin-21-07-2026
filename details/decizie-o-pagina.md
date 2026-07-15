@@ -1,16 +1,8 @@
 # Ghid de decizie pe o pagină — Claude API sau Ollama? (+ primii pași)
 
-> Handout-ul promis în Slide 0: printează sau salvează pagina asta pentru echipă.
+> Handout-ul promis la începutul prezentării: printează sau salvează pagina asta pentru echipă.
 
 ## 1. Arborele de decizie
-
-```
-Datele tale pot ieși din infrastructura ta?
- ├── NU  → Ollama (local) — obligatoriu
- └── DA  → Ai nevoie de calitate top-tier (raționament complex, cod avansat)?
-            ├── DA → Claude API (Sonnet/Opus)
-            └── NU → Ollama cu model 7–8B, cost $0
-```
 
 ## 2. Scenarii → alegere
 
