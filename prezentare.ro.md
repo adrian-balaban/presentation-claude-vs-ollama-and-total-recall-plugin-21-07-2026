@@ -144,7 +144,7 @@ propunerea din nota de regie: rulezi live doar demo-ul celor 4 agenți (Tema 1) 
 **Catalogul:** [ollama.com/library](https://ollama.com/library) (screenshot-uri în handout). Cum le alegem:
 
 - **Locale**: Llama, Mistral, Gemma, Phi, Qwen etc. — le alegi după VRAM/RAM-ul disponibil
-- **Remote** (`:cloud`, cont necesar): `glm-5.2:cloud`, `kimi-k2.7-code:cloud`, `gemini-3-flash-preview:cloud`, `gpt-oss:120b-cloud`
+- **Remote** (`:cloud`, cont necesar): `glm-5.2:cloud`, `kimi-k2.7-code:cloud`, `gemma4:cloud`, `gpt-oss:120b-cloud`
 - API compatibil Claude: [ollama.com/library/glm-5.2](https://ollama.com/library/glm-5.2) — Terminal-Bench 2.1: 81.0 vs 85.0 (Opus 4.8)
 
 ![ollama.com/library/glm-5.2 — 976K context, 756B parametri, ollama launch claude/codex/openclaw/hermes](images/ollama-glm-5.2.png)
@@ -170,7 +170,7 @@ ollama run glm-5.2:cloud
 ## Integrare Ollama cu Claude și Gemini
 
 > - **Claude nu există în Ollama** — doar imitații comunitare, de evitat. Pentru Claude real: API-ul Anthropic sau `ollama launch claude` cu alt model în spate
-> - Gemini există doar cu versiunea remote: `ollama launch claude --model gemini-3-flash-preview:cloud`
+> - Gemini există doar cu versiunea remote: `ollama launch claude --model gemma4:cloud`
 
 ---
 
