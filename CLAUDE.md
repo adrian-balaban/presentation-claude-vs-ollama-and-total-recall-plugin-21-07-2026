@@ -2,7 +2,7 @@
 
 ## Ce conține acest repo
 
-Materiale pentru prezentarea din **16 iulie 2026**, cu două subiecte:
+Materiale pentru prezentarea din **21 iulie 2026**, cu două subiecte:
 
 1. **Claude vs Ollama** — cloud vs local, comparație directă
 2. **Plugin total-recall** — memorie persistentă via MCP

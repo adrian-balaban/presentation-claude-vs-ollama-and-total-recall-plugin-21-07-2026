@@ -14,10 +14,10 @@ layout: docs
 **Autor:** Adrian Balaban  
 **Data:** 21 iulie 2026
 
-Două teme despre unelte AI:
+Două teme despre tool-uri AI:
 
-TEMA 1 : LLM+agent proprietar si remote (Claude) sau proxy open (Ollama) catre LLM open, remote si local
-TEMA 2 : Plugin de memorie persistentă in agent AI via plugin MCP (total-recall)
+TEMA 1 : LLM+agent proprietar si remote (Claude) sau proxy open-source (Ollama) catre LLM non-proprietar, remote si local
+TEMA 2 : Plugin memorie persistentă in agent AI (total-recall)
 
 ---
 
@@ -33,13 +33,16 @@ TEMA 2 : Plugin de memorie persistentă in agent AI via plugin MCP (total-recall
 
 ## Agendă (~60 de minute)
 
-1. **Claude vs Ollama** (28 min)
-2. **Total Recall Plugin** (22 min)
-3. **Sinteză & Întrebări (Q&A)** (10 min)
+1. **Claude vs Ollama** (26 min, include intro-ul de ~2 min)
+2. **Total Recall Plugin** (20 min)
+3. **Sinteză** (5 min)
+4. **Întrebări (Q&A)** (~7 min)
 
 <!--
 🎬 Regie timp: demo-urile live au hard-cap — 5 min (4 agenți, Tema 1) și 3 min (cu/fără memorie, Tema 2);
 dacă depășesc, treci la GIF/rezultate statice. Sinteza și resursele nu se citesc: o idee vorbită per slide.
+✂️ Supapă de timp — ordinea de tăiere dacă demo-urile derapează:
+1. GDPR, 2. De ce algoritmi proprii, 3. cq (Mozilla.ai), 4. Anatomia unei memorii.
 -->
 
 ---
@@ -245,6 +248,8 @@ north-mini-code-1.0:latest    18 GB     12 days ago
 
 ## GDPR: unde ajung datele
 
+<!-- ✂️ tăiabil (1) — prima supapă de timp dacă demo-urile derapează; nuanțele sunt oricum în handout -->
+
 - Modelele `:cloud` GLM-5.2, Kimi-K2.7-Code procesează datele pe **servere în China** — jurisdicție fără GDPR
 - Nici Claude nu e „gratuit" GDPR — pentru rezidență EU: AWS Bedrock / Vertex AI pe regiuni EU (nuanțele complete, în handout)
 
@@ -359,6 +364,8 @@ Datele tale pot ieși din infrastructura ta?
 
 ## Problema · Cine mai vrea asta: cq (Mozilla.ai)
 
+<!-- ✂️ tăiabil (3) — supapă de timp; cq revine oricum în sinteză și la întrebările deschise -->
+
 > **Cine mai vrea aceasta:** Mozilla.ai a lansat [`cq`](https://github.com/mozilla-ai/cq) (1.2k ⭐) — standard deschis pentru _shared agent learning_. **Complementar, nu concurent** cu total-recall — comparația onestă vine la finalul temei.
 
 ---
@@ -444,6 +451,8 @@ Publicul nu trebuie să creadă pe cuvânt — vede diferența pe ecran în 20 d
 
 ## Structura pe disc · Anatomia unei memorii
 
+<!-- ✂️ tăiabil (4) — supapă de timp; frontmatter-ul e vizibil și în exemplul din slide-ul „Structura pe disc" -->
+
 **Fiecare memorie** este un fișier `.md` cu frontmatter:
 
 ```markdown
@@ -487,6 +496,8 @@ Preferă PostgreSQL față de MySQL pentru proiecte noi...
 ---
 
 ## De ce algoritmi proprii (fără hard dependencies)
+
+<!-- ✂️ tăiabil (2) — supapă de timp; ideea „o singură dependență" e deja pe slide-ul de arhitectură -->
 
 **Ce câștigi:**
 
@@ -786,7 +797,7 @@ claude plugin install "$(pwd)"    # Claude Code; Copilot/Gemini/standalone: ./in
 
 ---
 
-**Q&A — 10 minute**
+**Q&A — ~7 minute**
 
 > Mulțumesc pentru participare. Cod, arhitecturi și întrebări — le abordăm pe toate.
 
