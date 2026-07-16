@@ -40,7 +40,7 @@ TEMA 2 : Plugin memorie persistentă in agent AI (total-recall)
 
 <!--
 🎬 Regie timp: demo-urile live au hard-cap — 5 min (4 agenți, Tema 1) și 3 min (cu/fără memorie, Tema 2);
-dacă depășesc, treci la GIF/rezultate statice. Sinteza și resursele nu se citesc: o idee vorbită per slide.
+dacă depășesc, treci la înregistrarea asciinema (casts/*.cast)/rezultate statice. Sinteza și resursele nu se citesc: o idee vorbită per slide.
 ✂️ Supapă de timp — ordinea de tăiere dacă demo-urile derapează:
 1. GDPR, 2. De ce algoritmi proprii, 3. cq (Mozilla.ai), 4. Anatomia unei memorii.
 -->
@@ -69,29 +69,33 @@ claude       # pornește agentul (cont claude.ai sau API key)
 
 ---
 
-## Pregătire: 4 agenți față în față, în consolă
+## Pregătire: Claude si Ollama față în față, în consolă
 
-**Pregătire:** conturi active pe **Claude**, **Ollama**, **Copilot** și **Gemini**.
+Aceleași comenzi de verificare, 2 agenți în paralel:
 
-Aceleași comenzi de verificare, 4 agenți în paralel:
-
-| Agent                   | Lansare                 | Verificare                      |
-| ----------------------- | ----------------------- | ------------------------------- |
-| Claude Code             | `claude`                | `/status`, `/models`, `/effort` |
-| Claude Code prin Ollama | `ollama launch claude`  | `/status`, `/models`, `/effort` |
-| Copilot CLI pe Ollama   | `ollama launch copilot` | `/status`, `/models`, `/effort` |
-| Gemini CLI              | `gemini`                | `/status`, `/models`, `/effort` |
+| Claude Code | `claude` | `/status`, `/model`, `/effort`, 'total-recall:status ; how many memories do we have?' | `casts/demo-4-agenti-1.cast` |
+| Claude Code prin Ollama | `ollama launch claude` | `/status`, `/model`, `/effort`, 'how many memories do we have?' | `casts/demo-4-agenti-2.cast` |
 
 ---
 
 ## Demo-uri față în față · Memorie, review, model local
 
+Prompt utilizat in folderul total-recall
+Review total-recall plugin ; propose fixes and improvements ; write conclusions in file REVIEW-<model>.txt
+(where model is claude or ollama-glm-5.2)
+
 <!--
 🎬 Regie (buget de timp): UN singur demo live per temă.
-Tema 1 live: cei 4 agenți față în față. Review-ul și modelul local: GIF pre-înregistrat sau doar rezultatele din REVIEW-<model>.txt.
-Tema 2 live: demo-ul cu/fără memorie. Demo-ul EN↔RO: GIF-ul pre-înregistrat (images/demo-multilingv.gif).
+Tema 1 live: cei 2 agenți față în față. Review-ul și modelul local: asciinema pre-înregistrat sau doar rezultatele din REVIEW-<model>.txt.
+Tema 2 live: demo-ul cu/fără memorie. Demo-ul EN↔RO: înregistrarea asciinema (casts/demo-multilingv.cast, redare cu `asciinema play`).
 
-propunerea din nota de regie: rulezi live doar demo-ul celor 4 agenți (Tema 1) și demo-ul cu/fără memorie (Tema 2); pentru review-ul paralel, modelul local și demo-ul EN↔RO arăți GIF-ul pre-înregistrat (ex. images/demo-multilingv.gif, menționat deja pe slide-ul EN↔RO).
+propunerea din nota de regie: rulezi live doar demo-ul celor 2 agenți (Tema 1) și demo-ul cu/fără memorie (Tema 2); pentru review-ul paralel, modelul local și demo-ul EN↔RO redai înregistrarea asciinema pre-înregistrată (ex. casts/demo-multilingv.cast, menționată deja pe slide-ul EN↔RO).
+
+Înregistrări asciinema (.cast) pentru acest slide — redare cu `asciinema play <fișier>`:
+- casts/demo-4-agenti-1.cast — Claude Code (`claude`): memorii + /total-recall:status (fallback pt. demo-ul live)
+- casts/demo-4-agenti-2.cast — Claude Code prin Ollama (`ollama launch claude`): aceleași comenzi (fallback pt. demo-ul live)
+- casts/demo-review-paralel-1.cast — același prompt de review → REVIEW-<model>.txt
+- casts/demo-model-local.cast — „what day is today" în Claude Code vs ollama run
 -->
 
 **Memoria (total-recall), pe cel 4 console/clienti:**
@@ -116,7 +120,7 @@ propunerea din nota de regie: rulezi live doar demo-ul celor 4 agenți (Tema 1) 
 > Ollama este un tool open-source care îți permite să rulezi modele LLM **local**,
 > pe propriul hardware, fără nicio conexiune la internet și fără cost per token.
 >
-> Pentru modelele prea mari ca să încapă pe hardware-ul tău, Ollama nu rulează local — face **proxy** către infrastructura sa cloud, prin aceleași comenzi CLI/API (`ollama run <model>:cloud`).
+> Pentru modelele prea mari ca să încapă pe hardware-ul tău, Ollama nu rulează local — face **proxy** către infrastructura sa cloud.
 
 > 💡 **WOW:** peste **100 de milioane de descărcări** pe [Docker Hub](https://hub.docker.com/r/ollama/ollama) (imaginea `ollama/ollama`) și **176k stars** pe [GitHub](https://github.com/ollama/ollama) _(verificat iul 2026)_. Este cel mai popular runtime local pentru LLM-uri.
 
@@ -132,7 +136,7 @@ propunerea din nota de regie: rulezi live doar demo-ul celor 4 agenți (Tema 1) 
 
 ---
 
-## Avantajul Ollama: o interfață, modele locale si remote, multiple integrari API (Claude,Codex,Copilot...) si asistenti
+## Avantajul Ollama: o interfață, modele locale si remote, multiple integrari API (Claude,Codex...) si asistenti
 
 - aceeași interfață CLI (`ollama run <model>:cloud`) pentru toate modelele
 - endpoint-uri compatibile cu multiple API-uri: **OpenAI**, **Anthropic**,...
@@ -173,11 +177,11 @@ ollama run glm-5.2:cloud
 ## Integrare Ollama cu Claude și Gemini
 
 > - **Claude nu există în Ollama** — doar imitații comunitare, de evitat. Pentru Claude real: API-ul Anthropic sau `ollama launch claude` cu alt model în spate
-> - Gemini există doar cu versiunea remote: `ollama launch claude --model gemma4:cloud`
+> - Gemini există doar cu versiunea non proprietary lansata astfel: `ollama launch claude --model gemma4:cloud`
 
 ---
 
-## Modele de top remote în Ollama
+## Modele remote de top în Ollama
 
 Filtrul de căutare: [ollama.com/search?c=cloud&c=tools&c=thinking](https://ollama.com/search?c=cloud&c=tools&c=thinking)
 
@@ -190,7 +194,7 @@ Filtrul de căutare: [ollama.com/search?c=cloud&c=tools&c=thinking](https://olla
 
 ---
 
-## Modele locale în Ollama instalate (`ollama list`)
+## Modele instalate în Ollama (`ollama list`)
 
 Mașina: **Dell Latitude 5521** (i7-11850H, MX450 2GB GDDR6).
 
@@ -208,22 +212,9 @@ glm-5.2:cloud                 —         10 days ago
 north-mini-code-1.0:latest    18 GB     12 days ago
 ```
 
----
-
-## Modele locale · Limitări și concluzia practică
-
-**Limitări pe acest hardware:**
-
-- MX450 (2GB VRAM) nu poate ține niciun model în VRAM — toate rulează pe CPU via RAM
-- `qwen3.5` (6.6 GB) și `ornith:9b` (5.6 GB) sunt singurele care intră confortabil în 16 GB RAM → ~3–8 tok/s
-- Modelele cu tag `:cloud` (kimi-k2.7-code, glm-5.2) sunt **API-uri externe proxiate prin Ollama** — nu rulează local
-
-**Extinderi posibile pentru a rula local:**
-
-- GLM-5.2 necesita investitie de minim ~7000 euro conform [insiderllm.com/guides/run-glm-5-2-locally](https://insiderllm.com/guides/run-glm-5-2-locally/)
-- realist: un LLM local mic (`qwen3.5`, `gemma4`) plus eGPU extern necesita investitie de minim ~700 euro — 📄 [details/egpu-pe-laptop.md](details/egpu-pe-laptop.md)
-
 **Concluzia practică:** pe acest laptop, Claude API rămâne alegerea corectă; modelele locale = experimente offline.
+
+📄 **Detalii** (limitările hardware-ului, extinderi posibile — eGPU, costuri): [details/modele-locale-limitari.md](details/modele-locale-limitari.md)
 
 ---
 
@@ -374,7 +365,7 @@ Datele tale pot ieși din infrastructura ta?
 
 <!--
 🎬 Regie — payoff-ul emoțional al întregii teme.
-Lipsync: varianta primară e clipul pre-înregistrat de 20 s (images/demo-cu-fara-memorie.gif); live doar dacă sala permite.
+Lipsync: varianta primară e înregistrarea asciinema de 20 s (casts/demo-cu-fara-memorie.cast); live doar dacă sala permite.
 
 Pregătire înainte de prezentare — stochează memoria:
   „stochează memoria urmatoare de architecture pentru db-choice: am ales PostgreSQL față de MySQL pentru JSONB"
@@ -401,7 +392,7 @@ Publicul nu trebuie să creadă pe cuvânt — vede diferența pe ecran în 20 d
 > Un plugin Claude Code care dă AI-ului memorie persistentă, căutabilă, între sesiuni.
 
 <!--
-🎬 Regie: rulează pe ecran `claude -p "Reaminteste-ti decizia noastra despre baza de date"` și arată apelul recall_memory în output. Lipsync: GIF pre-înregistrat ca plasă de siguranță. Pentru public, comanda e „tema de acasă" din handout.
+🎬 Regie: rulează pe ecran `claude -p "Reaminteste-ti decizia noastra despre baza de date"` și arată apelul recall_memory în output. Lipsync: înregistrare asciinema ca plasă de siguranță (casts/demo-recall-cli.cast). Pentru public, comanda e „tema de acasă" din handout.
 -->
 
 ---
@@ -546,7 +537,7 @@ store_memory(tags=[...])
 ## Cele 17 unelte MCP
 
 <!--
-🎬 Regie — ideea sticky demonstrată, nu enunțată: spui „reține că prefer PostgreSQL" → modelul alege singur store_memory; întrebi „ce am decis despre DB?" → alege recall_memory. Lipsync: GIF pre-înregistrat ca plasă de siguranță.
+🎬 Regie — ideea sticky demonstrată, nu enunțată: spui „reține că prefer PostgreSQL" → modelul alege singur store_memory; întrebi „ce am decis despre DB?" → alege recall_memory. Lipsync: înregistrare asciinema ca plasă de siguranță (casts/demo-store-recall-natural.cast).
 -->
 
 > 💡 CRUD complet + căutare + întreținere, **în limbaj natural** — nu înveți 17 nume de unelte.
@@ -612,7 +603,7 @@ Fiecare acces +20% retenție, confirmare +10%, flag −10% (`confirm_memory`) �
 
 <!--
 🎬 Climaxul TEMEI 2 — momentul pe care dev-ii îl povestesc mai departe.
-Lipsync: varianta primară e clipul pre-înregistrat (images/demo-multilingv.gif); live doar dacă rețeaua și sala permit.
+Lipsync: varianta primară e înregistrarea asciinema (casts/demo-multilingv.cast); live doar dacă rețeaua și sala permit.
 -->
 
 Stochezi memoria în **engleză**, apoi într-o sesiune nouă întrebi în **română** — expansiunea „decizie"→„decision" o găsește:
@@ -637,12 +628,12 @@ Stochezi memoria în **engleză**, apoi într-o sesiune nouă întrebi în **rom
 
 > 💡 **WOW:** înainte de compactarea contextului (`PreCompact`), pluginul **salvează automat learnings-urile sesiunii** — cunoașterea supraviețuiește chiar și când contextul e șters.
 
-| Hook           | Ce face                                                                  |
-| -------------- | ------------------------------------------------------------------------ |
+| Hook           | Ce face                                                                     |
+| -------------- | --------------------------------------------------------------------------- |
 | `SessionStart` | pull org-vault → rebuild index → injectează rezumatul memoriilor în context |
-| `PostToolUse`  | la `store/update/delete_memory`: filtru confidențialitate + push org-vault |
-| `PreCompact`   | extrage 0–3 learnings din transcript → le scrie în personal-vault          |
-| `SessionEnd`   | loghează sesiunea, flush embeddings                                       |
+| `PostToolUse`  | la `store/update/delete_memory`: filtru confidențialitate + push org-vault  |
+| `PreCompact`   | extrage 0–3 learnings din transcript → le scrie în personal-vault           |
+| `SessionEnd`   | loghează sesiunea, flush embeddings                                         |
 
 Rulează și pe **Copilot CLI** și **Gemini CLI** (`hooks.copilot.json` / `hooks.gemini.json`) — dar fără injectarea contextului (clienții ignoră stdout-ul).
 
