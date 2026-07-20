@@ -2,9 +2,8 @@ IDEI PE SLIDE — prezentare.ro.md
 =================================
 
 SLIDE 1 — Titlu
-
 - Două teme: (1) Claude vs Ollama, (2) plugin memorie persistentă total-recall
-
+- Cârlig: LLM + agent proprietar remote (Claude) vs runtime open-source local (Ollama)
 
 SLIDE 2 — Ce iei din această sesiune
 - Ce este Ollama
@@ -38,7 +37,8 @@ SLIDE 6 — Ce este Ollama?
 
 SLIDE 7 — Claude și Ollama față în față în consolă (model remote)
 - 2 clienți în paralel: Claude Code, Claude Code prin Ollama
-- Comenzi de verificare identice: `/status`, `/model`, `/effort`, `total-recall:status` , `what memories do we have available?`
+- Comenzi de verificare identice: `/status`, `/model`, `/effort`, `total-recall:status`
+- Apoi același prompt pe ambele: „what memories do we have available?"
 - Prompt de review: „review project from ../total-recall ; write conclusions in REVIEW-<model>.txt" (model = claude / ollama-glm-5.2)
 - Comparăm rezultatul ȘI timpul de răspuns
 - Fallback: casts/slide-7-claude.cast, casts/slide-7-ollama.cast
@@ -47,7 +47,7 @@ SLIDE 8 — Demo Ollama (model local)
 - `ollama run gemma4` (direct)
 - `ollama launch claude --model gemma4` (Claude Code pe model local)
 - Prompt simplu („what day is today") în ambele
-- Fallback: casts/demo-model-local.cast (de înregistrat)
+- Fallback: casts/slide-8-demo-model-local.cast 
 
 SLIDE 9 — Avantajul Ollama: o interfață, modele locale și remote, multiple integrări
 - Aceeași CLI pentru toate modelele (`ollama run <model>:cloud`)
@@ -69,7 +69,6 @@ SLIDE 12 — Integrare Ollama cu Claude și Gemini
 - Claude nu există în Ollama — doar imitații comunitare, de evitat
 - `ollama launch claude` rulează Claude Code cu alt model în spate
 - Gemini (proprietar Google) NU e în Ollama; alternativa open-weight de la Google e Gemma: `ollama launch claude --model gemma4`
-- Fallback: casts/demo-launch-gemma.cast (de înregistrat)
 
 SLIDE 13 — Modele remote de top în Ollama
 - Filtru: ollama.com/search?c=cloud&c=tools&c=thinking
@@ -78,10 +77,10 @@ SLIDE 13 — Modele remote de top în Ollama
 
 SLIDE 14 — Comparație directă: Claude vs Ollama
 - Nu e „care e mai bun", ci ce optimizezi: inteligență maximă vs suveranitate vs cost vs viteză de răspuns
-- WOW metric: TTFT ~120ms (Ollama, model 8B pe GPU local) vs ~650ms (Claude API) — de ~5× mai rapid local
-- Măsurare: scripts/ttft.sh pe ambele endpoint-uri
-- Avertisment: pe CPU-only (laptopul de demo) = 800–900ms, nu 120ms
-- Fallback: casts/demo-ttft.cast (de înregistrat)
+- TTFT măsurat pe laptop (gemma3:4b, CPU, warm): local ~1.4–1.8 s vs Claude ~1.6 s → comparabil; pe hardware slab avantajul Ollama NU e viteza, ci cost/offline/confidențialitate
+- Cifra „~120 ms / ~5× mai rapid local" ține doar pe GPU cu VRAM suficient (de citat sursa)
+- Măsurare: scripts/ttft.sh (sau scripts/demo-ttft.sh) pe ambele endpoint-uri — rulează de câteva ori, variază
+- Fallback: casts/slide-14-demo-ttft.cast (de înregistrat)
 
 SLIDE 15 — GDPR: unde ajung datele
 - GLM-5.2, Kimi-K2.7-Code :cloud → servere în China, fără GDPR
@@ -102,7 +101,7 @@ SLIDE 18 — Confidențialitate și date · Practic, cu Claude
 - GDPR: DPA disponibil, dar datele ies din EU
 - Ollama local: zero egress; :cloud = datele pleacă la furnizor, ca orice API
 
-SLIDE 19 — Ollama cu Claude Code · limitări
+SLIDE 19 — Ollama cu Claude Code · integrare & limitări
 - `ollama launch claude` — Ollama vorbește direct formatul API Anthropic, fără proxy
 - Limitări: suportă tool calling și extended thinking (budget_tokens acceptat, dar neaplicat); NU suportă prompt caching; calitatea = calitatea modelului ales
 
@@ -117,6 +116,7 @@ SLIDE 21 — Plugin AI pentru memorie persistentă (total-recall) + rolul Ollama
 - Unde ține memoriile: local (personal) + echipă/organizație pe GitHub (https://github.com/adrian-balaban/total-recall-memories)
 - Cum inserezi o memorie: locală / organizațională
 - Cum cauți: căutare simplă + căutare semantică multi-limbă (embeddings prin Ollama — leagă tema 1)
+- Fallback: casts/demo-total-recall.cast
 
 SLIDE 22 — Sinteza · Claude vs Ollama
 - Claude API: calitate maximă, cost per token, date în cloud
@@ -139,5 +139,6 @@ SLIDE 24 — Resurse
 - Ghid de decizie pe o pagină (printabil): details/decizie-o-pagina.md
 - Primele 10 minute cu total-recall: details/primele-10-minute.md
 
-SLIDE 25 — Q&A 
+SLIDE 25 — Q&A (~7 minute)
+- Echo Chamber: repetă fiecare întrebare înainte să răspunzi (confirmi că ai auzit-o + câștigi timp de gândire)
 - Seeding: roagă un coleg să deschidă cu „poate total-recall să ruleze complet offline cu embeddings prin Ollama?"
