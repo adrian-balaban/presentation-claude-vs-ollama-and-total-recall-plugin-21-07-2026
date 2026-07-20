@@ -9,7 +9,7 @@
 | **Cost per token**        | $3–$15 / 1M tokens (input $3 / output $15) | $0 — hardware propriu                                                                               |
 | **Cost infrastructură**   | $0 (fără server propriu)                   | GPU bun: $500–$3000+                                                                                |
 | **Confidențialitate**     | Date trimise la Anthropic                  | 100% local, zero egress                                                                             |
-| **Latență**               | ~500ms–2s primul token                     | ~100ms–500ms (GPU local)                                                                            |
+| **Latență**               | ~500ms–2s (~1.6 s măsurat)                 | ~100–500 ms (GPU local); ~0.8–1.8 s (CPU-only, comparabil cu API)                                    |
 | **Context window**        | 200K tokens (Sonnet/Opus)                  | 4K–128K (depinde de model+VRAM)                                                                     |
 | **Raționament avansat**   | ✅ Excelent (extended thinking)            | Limitat la modele mici-medii                                                                        |
 | **Disponibilitate**       | Necesită internet + API key                | Funcționează offline                                                                                |

@@ -77,7 +77,7 @@ SLIDE 13 — Modele remote de top în Ollama
 
 SLIDE 14 — Comparație directă: Claude vs Ollama
 - Nu e „care e mai bun", ci ce optimizezi: inteligență maximă vs suveranitate vs cost vs viteză de răspuns
-- TTFT măsurat pe laptop (gemma3:4b, CPU, warm): local ~1.4–1.8 s vs Claude ~1.6 s → comparabil; pe hardware slab avantajul Ollama NU e viteza, ci cost/offline/confidențialitate
+- TTFT măsurat pe laptop (gemma3:4b CPU warm vs claude-sonnet-5): local ~0.8–1.8 s (variază) vs Claude ~1.6 s → comparabil; pe hardware slab avantajul Ollama NU e viteza, ci cost/offline/confidențialitate
 - Cifra „~120 ms / ~5× mai rapid local" ține doar pe GPU cu VRAM suficient (de citat sursa)
 - Măsurare: scripts/ttft.sh (sau scripts/demo-ttft.sh) pe ambele endpoint-uri — rulează de câteva ori, variază
 - Fallback: casts/slide-14-demo-ttft.cast (de înregistrat)
