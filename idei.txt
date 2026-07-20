@@ -1,9 +1,10 @@
-IDEI PE SLIDE — prezentare.ro.md
+IDEI PE SLIDE — presentation.ro.md
 =================================
 
 SLIDE 1 — Titlu
-- Două teme: (1) Claude vs Ollama, (2) plugin memorie persistentă total-recall
+- Subiect: Claude vs Ollama (cloud proprietar vs local open-source)
 - Cârlig: LLM + agent proprietar remote (Claude) vs runtime open-source local (Ollama)
+- Bonus la final: total-recall (memorie persistentă) — embeddings rulate în Ollama
 
 SLIDE 2 — Ce iei din această sesiune
 - Ce este Ollama
@@ -11,9 +12,9 @@ SLIDE 2 — Ce iei din această sesiune
 - Integrarea Ollama cu Claude
 - Memorie persistentă cu total-recall
 
-SLIDE 3 — Agendă (~60 min)
+SLIDE 3 — Agendă (~45 min)
 - Claude vs Ollama: ~26 min (include intro ~2 min)
-- Total Recall (memorie persistentă): ~15 min
+- Bonus: total-recall (memorie persistentă): ~5 min
 - Sinteză: ~5 min
 - Q&A: ~7 min
 - Supape de timp (tăiabile): GDPR, cq (Mozilla.ai)
@@ -37,17 +38,15 @@ SLIDE 6 — Ce este Ollama?
 
 SLIDE 7 — Claude și Ollama față în față în consolă (model remote)
 - 2 clienți în paralel: Claude Code, Claude Code prin Ollama
-- Comenzi de verificare identice: `/status`, `/model`, `/effort`, `total-recall:status`
-- Apoi același prompt pe ambele: „what memories do we have available?"
-- Prompt de review: „review project from ../total-recall ; write conclusions in REVIEW-<model>.txt" (model = claude / ollama-glm-5.2)
-- Comparăm rezultatul ȘI timpul de răspuns
+- Comenzi de verificare identice: `/status`, `/model`, `/effort`
+- Apoi același prompt simplu pe ambele (ex. „explain this repo in 3 bullets") — comparăm rezultatul ȘI timpul de răspuns
 - Fallback: casts/slide-7-claude.cast, casts/slide-7-ollama.cast
 
 SLIDE 8 — Demo Ollama (model local)
 - `ollama run gemma4` (direct)
 - `ollama launch claude --model gemma4` (Claude Code pe model local)
 - Prompt simplu („what day is today") în ambele
-- Fallback: casts/slide-8-demo-model-local.cast 
+- Fallback: casts/slide-8-demo-model-local.cast
 
 SLIDE 9 — Avantajul Ollama: o interfață, modele locale și remote, multiple integrări
 - Aceeași CLI pentru toate modelele (`ollama run <model>:cloud`)
@@ -57,11 +56,11 @@ SLIDE 9 — Avantajul Ollama: o interfață, modele locale și remote, multiple 
 SLIDE 10 — Modelele Ollama: catalog, local vs remote, ce-i pe laptop
 - Catalogul: ollama.com/library
 - Locale (după VRAM/RAM): Llama, Mistral, Gemma, Phi, Qwen…
-- Remote (:cloud, cont): glm-5.2, kimi-k2.7-code, gemma4 — GLM-5.2 API compatibil Claude, TB 81.0 vs 85.0 (Opus 4.8)
+- Remote (:cloud, cont): glm-5.2, kimi-k2.7-code (detalii la „Modele remote de top")
 - Pe laptopul de demo (`ollama list`, Dell Latitude 5521 / MX450 2GB): nemotron-3-nano:30b, mistral-medium-3.5, qwen3.6/3.5, gemma4, ornith, glm-5.2:cloud, north-mini-code
 - Concluzie: aici Claude API rămâne alegerea corectă; local = experimente offline. Test: `ollama launch claude --model gemma4`
 
-SLIDE 11 — Ce este Ollama? · Comenzi
+SLIDE 11 — Ollama · Comenzi
 - `ollama list`, `ollama pull`, `ollama run` (download + rulare)
 - Modele cloud: `ollama signin`, `ollama run glm-5.2:cloud` (fără download)
 
@@ -69,10 +68,11 @@ SLIDE 12 — Integrare Ollama cu Claude și Gemini
 - Claude nu există în Ollama — doar imitații comunitare, de evitat
 - `ollama launch claude` rulează Claude Code cu alt model în spate
 - Gemini (proprietar Google) NU e în Ollama; alternativa open-weight de la Google e Gemma: `ollama launch claude --model gemma4`
+- Fallback: casts/slide-12-demo-launch-gemma.cast (de înregistrat)
 
 SLIDE 13 — Modele remote de top în Ollama
 - Filtru: ollama.com/search?c=cloud&c=tools&c=thinking
-- GLM-5.2: ~1M tokens context, 756B parametri, ~12–20× mai ieftin vs Claude Opus
+- GLM-5.2: ~1M tokens context, 756B parametri, ~12–20× mai ieftin vs Claude Opus; API compatibil Claude, Terminal-Bench 81.0 vs 85.0 (Opus 4.8)
 - Kimi-K2.7-Code: specializat pe cod, code review, explicare cod legacy
 
 SLIDE 14 — Comparație directă: Claude vs Ollama
@@ -109,14 +109,15 @@ SLIDE 20 — Ghid de decizie: Claude sau Ollama?
 - Arbore: datele pot ieși? → NU = Ollama local obligatoriu; DA → nevoie de calitate top? → DA = Claude API; NU = Ollama remote
 - A treia cale: Otari (Mozilla.ai) — gateway cu bugete enforce-uite
 
-SLIDE 21 — Plugin AI pentru memorie persistentă (total-recall) + rolul Ollama
+SLIDE 21 — Bonus: total-recall (memorie persistentă) + rolul Ollama
 - La ce nevoi răspunde: memorie persistentă între sesiuni, partajabilă în echipă
 - Clienți: Claude Code + Gemini CLI; Copilot CLI — de decis
 - Cum inserezi o memorie: locală / organizațională
-- Cum cauți: căutare simplă + căutare semantică multi-limbă (embeddings prin Ollama — leagă tema 1)
-- WOW (demo, leagă tema 1): stochezi în română, cauți în engleză (sau invers) → potrivire semantică prin embeddings bge-m3 rulate în Ollama local
+- Cum cauți: căutare simplă + căutare semantică multi-limbă (embeddings prin Ollama — tie-in cu partea Ollama)
+- WOW (demo, tie-in cu Ollama): stochezi în română, cauți în engleză (sau invers) → potrivire semantică prin embeddings bge-m3 rulate în Ollama local
 - Alternativ, contrastul cu/fără memorie: o întrebare care cere context din trecut → fără plugin Claude nu știe; cu total-recall îl recuperează
 - 📄 Detalii (status v1.0.106/MIT, unde-s stocate memoriile, clienți + repos): details/total-recall-pe-scurt.md
+- 📄 Detalii (demo contrast cu/fără memorie, rețetă `--bare` + întrebare): details/demo-contrast-cu-fara-memorie.md
 - Fallback: casts/demo-total-recall.cast
 
 SLIDE 22 — Sinteza · Claude vs Ollama
@@ -129,17 +130,16 @@ SLIDE 23 — Sinteza · Întrebări deschise
 - Ce modele Ollama ați testat pe hardware real?
 - Scenarii cu ambele: Ollama pentru cod, Claude pentru analiză?
 - Actualizări de model în Ollama vs API?
-- Strategii de backup pentru vaultul total-recall?
+- Confidențialitate: ce cod nu ar trebui să părăsească niciodată mașina?
 
 SLIDE 24 — Resurse
 - Ollama: ollama.com, ollama.com/library, ollama.com/docs, docs.ollama.com/integrations
 - Claude API: docs.anthropic.com, anthropic.com/pricing, anthropic.com/legal
 - Integrare Claude Code ↔ Ollama: ollama launch claude, docs.ollama.com/api/anthropic-compatibility, env vars ANTHROPIC_BASE_URL/ANTHROPIC_AUTH_TOKEN
 - Mozilla.ai: Otari, llamafile, any-llm, cq, articolul „AI Got Expensive. Now What?"
-- Total Recall: repo local, ARCHITECTURE.md, install.sh, README.md
 - Ghid de decizie pe o pagină (printabil): details/decizie-o-pagina.md
-- Primele 10 minute cu total-recall: details/primele-10-minute.md
+- Total Recall (bonus): github.com/adrian-balaban/total-recall · details/total-recall-pe-scurt.md · details/primele-10-minute.md
 
 SLIDE 25 — Q&A (~7 minute)
 - Echo Chamber: repetă fiecare întrebare înainte să răspunzi (confirmi că ai auzit-o + câștigi timp de gândire)
-- Seeding: roagă un coleg să deschidă cu „poate total-recall să ruleze complet offline cu embeddings prin Ollama?"
+- Seeding: roagă un coleg să deschidă cu „când merită să treci de la Claude API la Ollama local?"
