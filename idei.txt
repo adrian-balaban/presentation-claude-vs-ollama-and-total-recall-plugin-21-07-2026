@@ -116,8 +116,8 @@ SLIDE 21 — Bonus: total-recall (memorie persistentă) + rolul Ollama
 - Cum cauți: căutare simplă + căutare semantică multi-limbă (embeddings prin Ollama — tie-in cu partea Ollama)
 - WOW (demo, tie-in cu Ollama): stochezi în română, cauți în engleză (sau invers) → potrivire semantică prin embeddings bge-m3 rulate în Ollama local
 - Alternativ, contrastul cu/fără memorie: o întrebare care cere context din trecut → fără plugin Claude nu știe; cu total-recall îl recuperează
-- 📄 Detalii (status v1.0.106/MIT, unde-s stocate memoriile, clienți + repos): details/total-recall-pe-scurt.md
-- 📄 Detalii (demo contrast cu/fără memorie, rețetă `--bare` + întrebare): details/demo-contrast-cu-fara-memorie.md
+- 📄 Detalii (status v1.0.106/MIT, unde-s stocate memoriile, clienți + repos): details-ro/total-recall-pe-scurt.md
+- 📄 Detalii (demo contrast cu/fără memorie, rețetă `--bare` + întrebare): details-ro/demo-contrast-cu-fara-memorie.md
 - Fallback: casts/demo-total-recall.cast
 
 SLIDE 22 — Sinteza · Claude vs Ollama
@@ -137,8 +137,8 @@ SLIDE 24 — Resurse
 - Claude API: docs.anthropic.com, anthropic.com/pricing, anthropic.com/legal
 - Integrare Claude Code ↔ Ollama: ollama launch claude, docs.ollama.com/api/anthropic-compatibility, env vars ANTHROPIC_BASE_URL/ANTHROPIC_AUTH_TOKEN
 - Mozilla.ai: Otari, llamafile, any-llm, cq, articolul „AI Got Expensive. Now What?"
-- Ghid de decizie pe o pagină (printabil): details/decizie-o-pagina.md
-- Total Recall (bonus): github.com/adrian-balaban/total-recall · details/total-recall-pe-scurt.md · details/primele-10-minute.md
+- Ghid de decizie pe o pagină (printabil): details-ro/decizie-o-pagina.md
+- Total Recall (bonus): github.com/adrian-balaban/total-recall · details-ro/total-recall-pe-scurt.md · details-ro/primele-10-minute.md
 
 SLIDE 25 — Q&A (~7 minute)
 - Echo Chamber: repetă fiecare întrebare înainte să răspunzi (confirmi că ai auzit-o + câștigi timp de gândire)

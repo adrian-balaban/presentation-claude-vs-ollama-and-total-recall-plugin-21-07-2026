@@ -12,7 +12,7 @@ Materiale pentru prezentarea din **21 iulie 2026**, cu două subiecte:
 | Fișier             | Conținut                                                                       |
 | ------------------ | ------------------------------------------------------------------------------ |
 | `prezentare.ro.md` | Prezentarea completă în română (format Markdown cu slide-uri)                  |
-| `details/`         | Materiale de sprijin per slide, linkate din prezentare (📄 **Detalii**); include handout-urile `decizie-o-pagina.md` și `primele-10-minute.md` |
+| `details-ro/`         | Materiale de sprijin per slide, linkate din prezentare (📄 **Detalii**); include handout-urile `decizie-o-pagina.md` și `primele-10-minute.md` |
 
 ## Convenție de fișiere
 

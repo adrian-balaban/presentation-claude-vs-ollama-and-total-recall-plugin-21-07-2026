@@ -159,7 +159,7 @@ Preferă PostgreSQL față de MySQL pentru proiecte noi...
 └──────────────────────────┘   └──────────────────────────┘
 ```
 
-📄 **Detalii** (arborele complet al celor 24 de fișiere, cu ce face fiecare): [details/arhitectura-module.md](details/arhitectura-module.md)
+📄 **Detalii** (arborele complet al celor 24 de fișiere, cu ce face fiecare): [details-ro/arhitectura-module.md](details-ro/arhitectura-module.md)
 
 ---
 
@@ -235,7 +235,7 @@ Harta pe 4 cadrane (cu uneltele-erou):
 - `rerank_memories` = semantic rerank **local**: re-embeddează query + candidați și sortează după scor cosine — fără niciun apel LLM
 - `confirm_memory` = feedback confirm/flag integrat direct în scorul Ebbinghaus
 
-📄 **Detalii** (toate cele 17 unelte, cu descrierea fiecăreia): [details/unelte-mcp.md](details/unelte-mcp.md)
+📄 **Detalii** (toate cele 17 unelte, cu descrierea fiecăreia): [details-ro/unelte-mcp.md](details-ro/unelte-mcp.md)
 
 ---
 
@@ -262,7 +262,7 @@ decay = importanceScore × exp(−λ × daysSince)
 
 Fiecare acces +20% retenție, confirmare +10%, flag −10% (`confirm_memory`) — memoria nu doar „îmbătrânește", ci primește feedback.
 
-📄 **Detalii** (pipeline-ul complet `recall_memory`, TF-IDF & inverted index, RRF, formula λ): [details/algoritm-cautare.md](details/algoritm-cautare.md)
+📄 **Detalii** (pipeline-ul complet `recall_memory`, TF-IDF & inverted index, RRF, formula λ): [details-ro/algoritm-cautare.md](details-ro/algoritm-cautare.md)
 
 ---
 
@@ -297,7 +297,7 @@ Stochezi memoria în **engleză**, apoi într-o sesiune nouă întrebi în **rom
 → găsește memoria englezească, scor TF-IDF pe tokenii expandați ✅
 ```
 
-📄 **Detalii** (cum funcționează embeddings & vectorizarea, pipeline-ul ONNX local, sqlite-vec): [details/embeddings-vectorizare.md](details/embeddings-vectorizare.md)
+📄 **Detalii** (cum funcționează embeddings & vectorizarea, pipeline-ul ONNX local, sqlite-vec): [details-ro/embeddings-vectorizare.md](details-ro/embeddings-vectorizare.md)
 
 ---
 
@@ -314,7 +314,7 @@ Stochezi memoria în **engleză**, apoi într-o sesiune nouă întrebi în **rom
 
 Rulează și pe **Copilot CLI** și **Gemini CLI** (`hooks.copilot.json` / `hooks.gemini.json`) — dar fără injectarea contextului (clienții ignoră stdout-ul).
 
-📄 **Detalii** (pașii fiecărui hook, scripturile, graceful degradation pe non-Claude): [details/hooks-lifecycle.md](details/hooks-lifecycle.md)
+📄 **Detalii** (pașii fiecărui hook, scripturile, graceful degradation pe non-Claude): [details-ro/hooks-lifecycle.md](details-ro/hooks-lifecycle.md)
 
 ---
 
@@ -332,7 +332,7 @@ claude plugin install "$(pwd)"    # Claude Code; Copilot/Gemini/standalone: ./in
 - **Org vault = opțional, dezactivat implicit** — `personal-vault` merge 100% local, fără git
 - În sesiune: „reține că…" → `store_memory`, „reamintește-mi…" → `recall_memory`
 
-📄 **Detalii** (pașii compleți per client, org vault, exemple de utilizare): [details/instalare-total-recall.md](details/instalare-total-recall.md)
+📄 **Detalii** (pașii compleți per client, org vault, exemple de utilizare): [details-ro/instalare-total-recall.md](details-ro/instalare-total-recall.md)
 
 ---
 
@@ -353,4 +353,4 @@ claude plugin install "$(pwd)"    # Claude Code; Copilot/Gemini/standalone: ./in
 | **MCP Server (17 unelte)**    | ✅ Nativ    | ✅ stdio MCP suportat  | ✅ stdio MCP suportat  | ✅ `~/.codex/config.toml` |
 | **Side Effects (Sync/Index)** | ✅ Da       | ✅ Da (hooks automate) | ✅ Da (hooks automate) | ❌ Nu (manual)            |
 
-📄 **Detalii** (matricea completă — context injection, skills; Obsidian; comparația cu `cq`): [details/compatibilitate-clienti.md](details/compatibilitate-clienti.md)
+📄 **Detalii** (matricea completă — context injection, skills; Obsidian; comparația cu `cq`): [details-ro/compatibilitate-clienti.md](details-ro/compatibilitate-clienti.md)

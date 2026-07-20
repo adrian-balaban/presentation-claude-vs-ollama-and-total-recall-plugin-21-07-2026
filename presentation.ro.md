@@ -137,7 +137,7 @@ north-mini-code-1.0:latest    18 GB     12 days ago
 
 **Concluzie:** aici Claude API rămâne alegerea corectă; local = experimente offline. Test live: `ollama launch claude --model gemma4`
 
-📄 **Detalii** (limitări hardware, eGPU, costuri): [details/modele-locale-limitari.md](details/modele-locale-limitari.md)
+📄 **Detalii** (limitări hardware, eGPU, costuri): [details-ro/modele-locale-limitari.md](details-ro/modele-locale-limitari.md)
 
 ---
 
@@ -191,7 +191,7 @@ Filtru: [ollama.com/search?c=cloud&c=tools&c=thinking](https://ollama.com/search
 ⚠️ Cifra „~120 ms / ~5× mai rapid local" ține doar pe **GPU cu VRAM suficient** (model 8B încărcat complet).
 
 Măsurare: [scripts/ttft.sh](scripts/ttft.sh) (sau [scripts/demo-ttft.sh](scripts/demo-ttft.sh)) pe ambele endpoint-uri — rulează de 4–5 ori, variază.
-Fallback: `asciinema play casts/slide-14-demo-ttft.cast` · 📄 [details/masurare-ttft.md](details/masurare-ttft.md)
+Fallback: `asciinema play casts/slide-14-demo-ttft.cast` · 📄 [details-ro/masurare-ttft.md](details-ro/masurare-ttft.md)
 
 <!-- ✂️ tăiabil — prima supapă de timp -->
 
@@ -216,7 +216,7 @@ Fallback: `asciinema play casts/slide-14-demo-ttft.cast` · 📄 [details/masura
 | Daily driver          | ~$100/lună            | ~6 luni (RTX 3080 SH ~$600)     |
 | **Agentic developer** | **~$400/lună**        | **~5 luni (RTX 4090 ~$2.000)**  |
 
-📄 **Detalii** (calculul $400/lună, tier-uri hardware, nota Sonnet 5): [details/costul-real-claude-vs-ollama.md](details/costul-real-claude-vs-ollama.md)
+📄 **Detalii** (calculul $400/lună, tier-uri hardware, nota Sonnet 5): [details-ro/costul-real-claude-vs-ollama.md](details-ro/costul-real-claude-vs-ollama.md)
 
 ---
 
@@ -247,7 +247,7 @@ Serverele Anthropic (US)
 
 > Pe scurt, Ollama: **local** = zero egress, merge air-gapped; `:cloud` = datele pleacă la furnizor, ca orice API.
 
-📄 **Detalii** (fluxuri complete local vs `:cloud`, diagrame): [details/confidentialitate-fluxuri.md](details/confidentialitate-fluxuri.md)
+📄 **Detalii** (fluxuri complete local vs `:cloud`, diagrame): [details-ro/confidentialitate-fluxuri.md](details-ro/confidentialitate-fluxuri.md)
 
 ---
 
@@ -262,7 +262,7 @@ ollama launch claude --model glm-5.2:cloud     # model cloud, fără download
 
 **Limitări:** suportă **tool calling** și **extended thinking** (`budget_tokens` acceptat, dar **neaplicat**); **NU** suportă **prompt caching**; calitatea = calitatea modelului ales.
 
-📄 **Detalii** (ce face `launch` sub capotă, metoda manuală cu env vars, capabilități complete): [details/integrare-claude-code-ollama.md](details/integrare-claude-code-ollama.md)
+📄 **Detalii** (ce face `launch` sub capotă, metoda manuală cu env vars, capabilități complete): [details-ro/integrare-claude-code-ollama.md](details-ro/integrare-claude-code-ollama.md)
 
 ---
 
@@ -276,8 +276,8 @@ Datele tale pot ieși din infrastructura ta?
             └── NU → Ollama cu model remote
 ```
 
-📄 **A treia cale — Otari (Mozilla.ai):** gateway Anthropic-compatibil cu **bugete enforce-uite înainte de request** → [details/otari-gateway.md](details/otari-gateway.md)
-📄 **Ghid de decizie pe o pagină (printabil):** [details/decizie-o-pagina.md](details/decizie-o-pagina.md)
+📄 **A treia cale — Otari (Mozilla.ai):** gateway Anthropic-compatibil cu **bugete enforce-uite înainte de request** → [details-ro/otari-gateway.md](details-ro/otari-gateway.md)
+📄 **Ghid de decizie pe o pagină (printabil):** [details-ro/decizie-o-pagina.md](details-ro/decizie-o-pagina.md)
 
 ---
 
@@ -292,7 +292,7 @@ Datele tale pot ieși din infrastructura ta?
 
 Alternativ, **contrastul cu/fără memorie**: o întrebare care cere context din trecut → fără plugin Claude nu știe; cu total-recall îl recuperează.
 
-📄 [details/total-recall-pe-scurt.md](details/total-recall-pe-scurt.md) · [details/demo-contrast-cu-fara-memorie.md](details/demo-contrast-cu-fara-memorie.md)
+📄 [details-ro/total-recall-pe-scurt.md](details-ro/total-recall-pe-scurt.md) · [details-ro/demo-contrast-cu-fara-memorie.md](details-ro/demo-contrast-cu-fara-memorie.md)
 Fallback: `asciinema play casts/demo-total-recall.cast`
 
 ---
@@ -325,9 +325,9 @@ Fallback: `asciinema play casts/demo-total-recall.cast`
 
 **Ecosistem Mozilla.ai** — [Otari](https://github.com/mozilla-ai/otari) · [llamafile](https://github.com/mozilla-ai/llamafile) · [any-llm](https://github.com/mozilla-ai/any-llm) · [cq](https://github.com/mozilla-ai/cq) · „AI Got Expensive. Now What?" — blog.mozilla.ai
 
-**Handout-uri** — [details/decizie-o-pagina.md](details/decizie-o-pagina.md) (ghid de decizie printabil) · [details/primele-10-minute.md](details/primele-10-minute.md) (primele 10 minute cu total-recall)
+**Handout-uri** — [details-ro/decizie-o-pagina.md](details-ro/decizie-o-pagina.md) (ghid de decizie printabil) · [details-ro/primele-10-minute.md](details-ro/primele-10-minute.md) (primele 10 minute cu total-recall)
 
-**Total Recall (bonus)** — [github.com/adrian-balaban/total-recall](https://github.com/adrian-balaban/total-recall) · [details/total-recall-pe-scurt.md](details/total-recall-pe-scurt.md)
+**Total Recall (bonus)** — [github.com/adrian-balaban/total-recall](https://github.com/adrian-balaban/total-recall) · [details-ro/total-recall-pe-scurt.md](details-ro/total-recall-pe-scurt.md)
 
 ---
 

@@ -49,7 +49,7 @@ Trebuie să fie un fact care **există în vaultul total-recall dar NU în repo 
 
 ### Capcană
 
-Evită „ce model local am folosit pentru TTFT?" — `details/masurare-ttft.md` deja spune `gemma3:4b`, deci fără plugin Claude îl găsește prin `Read`/`Grep`. Partea cu „cold-load" e doar în memorie; întrebarea trebuie formulată fix pe asta.
+Evită „ce model local am folosit pentru TTFT?" — `details-ro/masurare-ttft.md` deja spune `gemma3:4b`, deci fără plugin Claude îl găsește prin `Read`/`Grep`. Partea cu „cold-load" e doar în memorie; întrebarea trebuie formulată fix pe asta.
 
 ## Recomandare pentru demo
 
