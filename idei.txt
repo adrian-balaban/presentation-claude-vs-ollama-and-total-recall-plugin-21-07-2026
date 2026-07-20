@@ -111,11 +111,12 @@ SLIDE 20 — Ghid de decizie: Claude sau Ollama?
 
 SLIDE 21 — Plugin AI pentru memorie persistentă (total-recall) + rolul Ollama
 - La ce nevoi răspunde: memorie persistentă între sesiuni, partajabilă în echipă
-- Cu ce AI-uri funcționează acum: Claude Code, Gemini CLI, Copilot CLI
-- Status: v1.0.106, licență MIT, https://github.com/adrian-balaban/total-recall
-- Unde ține memoriile: local (personal) + echipă/organizație pe GitHub (https://github.com/adrian-balaban/total-recall-memories)
+- Clienți: Claude Code + Gemini CLI; Copilot CLI — de decis
 - Cum inserezi o memorie: locală / organizațională
 - Cum cauți: căutare simplă + căutare semantică multi-limbă (embeddings prin Ollama — leagă tema 1)
+- WOW (demo, leagă tema 1): stochezi în română, cauți în engleză (sau invers) → potrivire semantică prin embeddings bge-m3 rulate în Ollama local
+- Alternativ, contrastul cu/fără memorie: o întrebare care cere context din trecut → fără plugin Claude nu știe; cu total-recall îl recuperează
+- 📄 Detalii (status v1.0.106/MIT, unde-s stocate memoriile, clienți + repos): details/total-recall-pe-scurt.md
 - Fallback: casts/demo-total-recall.cast
 
 SLIDE 22 — Sinteza · Claude vs Ollama
