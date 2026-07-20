@@ -1,0 +1,13 @@
+# total-recall — the last 7 improvements, in detail
+
+> Supporting material for the "Final synthesis" section in `prezentare.ro.md`.
+
+| #   | Improvement                                                                                                               | Why it matters                                                                                                                                       |
+| --- | ------------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------- |
+| 1   | **Semantic rerank** (`rerank_memories`) — re-embeds the query + the top-N candidates from `recall_memory` and reorders them locally by cosine score (no LLM call) | The recall-quality ceiling — exactly the product. Cheap, no new dependencies.                                                                        |
+| 2   | **Reconcile after `git pull`** — `pull-org-vault.sh` triggers an index rebuild after a successful pull                    | Before, memories pushed by teammates did not show up until restart / `rebuild_index`. Small fix, big impact on "team memory".                        |
+| 3   | **Re-embed on tag / importanceScore update**                                                                              | Previously it re-embedded only on `content` change — the vector went stale on metadata updates.                                                      |
+| 4   | **Coalescing on the sync hook** — sentinel + a single sync process per session                                            | The PostToolUse hook forked node+git on every store/update/delete.                                                                                   |
+| 5   | **`export_memories` / `import_memories`** + bulk delete with confirmation (`delete_memories`)                             | Closes the `prune_memories` loop (which only listed) and the "I'm switching laptops" scenario.                                                       |
+| 6   | **Confirm/flag signals** (`confirm_memory`) — a `confirmations`/`flags` field on each memory, integrated into the Ebbinghaus score | Idea validated by `cq` (endorsement as a quality signal): a frequently accessed but flagged-as-"wrong" memory no longer stays on top — signals correct it. |
+| 7   | **Property-based tests on frontmatter** (fast-check)                                                                      | The cheapest insurance against the next js-yaml-class regression.                                                                                    |
