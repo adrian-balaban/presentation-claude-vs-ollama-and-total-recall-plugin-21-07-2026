@@ -9,15 +9,17 @@ Materiale pentru prezentarea din **21 iulie 2026**, cu două subiecte:
 
 ## Fișiere
 
+Versiuni paralele **RO** (`.ro.md`, `details-ro/`) și **EN** (`.md`, `details/`) — același conținut tradus.
+
 | Fișier             | Conținut                                                                       |
 | ------------------ | ------------------------------------------------------------------------------ |
-| `prezentare.ro.md` | Prezentarea completă în română (format Markdown cu slide-uri)                  |
-| `details-ro/`         | Materiale de sprijin per slide, linkate din prezentare (📄 **Detalii**); include handout-urile `decizie-o-pagina.md` și `primele-10-minute.md` |
+| `presentation.ro.md` / `presentation.md` | Prezentarea completă (RO / EN), format Markdown cu slide-uri |
+| `details-ro/` / `details/` | Materiale de sprijin per slide, linkate din prezentare (📄 **Detalii**); includ handout-urile `decizie-o-pagina.md` și `primele-10-minute.md` |
 
 ## Convenție de fișiere
 
-Prezentările în română folosesc extensia `.ro.md`.
-Versiunile viitoare în engleză vor folosi `.md` sau `.en.md`.
+- Româna: extensia `.ro.md`, directorul `details-ro/`.
+- Engleza: extensia `.md`, directorul `details/`.
 
 ## Referințe pentru conținut
 
