@@ -1,0 +1,450 @@
+================================================================================
+REVIEW — total-recall plugin  (v1.0.106)
+Perspective: GLM-5.2 (cloud) reviewing a project that depends on Ollama (local)
+Angle:     Ollama embedding integration, then the rest — as a delta vs the
+           prior Fable / Minimax / GDM reviews already in the repo
+Date:      2026-07-20
+Method:    9-dimension adversarial fan-out (51 agents), each actionable finding
+           independently verified against the code by a skeptic agent.
+           37 confirmed / 3 partial / 2 refuted / 23 strengths.
+================================================================================
+
+0. VERDICT IN ONE PARAGRAPH
+--------------------------------------------------------------------------------
+total-recall is a well-engineered, honest MCP memory plugin. The Ollama path is
+the right design (optional dep, bounded timeout+retry, graceful TF-IDF fallback,
+fire-and-forget embeds flushed on SIGTERM). But it is pinned to Ollama's
+*deprecated* embedding endpoint, has a ~20s worst-case read latency when Ollama
+is hung, silently *drops the entire vector index* on a model swap, and never
+tells the user vector search is down. None of these are crashes; all are silent
+degradation. The single highest-leverage open item — an EmbeddingProvider
+registry — has been recommended by both prior reviews and is still unimplemented.
+
+A cloud model's observation worth stating plainly: this plugin's reliability
+floor is set by a *local* daemon the user must keep alive. Claude/Gemini/etc.
+hide that dependency behind an SLA; Ollama makes it the user's job, and the
+plugin does not always make the failure legible. That is the thread running
+through every Ollama finding below.
+
+
+1. THE OLLAMA STORY — HEADLINE FINDINGS (all confirmed against code)
+--------------------------------------------------------------------------------
+
+[1.1] PINNED TO OLLAMA'S DEPRECATED /api/embeddings ENDPOINT  (medium)
+  embeddings.ts:67  `const url = config.embeddingUrl ||
+    'http://127.0.0.1:11434/api/embeddings';`
+  - Body sent:  { model, prompt: text }           (legacy shape)
+  - Response:   { embedding: number[] }            (legacy shape)
+  - Ollama's newer /api/embed uses { input } and returns { embeddings: number[][] }.
+  - If Ollama removes the deprecated endpoint, EVERY embed silently fails →
+    vector search degrades to TF-IDF with no code fix short of a release.
+  FIX: make the endpoint shape version-aware, or at minimum probe at startup and
+  emit a distinct recordError when the endpoint 404s. Document that embeddingUrl
+  is expected to point at the legacy endpoint.
+
+[1.2] ~20s WORST-CASE LATENCY ON THE READ PATH WHEN OLLAMA IS HUNG  (high→med)
+  embeddings.ts:69-87, recall.ts:38  `const qvec = await embed(query);`
+  - recall_memory (hybrid=true, the default) AWAITS embed() synchronously.
+  - embeddingTimeoutMs default = 10000; 2 attempts + 200ms backoff = ~20.2s
+    before falling back to TF-IDF.
+  - AbortController correctly prevents an infinite hang — good — but 20s on the
+    default read path for an *optional* ranking signal is poor UX.
+  - No circuit breaker: every recall re-tries Ollama even after N failures.
+  FIX: session-scoped circuit breaker (after K consecutive failures, short-circuit
+  embed()→null for the session/cooldown, log one 'Ollama circuit open' error).
+  Also lower the read-path default timeout to 3–5s.
+
+[1.3] SILENT DEGRADATION — VECTOR-DOWN IS INVISIBLE  (medium)
+  embeddings.ts:84  recordError(...); return null;  → recall.ts:48 tfidf fallback
+  - Failure is recorded into get_stats.recentErrors only. No stderr line, no
+    SessionStart warning, no MCP notification.
+  - A user who never calls get_stats sees hybrid search silently become TF-IDF
+    and never knows. (The 10 'Ollama embedding failed after retry: aborted'
+    errors in the live status report are exactly this path.)
+  FIX: one-time stderr/log warning on first Ollama failure of a session, OR have
+  the SessionStart hook report vectorSearchEnabled=false-with-reason.
+
+[1.4] isVectorAvailable() IS A ONE-WAY LATCH  (medium→low)
+  embeddings.ts:122,180-189  `let externalEmbedSuccess = false;`
+  - Set true ONLY on a successful embed (line 122). NEVER reset on failure.
+  - Under-reports: vectorSearchEnabled stays false on a fresh session until the
+    first successful embed — even if Ollama is up — because search_index and a
+    hybrid=false recall never call embed().
+  - Over-reports: once one embed succeeds, the flag reads true for the rest of
+    the session even if Ollama subsequently dies.
+  - The code comment (174-179) acknowledges the under-reporting by design, not
+    the over-reporting.
+  FIX: set externalEmbedSuccess=false on the failed-embed branch (line 84), and
+  optionally do a cheap one-shot Ollama probe on first get_stats.
+
+[1.5] MODEL SWAP SILENTLY DROPS THE ENTIRE VECTOR INDEX  (high→med)
+  vectorStore.ts:47-61  `d.exec("DROP TABLE vec_memories");`
+  - ensureVecTable compares the stored table's dimension to the incoming
+    embedding.length. On mismatch (bge-m3 1024 → nomic 768, or HF MiniLM 384 →
+    Ollama bge-m3 1024) it DROPs and recreates. All vectors gone.
+  - Worse: searchVector calls ensureVecTable on EVERY READ (line 81). A single
+    malformed/garbage query embedding whose length ≠ stored dim wipes the index
+    on the READ path, no warning, recovery = re-embed everything.
+  - No recordError, no migration, no prompt. User pulls a different model, edits
+    config.json, silently loses their index and pays re-embed cost on next boot.
+  FIX: on the READ path, do NOT mutate schema — if queryEmbedding.length ≠
+  existingDim, return [] (or throw). Reserve drop-and-recreate for the upsert
+  path (explicit write). Surface a recordError so the operator knows to re-embed.
+
+[1.6] rerank_memories RE-EMBEDS EVERY CANDIDATE, EVERY CALL  (medium)
+  rerank.ts:60-70  `const mvec = await embed(textToEmbed);`  inside the loop
+  - Unlike recall_memory (which uses pre-computed stored vectors via
+    searchVector), rerank calls embed() per candidate on every invocation.
+    MAX_KEYS=200 → up to 201 fresh embed calls per rerank, repeated identically
+    on the next call with the same candidates.
+  - The stored vectors are right there in vec_memories (written by
+    embedAndUpsert on store/update) — one SELECT IN (...) would fetch them.
+  FIX: add a getVectors(dbPath, keys) helper; only re-embed keys missing from
+  the store. Also dedupe the double body-read (line 64 reads for embedding,
+  line 78 reads again for the response).
+
+
+2. CORE SEARCH (non-Ollama, but shapes the same hybrid result)
+--------------------------------------------------------------------------------
+
+[2.1] TF-IDF TITLE/TAG BOOST USES SUBSTRING, NOT TOKEN MATCH  (med→low)
+  tfidf.ts:167-168  `if (low.titleLow.includes(token)) score *= 2;`
+  - A query token 'cat' boosts a memory titled 'Category theory' (title includes
+  'cat'). Spurious score inflation for short common tokens.
+  FIX: tokenize title/tags into Sets, check .has(token) instead of .includes(token).
+
+[2.2] TF-IDF HAS NO DOCUMENT-LENGTH NORMALIZATION  (med→low)
+  tfidf.ts:161  `let score = doc.tf * entry.idf;`
+  - Raw token count as TF, no sublinear (1+log tf) saturation, no length norm.
+  Longer memories accumulate higher scores purely from length → retrieval biased
+  toward verbose entries regardless of relevance density.
+  FIX: sublinear TF (1+log tf) + cosine L2 length norm. At minimum divide by
+  sqrt(totalTokens) so a 2000-token memory doesn't outrank a 200-token one.
+
+
+3. SERVER / TOOLS / STATE
+--------------------------------------------------------------------------------
+
+[3.1] DEPRECATED LOW-LEVEL Server CLASS  (medium)
+  server.ts:43-52  `new Server(...)` + setRequestHandler
+  - SDK marks Server @deprecated in favor of McpServer/registerTool.
+  FIX: migrate to McpServer + registerTool() — also enables Zod boundary
+  validation (see 3.2). Pairs with ARCH-REVIEW item 8.
+
+[3.2] NO SCHEMA ENFORCEMENT AT THE DISPATCH BOUNDARY  (medium)
+  server.ts:314  `const result = await handler(args ?? {});`
+  - args passed straight through; the JSON Schema in tools/list is descriptive
+  only. Every handler is `(args: any) => any` and re-implements coercion ad hoc
+  (and invents different policies — see 3.3).
+  FIX: adopt registerTool with Zod shapes so malformed calls are rejected
+  uniformly.
+
+[3.3] confirm_memory TREATS 'no' AS CONFIRMATION  (med→low)
+  mutate.ts:198  `const useful = args.useful !== false && args.useful !== 'false';`
+  - Only special-cases the literal string 'false'. Any other truthy non-boolean
+  ('no', '0' as string, 1) counts as confirmation → increments confirmations
+  instead of flags. A well-behaved CLI sends a real boolean, so impact is narrow.
+  FIX: `useful = args.useful !== false` (boolean-only), drop the string special
+  case.
+
+[3.4] import_memories CLASSIFIES SKIPS BY REGEX-MATCHING ERROR TEXT  (medium)
+  bulk.ts:83  `if (/already exists/.test(e.message))`
+  - Distinguishes 'already exists' (skip) from real errors by regex on the
+  message string. If store.ts ever rewords the 'Memory ... already exists' error
+  (store.ts:221), imports silently become errors instead of skips.
+  FIX: throw a typed MemoryExistsError (or return a structured {status:'exists'})
+  and branch on type, not message text.
+
+
+4. PERSISTENCE / VAULT
+--------------------------------------------------------------------------------
+
+[4.1] NO FILE LOCK ON index.json — CONCURRENT SESSIONS RACE  (high→med)
+  persistence.ts:216-236,258-260  atomicWrite(INDEX_PATH, ...) — no flock
+  - Two Claude Code windows load the same index.json, mutate memIndex
+  independently, each debounced-flush atomicWrites the whole object → second
+  write clobbers the first, silently losing the other session's
+  accessCount/lastAccessed/store_memory updates. No flock in src/ (only in a
+  test). The install-time duplicate-instance guard reduced frequency; it did NOT
+  eliminate legitimate multi-window contention.
+  FIX: flock(LOCK_EX) on a sibling lockfile around load→reconcile→flush, OR
+  merge-on-read (take max(disk.accessCount, mem.accessCount) before save).
+
+[4.2] atomicWrite HAS NO fsync — POWER LOSS CAN CORRUPT index.json  (high→med)
+  persistence.ts:49-66  writeFileSync(tmp) … renameSync(tmp,p) — no fsync
+  - write-then-rename is atomic w.r.t. crashes ONLY if the tmp data is durable
+  before rename. Without fsync(fd) + fsync(parent dir), a power loss can leave a
+  zero-byte/stale file. No fsync/fdatasync/O_SYNC anywhere in src/ or scripts/.
+  - Self-healing (loadMemIndex rebuilds from .md on corrupt JSON) saves the
+  bodies, but the runtime-only accessCount/lastAccessed fields are silently lost.
+  FIX: open tmp, write, fsyncSync(fd), close, rename, fsync parent dir. A few
+  ms per debounced save — worth it; index.json holds history reconcileIndex
+  cannot rebuild.
+
+[4.3] atomicWrite FALLBACK LOSES POSIX ATOMICITY  (med→low)
+  persistence.ts:62,70  falls back to direct writeFileSync(p, data)
+  - On tmp-write failure (ENOSPC/EROFS) or rename failure (Windows cross-volume),
+  atomicWrite catches and overwrites the target directly. A crash during that
+  fallback leaves a truncated/half-written index.json — exactly the corruption
+  atomic write was meant to prevent.
+  FIX: on tmp-write failure, do NOT fall back to a direct overwrite — recordError
+  and keep the existing (still-valid) index.json. Only the rename-failure
+  fallback (Windows) is arguably justified; guard it behind a platform check.
+
+[4.4] FULL VAULT WALK ON EVERY BOOT  (med→low)
+  vault-scan.ts:202-273  readdirSync/lstatSync/realpathSync per .md, linear
+  - reconcileIndex walks both vaults on every boot. The mtime+size skip avoids
+  re-reading unchanged bodies, but the walk itself (readdir/lstat/realpath per
+  file) still runs linearly in file count — hundreds-to-thousands of syscalls
+  blocking server.connect for a large git-synced org vault. No dir-mtime skip,
+  no manifest, no incremental scan.
+  FIX: persist a per-directory mtime snapshot in index.json; skip recursing into
+  dirs whose mtime is unchanged. Or honor RECONCILE_REQUEST_FLAG for a fast boot.
+
+[4.5] parseFrontmatter DOES NOT STRIP A UTF-8 BOM  (med→low)
+  frontmatter.ts:19,57-63  FM_RE anchors on `^---`, no BOM handling
+  - A file saved by a Windows editor with a UTF-8 BOM starts with `﻿---\n`;
+  the regex doesn't match → the whole file (frontmatter+body) is returned as
+  content with data:{} → memory indexed with empty title (basename fallback),
+  empty tags, default importanceScore. CRLF is handled, BOM is not.
+  FIX: `raw = raw.replace(/^﻿/, '')` at the top of parseFrontmatter.
+
+[4.6] NO schemaVersion ON index.json  (med→low)
+  persistence.ts:122-182  coerceMemEntry does per-field coercion, no version
+  - Neither the personal nor the git-synced org index carries a version marker.
+  coerceMemEntry handles past drift, but an INCOMPATIBLE future format can't be
+  detected — an older build reading a newer index silently normalizes/drops
+  unknown fields instead of refusing. The org index is committed via git, so a
+  downgrade after a teammate upgrades is realistic.
+  FIX: add a top-level `_schema: 1` to both index files; on load, if _schema >
+  CURRENT, refuse to write (read-only) + recordError.
+
+
+5. INSTALL / HOOKS / DISTRIBUTION
+--------------------------------------------------------------------------------
+
+[5.1] --standalone WIRING OMITS SessionEnd  (high→med)
+  install.sh:533-545  pushes SessionStart/PostToolUse/PreCompact only
+  - The plugin-managed hooks.json registers a SessionEnd hook (SIGTERM flush
+  backup + session-end observability log). The --standalone node block never
+  adds SessionEnd to ~/.claude/settings.json. A standalone install silently
+  loses the flush backup and the session-end log.
+  FIX: add `s.hooks.SessionEnd = [...].push({ hooks:[ cmd('session-end.sh',5) ]})`
+  to the Step 5 node block.
+
+[5.2] plugin.json HAS NO `hooks` FIELD install.sh SAYS COPILOT READS  (high→med)
+  .claude-plugin/plugin.json:1-13  — no `hooks` key
+  - install.sh repeatedly documents that Copilot reads
+  `hooks: "hooks/hooks.copilot.json"` from plugin.json. The shipped manifest has
+  no such field. Either Copilot doesn't use it (comments are wrong) or the field
+  is missing and Copilot can't wire lifecycle hooks. Either way the documented
+  contract ≠ shipped manifest.
+  FIX: add `"hooks": "hooks/hooks.copilot.json"` to plugin.json, or correct the
+  install.sh comments to drop the claim.
+
+[5.3] NO HOOK-LEVEL INJECTION DEDUP  (med→low)
+  hooks/scripts/load-memory-index.sh:1-52  — unconditionally emits additionalContext
+  - Fable §1 proposal 2 asked for a self-check in the SessionStart hook: if the
+  injected-index marker is already present, emit nothing. Not implemented. The
+  only duplicate-injection mitigation is the install.sh --standalone prompt
+  (default n), which the user can override → two MCP servers → memory index
+  injected twice, no hook-level dedup.
+  FIX: have load-memory-index.sh check the hook input (stdin JSON) for an existing
+  total-recall marker and emit `{"continue":true}` with no additionalContext when
+  present. Belt-and-braces behind the install.sh prompt.
+
+[5.4] timeout FIELD NAME DIVERGES ACROSS HOOKS FILES  (med→low)
+  hooks.copilot.json:7 `timeoutSec` vs hooks.json/hooks.gemini.json `timeout`
+  - Three manifests, two field names for the same concept. install.sh writes
+  `timeout`. No shared schema; a maintainer changing one must remember all three.
+  FIX: document the per-client field-name contract in a comment at the top of
+  each hooks file, or generate the three from a single source-of-truth spec.
+
+
+6. PRIVACY / ORG SYNC  (these matter most for a SHARED repo)
+--------------------------------------------------------------------------------
+
+[6.1] SECRET FILTER ONLY MATCHES KNOWN-PREFIX TOKENS  (high→med)
+  privacy-filter.ts:88-101  SECRET_TOKEN_RE = alternation of literal prefixes
+  - sk-, AKIA/ASIA, ghp_, xox, AIza, glpat, eyJ, PEM headers, labeled
+  aws_secret_access_key. Any secret WITHOUT one of these prefixes is not detected
+  and WILL be committed to the shared org-vault branch, reaching every teammate.
+  FIX: add a labeled-generic pattern (api[_-]?key/token/secret/password["'\s:=]+
+  \S{16,}) and a bare high-entropy detector (Shannon entropy over 40+ char
+  base64/hex) as a second-pass fail-closed check. At minimum document the blind
+  spot in setup docs.
+
+[6.2] PERSONAL-DATA FILTER ONLY COVERS EMAIL  (high→med)
+  privacy-filter.ts:12-16,134-136  only findSuspiciousEmail + secret-token
+  - Phone numbers and pronouns were intentionally removed (high false-positive
+  rate). Personal names, home addresses, SSNs, credit cards, IBANs, DOBs were
+  never attempted. A user who tags a memory 'org' and pastes a teammate's phone,
+  address, or salary leaks it to the shared repo unredacted.
+  FIX: re-add a scoped phone detector (clearly phone-shaped, e.g. +\d{6,15} with
+  separators — not bare 10-digit runs) and a credit-card/IBAN Luhn check, OR make
+  the threat-model limitation prominent in setup docs and the org-sync error path.
+
+[6.3] ALL SYNC FAILURES EXIT 0 — USER NEVER SEES THEM  (medium)
+  sync-org-memory.mjs:359-370  main().catch → log to .sync-errors.log → exit 0
+  - A persistent push failure (expired gh token, network down, ff-only conflict,
+  symlink rejection, corrupt org index) is invisible. The memory appears stored
+  locally but is never synced; no in-session signal. Non-blocking is fine for the
+  hook protocol; silent is not.
+  FIX: surface a one-line warning in the hook's JSON output when .sync-errors.log
+  has grown since the last successful sync, OR have the MCP server check the
+  error log on SessionStart and report stale unsynced org memories.
+
+[6.4] QUEUE JOB DELETED BEFORE SYNC — FAILED PUSH PERMANENTLY DROPS ORG SYNC  (med)
+  sync-org-memory.sh:100-110  `rm -f "$job"` then run_queued_sync
+  - drain_queue removes the job file BEFORE invoking the sync. If the sync fails,
+  the job is gone and there is no retry — the org memory is in the local working
+  tree but never reaches the shared repo, and no later event re-attempts it.
+  FIX: move `rm -f` to AFTER a successful sync (or a finally that only removes on
+  success); on failure, re-enqueue or leave the job for the next worker pass.
+
+
+7. TESTS / QUALITY
+--------------------------------------------------------------------------------
+
+[7.1] ebbinghaus.ts NON-FINITE INPUT GUARDS UNTESTED  (med→low)
+  ebbinghaus.ts:20-27  Number.isFinite fallbacks for daysSince/accessCount/
+  confirmations/flags — branch coverage 73.68%, the guards are not exercised.
+  clampImportanceScore's equivalent guards ARE tested; retentionStrength's are not.
+  FIX: add tests asserting retentionStrength(NaN, ...) falls back to the 0-default
+  per axis rather than propagating NaN through the exponential.
+
+[7.2 PARTIAL] rerank_memories SILENTLY PASSES THROUGH WHEN NO EMBEDDER  (med→low)
+  rerank.ts:47-52  `if (!qvec) return candidateKeys.map(k => ({key, score:0}))`
+  - When embedding deps are absent, returns every key with score 0 in the
+  caller's original order — i.e. NO reranking happens, but the response shape is
+  identical to a successful rerank. No degraded flag. (Verifier confirmed the
+  behavior; the 'recall_memory records it' comparison was overstated.)
+  FIX: recordError the degradation (like recall_memory) and/or add a
+  `degraded: true` field; document the no-embedder behavior in the tool description.
+
+[7.3 PARTIAL] index.ts SHUTDOWN / SIGNAL HANDLERS UNTESTED  (med→low)
+  index.ts:22-27  shutdown()/SIGTERM/SIGINT/beforeExit — 50% function coverage
+  - The exit path is never exercised; a regression (e.g. flushEmbeddings no
+  longer awaited) wouldn't be caught by `npm test`. (Verifier: a specific
+  named regression IS already caught by an existing test the reviewer missed —
+  the coverage gap is real, the 'would slip through' framing is partial.)
+  FIX: integration test that sends SIGTERM to the spawned child and asserts
+  flushEmbeddings completed before exit. The harness already spawns the process.
+
+
+8. DOCS PARITY
+--------------------------------------------------------------------------------
+
+[8.1] ROOT README LINKS TO A NON-EXISTENT PRESENTATION REPO URL  (high→med)
+  README.md:21  links to …/presentation-claude-vs-ollama-and-total-recall-plugin
+  - Actual repo (per git remote -v) is …/presentation-claude-vs-ollama-and-total-
+  recall-plugin-21-07-2026. The URL is missing the -21-07-2026 suffix.
+  FIX: add the suffix.
+
+[8.2] ARCHITECTURE.md SAYS COPILOT IS 'IN PROGRESS' — IT'S FULLY IMPLEMENTED  (med)
+  ARCHITECTURE.md:7  'GitHub Copilot CLI update is in progress.'
+  - install.sh Step 5d (--copilot) is implemented; hooks/hooks.copilot.json has
+  all four lifecycle events. Doc lags code.
+  FIX: update line 7 to state Copilot CLI is supported (with the documented
+  graceful degradation that additionalContext is dropped by the client).
+
+[8.3] README LINKS TO A CODEX SECTION THAT DOESN'T EXIST IN INSTALL.md  (high→low)
+  README.md:274  → INSTALL.md#codex-cli-mcp-only-no-hooks  (anchor broken)
+  - INSTALL.md has zero Codex mentions. The anchor target doesn't exist.
+  FIX: add a 'Codex CLI (MCP only, no hooks)' section to INSTALL.md, or remove
+  the Codex row/link from the README compatibility table.
+
+
+9. DELTA vs PRIOR REVIEWS  (what's been done, what's still open)
+--------------------------------------------------------------------------------
+Prior reviews in repo: fable-proposals.md (Fable, 2026-07-14),
+ollama-minimax-proposals.md (Minimax, depth-first on the embedding path),
+ollama-gdm-proposals.md (GDM, 22KB, at plugin root — untracked in git).
+
+RESOLVED since Fable (commit 0eec5a2, v1.0.106):
+  - Fable §1 (.mcp.json emptied blocker)        → RESOLVED
+  - Fable §2 (install.sh --standalone stale dist) → RESOLVED
+  - Fable §3 (vunknown banner)                  → RESOLVED
+  (install.sh v1.0.106 guards + _resolve-node.sh now in place.)
+
+STILL OPEN — the shared top priority across all three prior reviews:
+  [9.1] EmbeddingProvider REGISTRY  (high→med)  — Fable §4.3 = Minimax P1
+       embeddings.ts:66  `if (provider === 'ollama')` — still a hardcoded if/else.
+       Both prior reviews independently identify this as the main friction for
+       adding providers and recommend extracting an EmbeddingProvider interface +
+       registry map. It is the one proposal both explicitly agree on and
+       prioritize as foundation. Unblocks Minimax P3/P4/P5/P7.
+       FIX: extract src/embeddings/providers.ts with the PROVIDERS registry
+       Minimax P1 specifies; keep the in-flight-promise cache and bounded
+       timeout+retry; re-point embeddings-external.test.ts at the registry.
+
+  [9.2] Fable §4.1 / ARCH-REVIEW item 6 — indexVersion marker  (med)  STILL OPEN
+       persistence.ts loadIndexes() — no version check of any kind. Fable's
+       'do this first' item. Every future index-format change (incl. Fable §4.2
+       merge-on-read and Minimax P2 vector fingerprint) depends on this hook.
+       FIX: add `indexVersion: 1` to index.json, gate loadIndexes() on it, bump
+       on any format change. Cheapest unlock; was explicitly step 1.
+
+  [9.3] Fable §4.2 / ARCH-REVIEW item 1 — index.json concurrent writer  (med)
+       STILL OPEN. The merge-on-read for accessCount/lastAccessed (take max of
+       disk vs memory before atomicWrite) is not implemented. Install-time guard
+       reduced duplicate-instance frequency; multi-window contention remains.
+       FIX: minimal merge-on-read — max(disk.accessCount, mem.accessCount) and
+       max(disk.lastAccessed, mem.lastAccessed) before atomicWrite. No lock needed.
+
+  [9.4] Minimax P3/P4/P10 — observability pass  (med)  STILL OPEN
+       query.ts:107  `vectorSearchEnabled: isVectorAvailable(),` (single bool)
+       - P3 no Ollama probe at boot; P4 get_stats still a single bool instead of
+       a structured vector block; P10 externalEmbedSuccess still sticky.
+       FIX: bundle as one pass — add provider.probe(), reset
+       externalEmbedSuccess on ECONNREFUSED/ECONNRESET, replace the bool with
+       `vector: { enabled, provider, model, dim, lastProbeAt, lastProbeOk }`.
+       Low risk, additive, mostly testable without a live Ollama.
+
+  [9.5] Minimax P2 — vector store schema-version + provider/model/dim fingerprint
+       (med)  STILL OPEN. vectorStore.ts ensureVecTable still drops+recreates on
+       dim mismatch with no recorded event. Depends on 9.2 landing first.
+       FIX: add a `vec_meta` table written on first upsert; surface
+       dim/provider/model in get_stats so 'did my config change actually take?'
+       is a one-call check.
+
+REFUTED (not actionable — do not re-flag):
+  - 'README marks --copilot as WIP' — misread; the compatibility-table row label
+    itself is 'Work in progress for Copilot CLI', consistent with the TL;DR.
+  - 'GDM review file does not exist' — false; ollama-gdm-proposals.md exists at
+    the plugin root (22621 bytes). The reviewer only searched the repo root.
+
+
+10. STRENGTHS WORTH KEEPING  (don't refactor these away)
+--------------------------------------------------------------------------------
+  - Ollama defaults are configurable (url/model/timeoutMs) with sensible
+    defaults (bge-m3, 10s, http://127.0.0.1:11434/api/embeddings).
+  - Graceful read fallback to TF-IDF — recall_memory always answers.
+  - Boundary coercion is defensive at every handler (survives the no-schema SDK).
+  - decay-once-per-doc algebraic optimization in the Ebbinghaus path.
+  - journal-refilter-after-fusion (journal entries excluded from search but
+    re-included in timeline).
+  - symlink / no-prune / org-author guards; never-trust-persisted-filePath.
+  - .mcp.json blocker (Fable §1) RESOLVED; install.sh v1.0.106 guards; _resolve-node.sh.
+  - 531/531 tests pass with coverage above gates; property-based frontmatter
+    tests; regression tests annotated with fix IDs; integration tests spawn real
+    dist/index.js.
+  - 17-tools claim accurate; ARCHITECTURE.md module map accurate.
+  - SIGTERM/SIGINT flushEmbeddings lands last-write vectors before exit (the
+    fire-and-forget embed hole class, closed on the exit path).
+  - getDb caches the promise, not the resolved db (concurrent-load fix v1.0.28).
+
+
+11. IF YOU FIX ONLY FIVE THINGS
+--------------------------------------------------------------------------------
+  1. EmbeddingProvider registry (9.1)              — unblocks everything else
+  2. Read-path dimension-mismatch DROP (1.5)       — silent data loss on a read
+  3. Circuit breaker + lower read timeout (1.2)    — 20s on the default path
+  4. Proactive vector-down signal (1.3)            — silent degradation today
+  5. indexVersion marker (9.2)                     — cheapest unlock, was step 1
+
+================================================================================
+End of review.  37 confirmed / 3 partial / 2 refuted / 23 strengths.
+Every actionable finding carries file:line evidence and an independent verifier
+verdict in the underlying workflow output.
+================================================================================

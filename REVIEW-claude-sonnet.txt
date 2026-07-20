@@ -1,0 +1,115 @@
+REVIEW: total-recall plugin (claude-sonnet-4-6, 2026-07-20)
+============================================================
+
+VERSION REVIEWED: 1.0.106
+SOURCE: /home/adrianb/_/ai-assisted/github/total-recall/plugins/total-recall/
+TEST STATUS: 531 tests, 34 test files — ALL PASS (vitest, 33.76s)
+MEMORIES AVAILABLE: 568 total (498 knowledge, 30 journal, 13 project, 7 architecture, 6 troubleshooting, ...)
+
+
+## WHAT IT IS
+
+total-recall is a Claude Code MCP plugin that gives the AI persistent, searchable memory across sessions.
+It runs as a stdio MCP server (TypeScript, compiled to dist/index.js via esbuild), backed by Markdown files
+with YAML frontmatter on disk. Compatible with Claude Code and Gemini CLI; Copilot CLI port in progress.
+
+Core numbers:
+  - 17 MCP tools (write: 4, bulk: 3, search/read: 4, list/query: 4, maintenance: 2)
+  - ~3800 lines of TypeScript source across 23 modules
+  - 6 bash hook scripts (SessionStart: 4 steps, PostToolUse: org-vault sync, PreCompact: journal extraction)
+  - 1 LRU in-memory cache (100 entries, 30-min TTL)
+  - Dual vault: personal (~/.total-recall/personal-vault/) + org (git-synced shared vault)
+
+
+## ARCHITECTURE STRENGTHS
+
+1. CLEAN MODULE DECOMPOSITION
+   Each concern lives in a single file: persistence.ts, tfidf.ts, ebbinghaus.ts, rrf.ts, embeddings.ts,
+   vectorStore.ts, privacy-filter.ts. Dependencies are acyclic. Tools under src/tools/ are thin dispatch
+   layers over the domain modules.
+
+2. SEARCH PIPELINE IS WELL-LAYERED
+   Three tiers, each cheaper than the next:
+   a) injected index (.index-cache.txt) — free, already in context at session start
+   b) TF-IDF (search_index / recall_memory) — metadata-only fast path avoids file reads
+   c) Hybrid TF-IDF + vector (RRF, k=60) — optional, gracefully degrades if deps absent
+
+3. EBBINGHAUS DECAY IS PRINCIPLED
+   Formula: strength = clamp(importance × exp(−λ × daysSince) × (1 + accessCount×0.2 + confirmations×0.1 − flags×0.1), 0, 1)
+   λ = 0.16 × (1 − importance×0.8) → high-importance memories decay at λ≈0.032, low-importance at λ≈0.122.
+   confirm_memory tool lets the AI reinforce or flag memories based on feedback. This is the right model:
+   relevance should decay without reinforcement.
+
+4. CUSTOM FRONTMATTER PARSER
+   Replaced gray-matter (CVE GHSA-h67p-54hq-rp68 via js-yaml 3.x) with a purpose-built parser that handles
+   only what total-recall writes: inline arrays, block arrays, quoted/bare strings, numbers, booleans.
+   Immune to YAML merge-key DoS by design. Security tradeoff was the right call.
+
+5. DURABLE WRITE PATH
+   Memory .md files are written synchronously (fs.writeFileSync). Index debounces 1s, IDF recalcs 2s after.
+   flushPending() on SIGTERM/exit cancels timers and runs both synchronously. No silent data loss on
+   normal shutdown.
+
+6. ORG VAULT PRIVACY GUARD
+   privacy-filter.ts with SECRET_TOKEN_RE + email regex is a fail-closed gate: if the filter throws,
+   org sync is blocked (not bypassed). Author-protected writes prevent one user from overwriting another's
+   org memories.
+
+7. GRACEFUL VECTOR DEGRADATION
+   embeddings.ts and vectorStore.ts are lazy-loaded. If @huggingface/transformers or sqlite-vec are absent,
+   vectorSearchEnabled stays false and TF-IDF-only mode runs cleanly. No crashes, no silent wrong answers.
+
+
+## KNOWN LIMITATIONS / ISSUES
+
+1. VECTOR SEARCH CURRENTLY DOWN (confirmed in this session)
+   get_stats reports vectorSearchEnabled: false with repeated "Ollama embedding failed after retry: This
+   operation was aborted" errors. The plugin was built to support both local HuggingFace embeddings
+   (Xenova/all-MiniLM-L6-v2) and external Ollama, but native deps (better-sqlite3, sqlite-vec) must be
+   rebuilt in the live plugin-cache directory (~/.claude/plugins/cache/.../total-recall/1.0.106/), NOT in
+   the git checkout. This is a known gotcha documented in memory troubleshooting/total-recall-semantic-*.
+   TF-IDF-only retrieval still works; hybrid search does not.
+
+2. SINGLE-WRITER ASSUMPTION (concurrent sessions)
+   index.json has no file lock. Multiple Claude Code windows each spawn their own total-recall process,
+   mutate memIndex in memory, and atomicWrite on exit — last rename wins. accessCount/lastAccessed
+   (Ebbinghaus retention signals) are NOT persisted to frontmatter, so a concurrent-session clobber resets
+   them. Memory content (.md files) is safe; decay accuracy is slightly impaired. Low practical impact
+   for solo users; would matter in a shared team setup.
+
+3. DEAD READ AT BOOT
+   main() reads invertedIndex.json then immediately calls recalcIdfNow() which rebuilds it from scratch.
+   The read is wasted. Minor inefficiency at cold boot. (Documented in ARCHITECTURE.md as issue #18.)
+
+4. SESSION CAP AT 50 IN FRONTMATTER
+   sessions[] in frontmatter is capped at 50 entries per memory. Fine in practice, but means old session
+   IDs are silently dropped. Not a correctness issue, but worth knowing for audit trails.
+
+5. minScore SCALE INCONSISTENCY
+   TF-IDF scores and RRF-fused scores are NOT comparable (TF-IDF returns larger numbers; RRF returns small
+   fractions near 0). A minScore threshold set for one mode will silently over-filter or under-filter in
+   the other. The docs flag this but there's no normalization.
+
+6. NO INTEGRATION TESTS IN CI (only vitest unit tests)
+   531 tests all pass; they test TypeScript logic thoroughly. But the full plugin lifecycle (install.sh →
+   plugin-cache → hook injection → MCP stdio handshake) is not covered by automated CI. Manual install
+   validation required on each version bump.
+
+
+## OVERALL ASSESSMENT
+
+total-recall is a well-engineered plugin for its stated purpose. The core read/write path is solid: durable
+writes, principled ranking (TF-IDF + Ebbinghaus), layered search from cheap to expensive, and a dual-vault
+routing model that works cleanly for personal vs team memories.
+
+The two biggest real risks are:
+  a) vector search being silently off (workaround: TF-IDF still works, just less accurate for semantic queries)
+  b) concurrent-session index clobber (workaround: don't run two Claude Code windows simultaneously on the
+     same vault, or accept slightly stale Ebbinghaus signals)
+
+For a solo developer using Claude Code as a daily driver — which is the primary use case — neither risk is
+blocking. The 568 memories currently stored are all retrievable; recall quality with TF-IDF alone is good
+enough for the presentation tomorrow (2026-07-21).
+
+RECOMMENDATION FOR PRESENTATION: demo the injected index + get_memories_by_keys path (fastest, most reliable).
+Avoid hybrid=true in the live demo since vector search is currently down.
