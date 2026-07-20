@@ -79,10 +79,10 @@ Interfețe: <https://ollama.com> · <https://docs.ollama.com> · [github.com/oll
 
 Doi clienți în paralel, **aceleași comenzi de verificare**:
 
-| Client | Pornire | Verificare |
-|---|---|---|
-| Claude Code | `claude` | `/status`, `/model`, `/effort` |
-| Claude Code prin Ollama | `ollama launch claude` | `/status`, `/model`, `/effort` |
+| Client                  | Pornire                                      | Verificare                     |
+| ----------------------- | -------------------------------------------- | ------------------------------ |
+| Claude Code             | `claude`                                     | `/status`, `/model`, `/effort` |
+| Claude Code prin Ollama | `ollama launch claude --model glm-5.2:cloud` | `/status`, `/model`, `/effort` |
 
 Apoi **același prompt simplu** pe ambele (ex. „explain this repo in 3 bullets") — comparăm **rezultatul** ȘI **timpul de răspuns**.
 
@@ -118,7 +118,7 @@ Fallback: `asciinema play casts/slide-8-demo-model-local.cast`
 **Catalogul:** [ollama.com/library](https://ollama.com/library)
 
 - **Locale** (le alegi după VRAM/RAM): Llama, Mistral, Gemma, Phi, Qwen…
-- **Remote** (`:cloud`, cont ollama.com): `glm-5.2`, `kimi-k2.7-code` (detalii la „Modele remote de top")
+- **Remote** (`:cloud`, cont ollama.com): `glm-5.2:cloud`, `kimi-k2.7-code:cloud` (detalii la „Modele remote de top")
 
 **Pe laptopul de demo** (`ollama list`, Dell Latitude 5521 / MX450 2GB):
 
@@ -175,16 +175,16 @@ Filtru: [ollama.com/search?c=cloud&c=tools&c=thinking](https://ollama.com/search
 
 ---
 
-## Comparație directă: Claude vs Ollama
+## Comparație directă: Claude vs Ollama (optional)
 
-> 💡 **Punctul-cheie:** nu e „care e mai bun", ci **ce optimizezi** — inteligență maximă (Claude) vs suveranitate (Ollama) vs cost vs viteză.
+> 💡 **Punctul-cheie:** nu e „care e mai bun", ci **ce optimizezi** — calitate maximă (Claude) vs suveranitate (Ollama) vs cost vs viteză.
 
 **TTFT măsurat** pe laptopul de demo (`gemma3:4b` CPU warm vs `claude-sonnet-5`):
 
-| Endpoint | TTFT (după warm-up) |
-|---|---|
-| `gemma3:4b` local (CPU) | ~0.8–1.8 s (variază mult) |
-| Claude API (`claude-sonnet-5`) | ~1.6 s (măsurat) |
+| Endpoint                       | TTFT (după warm-up)       |
+| ------------------------------ | ------------------------- |
+| `gemma3:4b` local (CPU)        | ~0.8–1.8 s (variază mult) |
+| Claude API (`claude-sonnet-5`) | ~1.6 s (măsurat)          |
 
 → **comparabil**. Pe hardware slab avantajul Ollama **NU** e viteza, ci **cost / offline / confidențialitate**.
 
@@ -197,7 +197,7 @@ Fallback: `asciinema play casts/slide-14-demo-ttft.cast` · 📄 [details/masura
 
 ---
 
-## GDPR: unde ajung datele
+## GDPR: unde ajung datele (optional)
 
 <!-- ✂️ tăiabil (supapă de timp) -->
 
@@ -206,15 +206,15 @@ Fallback: `asciinema play casts/slide-14-demo-ttft.cast` · 📄 [details/masura
 
 ---
 
-## Costul real: Claude API vs Ollama
+## Costul real: Claude API vs Ollama (optional)
 
 > 💡 **WOW:** un **agentic developer** care lucrează intens arde **~$400/lună** pe API — un **RTX 4090 de $2.000** se amortizează în **~5 luni**. Dar dacă ești utilizator light ($30/lună), amortizarea durează ani.
 
-| Profil | Cheltuială API tipică | Amortizare hardware local |
-|---|---|---|
-| Indie / light | ~$30/lună | ani — rămâi pe API sau CPU-only |
-| Daily driver | ~$100/lună | ~6 luni (RTX 3080 SH ~$600) |
-| **Agentic developer** | **~$400/lună** | **~5 luni (RTX 4090 ~$2.000)** |
+| Profil                | Cheltuială API tipică | Amortizare hardware local       |
+| --------------------- | --------------------- | ------------------------------- |
+| Indie / light         | ~$30/lună             | ani — rămâi pe API sau CPU-only |
+| Daily driver          | ~$100/lună            | ~6 luni (RTX 3080 SH ~$600)     |
+| **Agentic developer** | **~$400/lună**        | **~5 luni (RTX 4090 ~$2.000)**  |
 
 📄 **Detalii** (calculul $400/lună, tier-uri hardware, nota Sonnet 5): [details/costul-real-claude-vs-ollama.md](details/costul-real-claude-vs-ollama.md)
 
@@ -238,7 +238,7 @@ Serverele Anthropic (US)
 
 ---
 
-## Confidențialitate și date · Practic, cu Claude
+## Confidențialitate și date · Practic, cu Claude (optional)
 
 - **Codul tău** (parțial sau complet) este trimis la Anthropic
 - **Secretele din prompt** ajung pe servere externe
@@ -266,7 +266,7 @@ ollama launch claude --model glm-5.2:cloud     # model cloud, fără download
 
 ---
 
-## Ghid de decizie: Claude sau Ollama?
+## Ghid de decizie: Claude sau Ollama? (optional)
 
 ```
 Datele tale pot ieși din infrastructura ta?
