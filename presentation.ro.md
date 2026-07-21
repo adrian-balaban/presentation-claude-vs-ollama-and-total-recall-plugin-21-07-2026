@@ -217,6 +217,12 @@ Fallback: `asciinema play casts/slide-14-demo-ttft.cast` · 📄 [details-ro/mas
 
 📄 **Detalii** (calculul $400/lună, tier-uri hardware, nota Sonnet 5): [details-ro/costul-real-claude-vs-ollama.md](details-ro/costul-real-claude-vs-ollama.md)
 
+🔗 **Context piață:** [The Pulse — what can we learn from...](https://newsletter.pragmaticengineer.com/p/the-pulse-what-can-we-learn-from) (The Pragmatic Engineer) — analiză despre tendințele de adopție și cost ale tool-urilor AI agentice în industrie
+
+🔗 **Rulare locală GLM-5.2:** [How to Run GLM-5.2 Locally (2026)](https://codersera.com/blog/how-to-run-glm-5-2-locally-2026/) — ghid practic de setup pentru GLM-5.2 pe hardware propriu (cerințe, cuantizare, pași de instalare)
+
+🔗 **Self-hosting LLM-uri:** [Self-Hosting LLMs: The Complete Guide (2026)](https://codersera.com/blog/self-hosting-llms-complete-guide-2026/) — ghid complet despre self-hosting LLM-uri: hardware, tooling, trade-off-uri vs API cloud
+
 ---
 
 ## Confidențialitate și date: diferența crucială
@@ -309,20 +315,26 @@ Fallback: `asciinema play casts/slide-21-demo-total-recall.cast`
 1. Cum integrezi **total-recall** într-o echipă? (org vault, drepturi de scriere) — vs **cq.exchange (Mozilla.ai)** (store partajat cu review uman)?
 2. Ce **modele Ollama** ați testat pe hardware de lucru real?
 3. Scenarii cu **ambele**: Ollama pentru cod, Claude pentru analiză?
-4. Cum gestionați **actualizările de model** în Ollama față de API (fără breaking changes)?
+4. Cum gestionați **actualizările de model** în Ollama ?
 5. **Confidențialitate:** ce cod nu ar trebui să părăsească **niciodată** mașina?
 
 ---
 
 ## Resurse
 
-**Ollama** — ollama.com · [ollama.com/library](https://ollama.com/library) · ollama.com/docs · [docs.ollama.com/integrations](https://docs.ollama.com/integrations)
+**Ollama** — ollama.com · [ollama.com/library](https://ollama.com/library) · ollama.com/docs · [docs.ollama.com/integrations](https://docs.ollama.com/integrations) · [github.com/ollama/ollama](https://github.com/ollama/ollama) (176k ⭐) · [Docker Hub](https://hub.docker.com/r/ollama/ollama) (100M+ descărcări) · [căutare modele cloud/tools/thinking](https://ollama.com/search?c=cloud&c=tools&c=thinking)
 
 **Claude API** — [docs.anthropic.com](https://docs.anthropic.com) · [anthropic.com/pricing](https://anthropic.com/pricing) · [anthropic.com/legal](https://anthropic.com/legal) (DPA/GDPR)
 
 **Integrare Claude Code ↔ Ollama** — `ollama launch claude` · [docs.ollama.com/api/anthropic-compatibility](https://docs.ollama.com/api/anthropic-compatibility) · env vars `ANTHROPIC_BASE_URL`, `ANTHROPIC_AUTH_TOKEN`
 
+**Modele remote (GLM-5.2, Kimi-K2.7-Code)** — [ollama.com/library/glm-5.2](https://ollama.com/library/glm-5.2) · [ollama.com/library/kimi-k2.7-code](https://ollama.com/library/kimi-k2.7-code) · [comparație GLM-5.2 vs Claude Opus 4.8 — llm-stats.com](https://llm-stats.com/blog/research/glm-5-2-vs-claude-opus-4-8)
+
+**Rulare locală / self-hosting LLM-uri** — [How to Run GLM-5.2 Locally (2026)](https://codersera.com/blog/how-to-run-glm-5-2-locally-2026/) · [Self-Hosting LLMs: The Complete Guide (2026)](https://codersera.com/blog/self-hosting-llms-complete-guide-2026/)
+
 **Ecosistem Mozilla.ai** — [Otari](https://github.com/mozilla-ai/otari) · [llamafile](https://github.com/mozilla-ai/llamafile) · [any-llm](https://github.com/mozilla-ai/any-llm) · [cq](https://github.com/mozilla-ai/cq) · „AI Got Expensive. Now What?" — blog.mozilla.ai
+
+**Context piață** — [The Pulse — what can we learn from...](https://newsletter.pragmaticengineer.com/p/the-pulse-what-can-we-learn-from) (The Pragmatic Engineer)
 
 **Handout-uri** — [details-ro/decizie-o-pagina.md](details-ro/decizie-o-pagina.md) (ghid de decizie printabil) · [details-ro/primele-10-minute.md](details-ro/primele-10-minute.md) (primele 10 minute cu total-recall)
 
@@ -334,8 +346,3 @@ Fallback: `asciinema play casts/slide-21-demo-total-recall.cast`
 
 > Mulțumesc pentru participare. Cod, arhitecturi și întrebări — le abordăm pe toate.
 
-<!--
-Regie Q&A:
-- Echo Chamber: repetă fiecare întrebare înainte să răspunzi — confirmi că ai auzit-o și câștigi timp de gândire.
-- Seeding: roagă un coleg să deschidă cu „când merită să treci de la Claude API la Ollama local?"
--->

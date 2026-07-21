@@ -216,6 +216,12 @@ Fallback: `asciinema play casts/slide-14-demo-ttft.cast` · 📄 [details/masura
 
 📄 **Details** (the $400/month calculation, hardware tiers, the Sonnet 5 note): [details/costul-real-claude-vs-ollama.md](details/costul-real-claude-vs-ollama.md)
 
+🔗 **Market context:** [The Pulse — what can we learn from...](https://newsletter.pragmaticengineer.com/p/the-pulse-what-can-we-learn-from) (The Pragmatic Engineer) — analysis of adoption trends and costs of agentic AI tools in the industry
+
+🔗 **Running GLM-5.2 locally:** [How to Run GLM-5.2 Locally (2026)](https://codersera.com/blog/how-to-run-glm-5-2-locally-2026/) — practical setup guide for GLM-5.2 on your own hardware (requirements, quantization, install steps)
+
+🔗 **Self-hosting LLMs:** [Self-Hosting LLMs: The Complete Guide (2026)](https://codersera.com/blog/self-hosting-llms-complete-guide-2026/) — full guide to self-hosting LLMs: hardware, tooling, trade-offs vs cloud APIs
+
 ---
 
 ## Privacy and data: the crucial difference
@@ -309,20 +315,26 @@ Fallback: `asciinema play casts/slide-21-demo-total-recall.cast`
 1. How do you integrate **total-recall** in a team? (org vault, write permissions) — vs **cq.exchange** (a shared store with human review)?
 2. Which **Ollama models** have you tested on real work hardware?
 3. Scenarios with **both**: Ollama for code, Claude for analysis?
-4. How do you handle **model updates** in Ollama vs the API (without breaking changes)?
+4. How do you handle **model updates** in Ollama ?
 5. **Privacy:** what code should **never** leave the machine?
 
 ---
 
 ## Resources
 
-**Ollama** — ollama.com · [ollama.com/library](https://ollama.com/library) · ollama.com/docs · [docs.ollama.com/integrations](https://docs.ollama.com/integrations)
+**Ollama** — ollama.com · [ollama.com/library](https://ollama.com/library) · ollama.com/docs · [docs.ollama.com/integrations](https://docs.ollama.com/integrations) · [github.com/ollama/ollama](https://github.com/ollama/ollama) (176k ⭐) · [Docker Hub](https://hub.docker.com/r/ollama/ollama) (100M+ downloads) · [cloud/tools/thinking model search](https://ollama.com/search?c=cloud&c=tools&c=thinking)
 
 **Claude API** — [docs.anthropic.com](https://docs.anthropic.com) · [anthropic.com/pricing](https://anthropic.com/pricing) · [anthropic.com/legal](https://anthropic.com/legal) (DPA/GDPR)
 
 **Claude Code ↔ Ollama integration** — `ollama launch claude` · [docs.ollama.com/api/anthropic-compatibility](https://docs.ollama.com/api/anthropic-compatibility) · env vars `ANTHROPIC_BASE_URL`, `ANTHROPIC_AUTH_TOKEN`
 
+**Remote models (GLM-5.2, Kimi-K2.7-Code)** — [ollama.com/library/glm-5.2](https://ollama.com/library/glm-5.2) · [ollama.com/library/kimi-k2.7-code](https://ollama.com/library/kimi-k2.7-code) · [GLM-5.2 vs Claude Opus 4.8 comparison — llm-stats.com](https://llm-stats.com/blog/research/glm-5-2-vs-claude-opus-4-8)
+
+**Self-hosting / running LLMs locally** — [How to Run GLM-5.2 Locally (2026)](https://codersera.com/blog/how-to-run-glm-5-2-locally-2026/) · [Self-Hosting LLMs: The Complete Guide (2026)](https://codersera.com/blog/self-hosting-llms-complete-guide-2026/)
+
 **Mozilla.ai ecosystem** — [Otari](https://github.com/mozilla-ai/otari) · [llamafile](https://github.com/mozilla-ai/llamafile) · [any-llm](https://github.com/mozilla-ai/any-llm) · [cq](https://github.com/mozilla-ai/cq) · "AI Got Expensive. Now What?" — blog.mozilla.ai
+
+**Market context** — [The Pulse — what can we learn from...](https://newsletter.pragmaticengineer.com/p/the-pulse-what-can-we-learn-from) (The Pragmatic Engineer)
 
 **Handouts** — [details/decizie-o-pagina.md](details/decizie-o-pagina.md) (printable decision guide) · [details/primele-10-minute.md](details/primele-10-minute.md) (the first 10 minutes with total-recall)
 
@@ -334,8 +346,3 @@ Fallback: `asciinema play casts/slide-21-demo-total-recall.cast`
 
 > Thanks for attending. Code, architectures and questions — we'll cover them all.
 
-<!--
-Q&A stage direction:
-- Echo Chamber: repeat each question before you answer — confirms you heard it and buys thinking time.
-- Seeding: ask a colleague to open with "when is it worth switching from the Claude API to local Ollama?"
--->
