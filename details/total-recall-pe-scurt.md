@@ -4,7 +4,7 @@ Reference summary for the total-recall slide (SLIDE 21). The reference content w
 
 ## Status
 
-- Version: **v1.0.106** · License: **MIT**
+- Version: **v1.0.109** · License: **MIT**
 - Plugin repo: <https://github.com/adrian-balaban/total-recall>
 - Organization vault (team memories): <https://github.com/adrian-balaban/total-recall-memories>
 

@@ -123,19 +123,21 @@ Fallback: `asciinema play casts/slide-8-demo-model-local.cast`
 **Pe laptopul de demo** (`ollama list`, Dell Latitude 5521 / MX450 2GB):
 
 ```
-NAME                          SIZE      MODIFIED
-nemotron-3-nano:30b           24 GB     8 days ago
-mistral-medium-3.5:latest     80 GB     8 days ago
-qwen3.6:latest                23 GB     8 days ago
-qwen3.5:latest                6.6 GB    8 days ago
-gemma4:latest                 9.6 GB    8 days ago
-kimi-k2.7-code:cloud          —         8 days ago
-ornith:9b                     5.6 GB    8 days ago
-glm-5.2:cloud                 —         10 days ago
-north-mini-code-1.0:latest    18 GB     12 days ago
+NAME                          ID              SIZE      MODIFIED     
+gemma3:4b                     a2af6cc3eb7f    3.3 GB    25 hours ago    
+bge-m3:latest                 790764642607    1.2 GB    26 hours ago    
+nemotron-3-nano:30b           b725f1117407    24 GB     2 weeks ago     
+mistral-medium-3.5:latest     0341632adb05    80 GB     2 weeks ago     
+qwen3.6:latest                07d35212591f    23 GB     2 weeks ago     
+qwen3.5:latest                6488c96fa5fa    6.6 GB    2 weeks ago     
+gemma4:latest                 c6eb396dbd59    9.6 GB    2 weeks ago     
+kimi-k2.7-code:cloud          eda07a659237    -         2 weeks ago     
+ornith:9b                     a75697c14589    5.6 GB    2 weeks ago     
+glm-5.2:cloud                 ce8fd6f94793    -         3 weeks ago     
+north-mini-code-1.0:latest    d8b269ad5c7c    18 GB     3 weeks ago     
 ```
 
-**Concluzie:** aici Claude API rămâne alegerea corectă; local = experimente offline. Test live: `ollama launch claude --model gemma4`
+**Concluzie:** aici Claude API rămâne alegerea corectă; local = experimente offline. Test live: `ollama launch claude --model gemma3:4b`
 
 📄 **Detalii** (limitări hardware, eGPU, costuri): [details-ro/modele-locale-limitari.md](details-ro/modele-locale-limitari.md)
 
@@ -158,7 +160,7 @@ ollama run glm-5.2:cloud
 ## Integrare Ollama cu Claude și Gemini
 
 > - **Claude nu există în Ollama** — doar imitații comunitare, de evitat. Pentru Claude real: API-ul Anthropic sau `ollama launch claude` (Claude Code cu alt model în spate).
-> - **Gemini** (proprietar Google) **NU** e în Ollama; alternativa open-weight de la Google e **Gemma**: `ollama run gemma4`.
+> - **Gemini** (proprietar Google) **NU** e în Ollama; alternativa open-weight de la Google e **Gemma**: `ollama run gemma3:4b`.
 
 
 ---
