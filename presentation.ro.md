@@ -170,7 +170,7 @@ Filtru: [ollama.com/search?c=cloud&c=tools&c=thinking](https://ollama.com/search
 
 ![Ollama search — modele cloud cu tools & thinking](images/ollama-search-cloud-tools-thinking.png)
 
-- **GLM-5.2** — context ~1M tokens (976K), 756B parametri, ~**12–20× mai ieftin** vs Claude Opus; API compatibil Claude, Terminal-Bench 2.1 **81.0 vs 85.0** (Opus 4.8) — [ollama.com/library/glm-5.2](https://ollama.com/library/glm-5.2)
+- **GLM-5.2** — context ~1M tokens (976K), 756B parametri, ~**3,6–5,7× mai ieftin** vs Claude Opus 4.8 ([sursă](https://llm-stats.com/blog/research/glm-5-2-vs-claude-opus-4-8)); API compatibil Claude, Terminal-Bench 2.1 **81.0 vs 85.0** (Opus 4.8) — [ollama.com/library/glm-5.2](https://ollama.com/library/glm-5.2)
 - **Kimi-K2.7-Code** — specializat pe cod: code review, explicare cod legacy — [ollama.com/library/kimi-k2.7-code](https://ollama.com/library/kimi-k2.7-code)
 
 ---
@@ -187,8 +187,6 @@ Filtru: [ollama.com/search?c=cloud&c=tools&c=thinking](https://ollama.com/search
 | Claude API (`claude-sonnet-5`) | ~1.6 s (măsurat)          |
 
 → **comparabil**. Pe hardware slab avantajul Ollama **NU** e viteza, ci **cost / offline / confidențialitate**.
-
-⚠️ Cifra „~120 ms / ~5× mai rapid local" ține doar pe **GPU cu VRAM suficient** (model 8B încărcat complet).
 
 Măsurare: [scripts/ttft.sh](scripts/ttft.sh) (sau [scripts/demo-ttft.sh](scripts/demo-ttft.sh)) pe ambele endpoint-uri — rulează de 4–5 ori, variază.
 Fallback: `asciinema play casts/slide-14-demo-ttft.cast` · 📄 [details-ro/masurare-ttft.md](details-ro/masurare-ttft.md)
@@ -208,7 +206,7 @@ Fallback: `asciinema play casts/slide-14-demo-ttft.cast` · 📄 [details-ro/mas
 
 ## Costul real: Claude API vs Ollama (optional)
 
-> 💡 **WOW:** un **agentic developer** care lucrează intens arde **~$400/lună** pe API — un **RTX 4090 de $2.000** se amortizează în **~5 luni**. Dar dacă ești utilizator light ($30/lună), amortizarea durează ani.
+> 💡 **WOW:** un **'agentic developer'** care lucrează intens 'arde' **~$400/lună** pe API — un **RTX 4090 de $2.000** se amortizează în **~5 luni**. Dar dacă ești utilizator light ($30/lună), amortizarea durează ani.
 
 | Profil                | Cheltuială API tipică | Amortizare hardware local       |
 | --------------------- | --------------------- | ------------------------------- |

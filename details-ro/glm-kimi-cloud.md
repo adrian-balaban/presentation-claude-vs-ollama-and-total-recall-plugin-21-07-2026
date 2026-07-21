@@ -7,7 +7,7 @@
 - Flagship-ul Z.ai (spin-off Tsinghua); context **~1M tokens** (976K — verificat pe [ollama.com/library/glm-5.2](https://ollama.com/library/glm-5.2)), 756B parametri, bun la raționament, agentic și cod
 - Pentru un dev român: română slabă (rămâi pe Claude pentru RO), date sensibile → servere în China
 
-> **Context rapid:** GLM-5.2 (lansat iun 2026) — aproape de Claude Opus 4.8 pe Terminal-Bench 2.1 (**81.0 vs 85.0**, cifrele publicate de Ollama), la un preț API de aproximativ **12–20× mai mic** (în funcție de input/output), greutăți deschise sub licență MIT.
+> **Context rapid:** GLM-5.2 (lansat iun 2026) — aproape de Claude Opus 4.8 pe Terminal-Bench 2.1 (**81.0 vs 85.0**, cifrele publicate de Ollama), la un preț API de aproximativ **3,6× mai mic la input și 5,7× la output** ($1,40/$4,40 per 1M tokens vs $5/$25 la Opus 4.8 — [sursă](https://llm-stats.com/blog/research/glm-5-2-vs-claude-opus-4-8)), greutăți deschise sub licență MIT.
 
 ## Kimi-K2.7-Code — Moonshot AI (Beijing)
 

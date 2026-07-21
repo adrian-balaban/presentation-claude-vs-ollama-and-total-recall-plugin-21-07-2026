@@ -79,10 +79,10 @@ Interfaces: <https://ollama.com> · <https://docs.ollama.com> · [github.com/oll
 
 Two clients in parallel, **the same verification commands**:
 
-| Client                  | Start                                        | Check                         |
-| ----------------------- | -------------------------------------------- | ----------------------------- |
-| Claude Code             | `claude`                                     | `/status`, `/model`, `/effort` |
-| Claude Code via Ollama  | `ollama launch claude --model glm-5.2:cloud` | `/status`, `/model`, `/effort` |
+| Client                 | Start                                        | Check                          |
+| ---------------------- | -------------------------------------------- | ------------------------------ |
+| Claude Code            | `claude`                                     | `/status`, `/model`, `/effort` |
+| Claude Code via Ollama | `ollama launch claude --model glm-5.2:cloud` | `/status`, `/model`, `/effort` |
 
 Then **the same simple prompt** on both (e.g. "explain this repo in 3 bullets") — compare the **result** AND **the response time**.
 
@@ -170,7 +170,7 @@ Filter: [ollama.com/search?c=cloud&c=tools&c=thinking](https://ollama.com/search
 
 ![Ollama search — cloud models with tools & thinking](images/ollama-search-cloud-tools-thinking.png)
 
-- **GLM-5.2** — context ~1M tokens (976K), 756B params, ~**12–20× cheaper** vs Claude Opus; Claude-compatible API, Terminal-Bench 2.1 **81.0 vs 85.0** (Opus 4.8) — [ollama.com/library/glm-5.2](https://ollama.com/library/glm-5.2)
+- **GLM-5.2** — context ~1M tokens (976K), 756B params, ~**3.6–5.7× cheaper** vs Claude Opus 4.8 ([source](https://llm-stats.com/blog/research/glm-5-2-vs-claude-opus-4-8)); Claude-compatible API, Terminal-Bench 2.1 **81.0 vs 85.0** (Opus 4.8) — [ollama.com/library/glm-5.2](https://ollama.com/library/glm-5.2)
 - **Kimi-K2.7-Code** — specialized in code: code review, legacy code explanation — [ollama.com/library/kimi-k2.7-code](https://ollama.com/library/kimi-k2.7-code)
 
 ---
@@ -181,14 +181,12 @@ Filter: [ollama.com/search?c=cloud&c=tools&c=thinking](https://ollama.com/search
 
 **Measured TTFT** on the demo laptop (`gemma3:4b` CPU warm vs `claude-sonnet-5`):
 
-| Endpoint                       | TTFT (after warm-up)       |
-| ------------------------------ | -------------------------- |
-| `gemma3:4b` local (CPU)        | ~0.8–1.8 s (varies a lot)  |
-| Claude API (`claude-sonnet-5`) | ~1.6 s (measured)          |
+| Endpoint                       | TTFT (after warm-up)      |
+| ------------------------------ | ------------------------- |
+| `gemma3:4b` local (CPU)        | ~0.8–1.8 s (varies a lot) |
+| Claude API (`claude-sonnet-5`) | ~1.6 s (measured)         |
 
 → **comparable**. On weak hardware Ollama's advantage is **NOT** speed, but **cost / offline / privacy**.
-
-⚠️ The "~120 ms / ~5× faster local" figure holds only on a **GPU with enough VRAM** (an 8B model fully loaded).
 
 Measurement: [scripts/ttft.sh](scripts/ttft.sh) (or [scripts/demo-ttft.sh](scripts/demo-ttft.sh)) on both endpoints — run it 4–5 times, it varies.
 Fallback: `asciinema play casts/slide-14-demo-ttft.cast` · 📄 [details/masurare-ttft.md](details/masurare-ttft.md)
@@ -210,11 +208,11 @@ Fallback: `asciinema play casts/slide-14-demo-ttft.cast` · 📄 [details/masura
 
 > 💡 **WOW:** an **agentic developer** working intensively burns **~$400/month** on the API — a **$2,000 RTX 4090** amortizes in **~5 months**. But if you're a light user ($30/month), amortization takes years.
 
-| Profile               | Typical API spend   | Local hardware amortization       |
-| --------------------- | -------------------- | ---------------------------------- |
-| Indie / light         | ~$30/month           | years — stay on the API or CPU-only |
-| Daily driver          | ~$100/month          | ~6 months (RTX 3080 SH ~$600)      |
-| **Agentic developer** | **~$400/month**      | **~5 months (RTX 4090 ~$2,000)**   |
+| Profile               | Typical API spend | Local hardware amortization         |
+| --------------------- | ----------------- | ----------------------------------- |
+| Indie / light         | ~$30/month        | years — stay on the API or CPU-only |
+| Daily driver          | ~$100/month       | ~6 months (RTX 3080 SH ~$600)       |
+| **Agentic developer** | **~$400/month**   | **~5 months (RTX 4090 ~$2,000)**    |
 
 📄 **Details** (the $400/month calculation, hardware tiers, the Sonnet 5 note): [details/costul-real-claude-vs-ollama.md](details/costul-real-claude-vs-ollama.md)
 

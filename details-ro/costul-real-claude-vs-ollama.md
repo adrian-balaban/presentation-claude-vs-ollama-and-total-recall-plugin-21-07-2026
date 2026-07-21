@@ -16,6 +16,8 @@ Sesiune agentică intensă (8h/zi, multe tool calls, context re-reads):
   TOTAL:  ~$18/zi → ~$400/lună (22 zile lucrătoare)
 ```
 
+> **Confirmare externă:** [documentația oficială Claude Code](https://code.claude.com/docs/en/costs) (Anthropic) — "average cost is around $13 per developer per active day and $150–250 per developer per month, with costs remaining below $30 per active day for 90% of users." Top 10% (>$30/zi) ajunge exact în zona ~$400+/lună calculată mai sus. Surse terțe (morphllm.com, n1n.ai) citează $400–1.200+/lună pentru sesiuni multi-agent/automatizare intensivă.
+
 ## Ollama pe hardware local
 
 ```

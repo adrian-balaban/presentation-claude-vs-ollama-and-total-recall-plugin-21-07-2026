@@ -10,7 +10,7 @@ Supporting material for the "Models installed in Ollama (`ollama list`)" slide �
 
 **Possible upgrades to run locally:**
 
-- GLM-5.2 requires a minimum investment of ~7000 euro per [insiderllm.com/guides/run-glm-5-2-locally](https://insiderllm.com/guides/run-glm-5-2-locally/)
+- GLM-5.2 requires a minimum investment of ~10.000 euro per [insiderllm.com/guides/run-glm-5-2-locally](https://insiderllm.com/guides/run-glm-5-2-locally/)
 - realistic: a small local LLM (`qwen3.5`, `gemma4`) plus an external eGPU requires a minimum investment of ~700 euro — 📄 [egpu-pe-laptop.md](egpu-pe-laptop.md)
 
 **Practical conclusion:** on this laptop, the Claude API remains the right choice; local models = offline experiments.

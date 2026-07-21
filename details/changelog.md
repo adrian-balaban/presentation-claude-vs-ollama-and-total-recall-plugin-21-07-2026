@@ -1,6 +1,6 @@
 # total-recall — the last 7 improvements, in detail
 
-> Supporting material for the "Final synthesis" section in `prezentare.ro.md`.
+> Supporting material for the "Final synthesis" section in `presentation.md`.
 
 | #   | Improvement                                                                                                               | Why it matters                                                                                                                                       |
 | --- | ------------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------- |

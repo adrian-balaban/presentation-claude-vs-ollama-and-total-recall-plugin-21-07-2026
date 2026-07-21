@@ -16,6 +16,8 @@ Intensive agentic session (8h/day, many tool calls, context re-reads):
   TOTAL:  ~$18/day → ~$400/month (22 working days)
 ```
 
+> **External confirmation:** [official Claude Code documentation](https://code.claude.com/docs/en/costs) (Anthropic) — "average cost is around $13 per developer per active day and $150–250 per developer per month, with costs remaining below $30 per active day for 90% of users." The top 10% (>$30/day) lands exactly in the ~$400+/month range computed above. Third-party sources (morphllm.com, n1n.ai) cite $400–1,200+/month for multi-agent/heavy-automation sessions.
+
 ## Ollama on local hardware
 
 ```

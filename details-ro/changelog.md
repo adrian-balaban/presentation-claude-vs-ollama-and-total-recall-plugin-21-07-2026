@@ -1,6 +1,6 @@
 # total-recall — ultimele 7 îmbunătățiri, în detaliu
 
-> Material de sprijin pentru secțiunea „Sinteza finală” din `prezentare.ro.md`.
+> Material de sprijin pentru secțiunea „Sinteza finală” din `presentation.ro.md`.
 
 | #   | Îmbunătățire                                                                                                              | De ce contează                                                                                                                                        |
 | --- | ------------------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------- |

@@ -10,7 +10,7 @@ Material de sprijin pentru slide-ul „Modele instalate în Ollama (`ollama list
 
 **Extinderi posibile pentru a rula local:**
 
-- GLM-5.2 necesita investitie de minim ~7000 euro conform [insiderllm.com/guides/run-glm-5-2-locally](https://insiderllm.com/guides/run-glm-5-2-locally/)
+- GLM-5.2 necesita investitie de minim ~10000 euro conform [insiderllm.com/guides/run-glm-5-2-locally](https://insiderllm.com/guides/run-glm-5-2-locally/)
 - realist: un LLM local mic (`qwen3.5`, `gemma4`) plus eGPU extern necesita investitie de minim ~700 euro — 📄 [egpu-pe-laptop.md](egpu-pe-laptop.md)
 
 **Concluzia practică:** pe acest laptop, Claude API rămâne alegerea corectă; modelele locale = experimente offline.

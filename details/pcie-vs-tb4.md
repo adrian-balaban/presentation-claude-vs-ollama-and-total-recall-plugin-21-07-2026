@@ -1,6 +1,6 @@
 # PCIe vs Thunderbolt 4 — why bandwidth doesn't matter for LLM inference
 
-> Support material for the "Can I add a GPU to a laptop?" section of `prezentare.ro.md`.
+> Support material for the "Can I add a GPU to a laptop?" section of `presentation.md`.
 > Explains the claim: **TB4 ≈ 40 Gbps (PCIe x4) vs PCIe x16 desktop**.
 
 The short explanation — it's a comparison of the "pipe thickness" through which the GPU talks to the rest of the computer:
