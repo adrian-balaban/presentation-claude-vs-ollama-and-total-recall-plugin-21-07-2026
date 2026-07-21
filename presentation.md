@@ -93,8 +93,8 @@ Fallback (if the live demo derails): `asciinema play casts/slide-7-claude.cast` 
 ## Ollama demo (local model)
 
 ```bash
-ollama run gemma4                          # directly in the console
-ollama launch claude --model gemma4        # Claude Code on a local model
+ollama run ornith:9b                                              # directly in the console
+ollama launch claude --model ornith:9b                            # Claude Code on a local model
 ```
 
 The same simple prompt ("what day is today") in both — the local model answers **offline**, without an API key.
@@ -158,9 +158,7 @@ ollama run glm-5.2:cloud
 ## Integrating Ollama with Claude and Gemini
 
 > - **Claude doesn't exist in Ollama** — only community imitations, to be avoided. For real Claude: the Anthropic API or `ollama launch claude` (Claude Code with another model behind it).
-> - **Gemini** (Google's proprietary) is **NOT** in Ollama; Google's open-weight alternative is **Gemma**: `ollama launch claude --model gemma4`.
-
-Fallback: `asciinema play casts/slide-12-demo-launch-gemma.cast` _(to record)_
+> - **Gemini** (Google's proprietary) is **NOT** in Ollama; Google's open-weight alternative is **Gemma**: `ollama run gemma4`.
 
 ---
 
@@ -291,7 +289,8 @@ Can your data leave your infrastructure?
 Alternatively, **the with/without-memory contrast**: a question that needs past context → without the plugin Claude doesn't know; with total-recall it recovers it.
 
 📄 [details/total-recall-pe-scurt.md](details/total-recall-pe-scurt.md) · [details/demo-contrast-cu-fara-memorie.md](details/demo-contrast-cu-fara-memorie.md)
-Fallback: `asciinema play casts/demo-total-recall.cast`
+
+Fallback: `asciinema play casts/slide-21-demo-total-recall.cast`
 
 ---
 

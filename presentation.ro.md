@@ -93,8 +93,8 @@ Fallback (dacă demo-ul live derapează): `asciinema play casts/slide-7-claude.c
 ## Demo Ollama (model local)
 
 ```bash
-ollama run gemma4                          # direct în consolă
-ollama launch claude --model gemma4        # Claude Code pe model local
+ollama run ornith:9b                          # direct în consolă
+ollama launch claude --model ornith:9b        # Claude Code pe model local
 ```
 
 Același prompt simplu („what day is today") în ambele — modelul local răspunde **offline**, fără API key.
@@ -158,9 +158,8 @@ ollama run glm-5.2:cloud
 ## Integrare Ollama cu Claude și Gemini
 
 > - **Claude nu există în Ollama** — doar imitații comunitare, de evitat. Pentru Claude real: API-ul Anthropic sau `ollama launch claude` (Claude Code cu alt model în spate).
-> - **Gemini** (proprietar Google) **NU** e în Ollama; alternativa open-weight de la Google e **Gemma**: `ollama launch claude --model gemma4`.
+> - **Gemini** (proprietar Google) **NU** e în Ollama; alternativa open-weight de la Google e **Gemma**: `ollama run gemma4`.
 
-Fallback: `asciinema play casts/slide-12-demo-launch-gemma.cast` _(de înregistrat)_
 
 ---
 
@@ -260,7 +259,7 @@ ollama launch claude --model glm-5.2:cloud     # model cloud, fără download
 
 **Limitări:** suportă **tool calling** și **extended thinking** (`budget_tokens` acceptat, dar **neaplicat**); **NU** suportă **prompt caching**; calitatea = calitatea modelului ales.
 
-📄 **Detalii** (ce face `launch` sub capotă, metoda manuală cu env vars, capabilități complete): [details-ro/integrare-claude-code-ollama.md](details-ro/integrare-claude-code-ollama.md)
+📄 **Detalii** (ce face `launch` in 'subteran', metoda manuală cu env vars, capabilități complete): [details-ro/integrare-claude-code-ollama.md](details-ro/integrare-claude-code-ollama.md)
 
 ---
 
@@ -291,7 +290,7 @@ Datele tale pot ieși din infrastructura ta?
 Alternativ, **contrastul cu/fără memorie**: o întrebare care cere context din trecut → fără plugin Claude nu știe; cu total-recall îl recuperează.
 
 📄 [details-ro/total-recall-pe-scurt.md](details-ro/total-recall-pe-scurt.md) · [details-ro/demo-contrast-cu-fara-memorie.md](details-ro/demo-contrast-cu-fara-memorie.md)
-Fallback: `asciinema play casts/demo-total-recall.cast`
+Fallback: `asciinema play casts/slide-21-demo-total-recall.cast`
 
 ---
 
@@ -305,7 +304,7 @@ Fallback: `asciinema play casts/demo-total-recall.cast`
 
 ## Sinteza · Întrebări deschise
 
-1. Cum integrezi **total-recall** într-o echipă? (org vault, drepturi de scriere) — vs **cq.exchange** (store partajat cu review uman)?
+1. Cum integrezi **total-recall** într-o echipă? (org vault, drepturi de scriere) — vs **cq.exchange (Mozilla.ai)** (store partajat cu review uman)?
 2. Ce **modele Ollama** ați testat pe hardware de lucru real?
 3. Scenarii cu **ambele**: Ollama pentru cod, Claude pentru analiză?
 4. Cum gestionați **actualizările de model** în Ollama față de API (fără breaking changes)?
